@@ -9,6 +9,7 @@
 ## Functional Requirements
 
 * [Authentication and User Management](functional-requirements/authentication-and-user-management.md)
+* [Roles and permissions](functional-requirements/roles-and-permissions.md)
 * [Project and Task Management](functional-requirements/project-and-task-management.md)
 * [Dashboard & stadistics](functional-requirements/dashboard-and-stadistics.md)
 * [Real-time Chat](functional-requirements/real-time-chat.md)
