@@ -1,7 +1,7 @@
 ---
-icon: align-justify
+icon: bars
 ---
 
 # System Description
 
-**The system enables task and project management, facilitating the assignment of responsibilities, monitoring progress, and communication among team members.**
+The system enables task and project management, facilitating the assignment of responsibilities, monitoring progress, and communication among team members.

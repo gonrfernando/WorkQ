@@ -2,9 +2,8 @@
 icon: thumbtack
 ---
 
-# General Objectives
+# General objectives
 
-* **Improve task organization and planning.**
-* **Facilitate project status tracking.**
-* **Enable efficient communication within the team.**
-
+Improve task organization and planning.\
+Facilitate project status tracking.\
+Enable efficient communication within the team.

@@ -1,9 +1,8 @@
 ---
-icon: css3
+icon: bootstrap
 ---
 
 # Frontend
 
-**JavaScript with Bootstrap.**\
-**Consumption of REST API.**
-
+* JavaScript with Bootstrap.
+* Consumption of REST API.

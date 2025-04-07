@@ -31,3 +31,4 @@ graph TD;
     D -->|Chooses important or all notifications| O;
     
 ```
+

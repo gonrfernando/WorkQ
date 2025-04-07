@@ -1,12 +1,12 @@
 ---
-icon: ball-pile
+icon: circle-check
 ---
 
-# Roles and permissions
+# Roles and Permissions
 
-**System Administrator (Super Admin)**
+**System Administrator**
 
-The **System Administrator** has the highest level of access and can:
+The System Administrator has the highest level of access and can:
 
 * Delegate Area Administrators.
 * Create user accounts.
@@ -14,9 +14,11 @@ The **System Administrator** has the highest level of access and can:
 * Manage permission settings for projects.
 * View the general project duration calendar.
 
+***
+
 **Area Administrator**
 
-The **Area Administrator** has control over their assigned area and can:
+The Area Administrator has control over their assigned area and can:
 
 * Create user accounts.
 * Change a user's role from a regular user to a Project Manager.
@@ -24,9 +26,11 @@ The **Area Administrator** has control over their assigned area and can:
 * Manage permission settings for projects in their area.
 * View the general project duration calendar.
 
+***
+
 **Project Manager**
 
-The **Project Manager** is responsible for overseeing projects and has the ability to:
+The Project Manager is responsible for overseeing projects and has the ability to:
 
 * Create new projects.
 * Add users to a project.
@@ -39,6 +43,8 @@ The **Project Manager** is responsible for overseeing projects and has the abili
 * Review and approve/reject completed tasks.
 * Access the project activity history.
 * View the project task calendar.
+
+***
 
 **Regular User**
 
@@ -54,14 +60,17 @@ Regular users have limited access and can:
 
 #### **Project Permissions**
 
-**Task Modification Rules:**
+**Task Modification Rules**
 
-* **With approval request** (modifications require approval).
-* **Free modification** (users can modify tasks without approval).
-* **Free modification with a custom cooldown period** (users can modify tasks but with a time restriction).
-* **Modification not allowed** (users cannot modify tasks).
+* **With approval request**: Modifications require approval.
+* **Free modification**: Users can modify tasks without approval.
+* **Free modification with a custom cooldown period**: Users can modify tasks but with a time restriction.
+* **Modification not allowed**: Users cannot modify tasks.
 
-**Additional Configuration:**
+***
 
-* Users can choose to receive **notifications for all events** or **only important ones**.
-* Users can select whether to receive specific notification categories via email.
+**Additional Configuration**
+
+* Users can choose to receive notificactions for all events or only important ones
+* Users can select wheter to receive specific notificacion categories via email
+
