@@ -1,0 +1,4 @@
+# requirements.txt
+# Este archivo contiene las dependencias del proyecto Pyramid.
+# Por ahora está vacío. Las dependencias se agregarán conforme avance el desarrollo.
+
