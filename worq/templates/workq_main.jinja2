@@ -74,8 +74,13 @@
         <img src="{{request.static_url('worq:static/calendar-icon.png')}}" class="toolbar-icon">
       </div>
       <span class="toolbar-separator"></span>
-      <div class="profile">
-        <img src="{{request.static_url('worq:static/profile-icon.png')}}" class="toolbar-icon">
+      <div class="profile" id="profile-menu">
+        <img src="{{request.static_url('worq:static/profile-icon.png')}}" class="toolbar-icon" id="profile-icon">
+        <ul id="dropdown-menu">
+          <li><a href="">Profile</a></li>
+          <li><a href="">Tutorial</a></li>
+          <li><a href="">Logout</a></li>
+        </ul>
       </div>
     </div>
 
@@ -87,6 +92,25 @@
     <script>
       const projects = {{ projects|tojson }};
     </script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const profileIcon = document.getElementById('profile-icon');
+          const dropdownMenu = document.getElementById('dropdown-menu');
+          const profileContainer = document.getElementById('profile-menu');
+      
+          // Alternar visibilidad al hacer clic en el ícono
+          profileIcon.addEventListener('click', function (event) {
+            event.stopPropagation(); // Evita que el clic se propague
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+          });
+      
+          // Cerrar el menú si clickeás fuera
+          document.addEventListener('click', function (event) {
+            if (!profileContainer.contains(event.target)) {
+              dropdownMenu.style.display = 'none';
+            }
+          });
+        });
+      </script>
   </body>
 </html>

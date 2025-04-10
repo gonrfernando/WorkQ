@@ -254,3 +254,38 @@ body {
     height: 77%;
 }
 
+
+.profile {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  /* Oculto por defecto */
+  #dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background-color: white;
+    list-style: none;
+    padding: 10px;
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border-radius: 4px;
+    z-index: 1000;
+  }
+  
+  #dropdown-menu li {
+    margin: 5px 0;
+  }
+  
+  #dropdown-menu li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  #dropdown-menu li a:hover {
+    color: #007BFF;
+  }
