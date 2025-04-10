@@ -1,0 +1,125 @@
+.navbar-brand img {
+    height: 40px;
+  }
+  .top-bar {
+    font-size: 12px;
+    background-color: #f8f9fa;
+    padding: 4px 0;
+  }
+  .top-bar a {
+    margin: 0 10px;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .image-box {
+    width: 80%;         
+    max-width: 1200px;     
+    margin: 0 auto;       
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .custom-img {
+    width: 100%;          
+    height: auto;
+    display: block;
+  }
+  
+  .custom-img2 {
+    width: 100%;          
+    height: auto;
+    display: block;
+    padding: 1.4rem;
+  }
+  
+  .image-title {
+    position: absolute;
+    top: 90%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    text-align: center;
+  }
+
+  .narrow-text {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .email-box {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 40px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  .email-box h5 {
+    margin-bottom: 15px;
+  }
+
+  @media (max-width: 576px) {
+    .image-title {
+      font-size: 1.3rem;
+    }
+  }
+  .navbar .nav-link {
+    color: white; 
+    transition: color 0.3s ease; 
+  }
+  
+  .navbar .nav-link:hover {
+    color: black; 
+  }
+  .navbar .btn:hover {
+    background-color: #5599b9;
+    color: #465158;
+    transition: 0.3s ease;
+  }
+
+  .btn-blue {
+    background-color: #5599b9;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-blue:hover {
+    background-color: #407a99;
+    color: #f0f0f0;
+  }
+
+  .btn-seg{
+    color: white; 
+    border: 2px solid white; 
+    padding: 6px 10px; 
+    border-radius: 6px;
+  }
+
+  .workq-section {
+  width: 100%;
+  height: auto;
+}
+
+  .workq-section h2 {
+    font-size: 1.8rem;  
+    margin-bottom: 10px;
+  }
+  
+  .workq-section p {
+    font-size: 0.95rem;    
+    margin-bottom: 8px;
+    line-height: 1.5;     
+  }
+  
+  .workq-section .p-5 {
+    padding: 4rem !important;
+  }
+  
+  
+  
