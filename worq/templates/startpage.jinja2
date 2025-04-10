@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title or 'WorkQ - A new form of working together' }}</title>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ request.static_url('workq:static/assets/start.css') }}">
+</head>
+<body>
+  <header>
+  <nav class="navbar navbar-expand-lg" style="background-color: #465158;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <img src="{{ request.static_url('workq:static/logo.png') }}" alt="Logo" height="40">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon" style="color: white; border: 1px solid white; padding: 5px; border-radius: 3px;">☰</span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          {% for item in navbar_links %}
+            <li class="nav-item"><a class="nav-link text-white" href="{{ item.href }}">{{ item.label }}</a></li>
+          {% endfor %}
+          <li class="nav-item">
+            <a class="btn me-2 btn-blue" href="{{ request.route_url('sign_in') }}">Sign in</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn me-2 btn-seg" href="{{ request.route_url('sign_up') }}">Sign up</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  </header>
+  <br>
+
+  <div class="image-box">
+    <img src="{{ request.static_url('workq:static/img/1380922.jpg') }}" class="custom-img" alt="Fondo">
+    <div class="image-title">Creating teams. 
+      <br>Making work easier.
+    </div>
+  </div>
+
+  <br>
+
+  <div class="workq-section d-flex align-items-center" style="background-color: #e6e8eb; min-height: 400px;">
+    <div class="container d-flex flex-wrap">
+      <div class="col-md-6 d-flex justify-content-center">
+        <img src="{{ request.static_url('workq:static/img/1380922.jpg') }}" class="custom-img2" alt="Fondo">
+      </div>
+      <div class="col-md-6 d-flex flex-column justify-content-center">
+        <h2 class="text-start fw-bold" style="color: #465158;">What is WorkQ</h2>
+        <p class="fw-bold text-dark">CREATE TOOLS AND SPACES THAT HELP TEAMS WORK TOGETHER</p>
+        <p class="text-dark mt-2">
+          {{ what_is_workq }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="workq-section d-flex align-items-center" style="background-color: #465158; min-height: 400px;">
+    <div class="container d-flex flex-wrap">
+      <div class="col-md-6 d-flex flex-column justify-content-center">
+        <h2 class="text-start fw-bold" style="color: #ffffff;">What are we looking for?</h2>
+        <p class="fw-bold text-white">CREATE TOOLS AND SPACES THAT HELP TEAMS WORK TOGETHER</p>
+        <p class="text-white mt-2">
+          {{ goal_description }}
+        </p>
+      </div>
+      <div class="col-md-6 d-flex justify-content-center">
+        <img src="{{ request.static_url('workq:static/img/1380922.jpg') }}" class="custom-img2" alt="Fondo">
+      </div>
+    </div>
+  </div>
+
+  <div class="email-box narrow-text text-center">
+    <h5>Don't have an account?</h5>
+    <p>Join us to create something unique with your partners.</p>
+    <form class="row g-2 justify-content-center" method="POST" action="#">
+      <div class="col-md-8 col-sm-12">
+        <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
+      </div>
+      <div class="col-md-4 col-sm-12">
+        <button type="submit" class="btn" style="background-color: #5599b9; color: white;">Sign up for WorkQ</button>
+      </div>
+    </form>
+  </div>
+
+  <br>
+</body>
+</html>

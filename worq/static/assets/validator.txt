@@ -1,0 +1,11 @@
+import re
+from pyramid.exceptions import ValidationError
+
+def validar_correo(valor):
+    # Expresión regular para validar el formato: nombre.apellido@gmail.com
+    regex = r'^[a-zA-Z0-9_.+-]+(\.[a-zA-Z0-9_.+-]+)?@gmail\.com$'
+
+    if not re.match(regex, valor):
+        raise ValidationError('El correo debe tener el formato: nombre.apellido@gmail.com')
+
+    return valor

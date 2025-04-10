@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title or 'Sign-up' }}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="{{ request.static_url('workq:static/assets/style.css') }}">
+  </head>
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg" style="background-color: #465158;">
+        <div class="container-fluid">
+          <img src="{{ request.static_url('workq:static/logo.png') }}" alt="Logo" width="50" height="50">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="#">Help</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Documentation</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <section class="out">
+      <section class="form-login">
+        <h5>Sign-up</h5>
+        <h6>Koch email address</h6>
+        <form method="POST" action="{{ request.route_url('sign_up') }}">
+          <input class="controls" type="text" name="email" placeholder="Email" required>
+          <input class="buttons" type="submit" value="Submit">
+        </form>
+
+        <p>Already have a password?
+          <a href="{{ request.route_url('sign_in') }}">Sign-in</a>
+        </p>
+      </section>
+    </section>
+  </body>
+</html>
