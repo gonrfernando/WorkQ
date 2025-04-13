@@ -1,3 +1,29 @@
+$(function () {
+    $("#sortable").sortable({
+        axis: "y", // Allow vertical sorting only
+        revert: 200, // Smooth animation when dropping
+        placeholder: "sortable-placeholder", // Add a placeholder for better visual feedback
+        tolerance: "pointer", // Makes the drop position clearer
+        cursor: "move", // Change the cursor to indicate dragging
+        opacity: 0.8, // Make the dragged item semi-transparent
+        start: function (event, ui) {
+            ui.item.addClass("dragging"); // Add a class to the dragged item
+        },
+        stop: function (event, ui) {
+            ui.item.removeClass("dragging"); // Remove the class after dropping
+        }
+    });
+
+    $("#draggable").draggable({
+        connectToSortable: "#sortable",
+        helper: "clone",
+        revert: "invalid",
+        cursor: "move"
+    });
+
+    $("ul, li").disableSelection();
+});
+
 function openNav() {
     document.getElementById("mySidebar").classList.add("expanded");
     document.getElementById("main").style.marginLeft = "23%";
