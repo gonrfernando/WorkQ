@@ -14,7 +14,7 @@ body {
     height: 100%;
     width: 6%;
     position: fixed;
-    z-index: 1;
+    z-index: 999; /* Mayor que .blur-overlay */
     top: 0;
     left: 0;
     background-color: #465158;
@@ -192,7 +192,7 @@ body {
     width: 100vw;
     backdrop-filter: blur(4px);
     background-color: rgba(0, 0, 0, 0.2); /* subtle dark tint */
-    z-index: 0;
+    z-index: 998;
     pointer-events: none; /* let clicks go through */
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -200,12 +200,8 @@ body {
   /* Show the blur when sidebar is expanded */
 .sidebar.expanded ~ .blur-overlay {
     opacity: 1;
-    z-index: 0; /* stays below sidebar */
-}
-
-.blur-overlay {
-    z-index: 998;
-    pointer-events: auto;
+    z-index: 998; /* Mantén el z-index correcto */
+    pointer-events: none; /* Asegúrate de que no bloquee clics */
 }
 
 .sidebar {
