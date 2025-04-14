@@ -215,7 +215,7 @@ body {
 
 .blur-overlay {
     z-index: 998;
-    pointer-events: auto;
+    pointer-events: none;
 }
 
 .sidebar {
