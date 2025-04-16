@@ -1,29 +1,28 @@
 {% extends "workq_main.jinja2" %}
 
 {% block content %}
-    <div class="container">
-    <div class="welcome">WELCOME</div>
+<div class="container">
     <br>
     <div class="form-box2">
-    <div class="form-box">
-    <div class="form-header">
-      <h2 class="form-title">CREATE PROJECT</h2>
-      <div class="form-inner">
-  <input class="controls" type="text" name="p_name" placeholder="Name">
-  <div class="date-group">
-  <input type="date" name="start_date" placeholder="start date">
-  <input type="date" name="end_date" placeholder="end date">
-</div>
-  <textarea class="controls full-width" placeholder="Description"></textarea>
-  <input class="controls" type="file">
-  <div class="icon-preview full-width">
-    <img src="{{request.static_url('worq:static/img/upload.png')}}" alt="icon preview">
-    <input class="buttons" type="submit" value="CREATE">
-  </div>
-</div>
+      <div class="form-box">
+        <div class="form-header">
+          <h2 class="form-title">CREATE PROJECT</h2>
+          <div class="form-inner">
+            <input class="controls" type="text" name="p_name" placeholder="Name">
+            <div class="date-group">
+            <input type="date" name="start_date" placeholder="start date">
+            <input type="date" name="end_date" placeholder="end date">
+          </div>
+          <textarea class="controls full-width" placeholder="Description"></textarea>
+          <input class="controls" type="file">
+          <div class="icon-preview full-width">
+            <img src="{{request.static_url('worq:static/img/upload.png')}}" alt="icon preview">
+            <input class="buttons" type="submit" value="CREATE">
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 </div>
 {% endblock %}
 
