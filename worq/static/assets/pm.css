@@ -1,0 +1,104 @@
+.container {
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 10px;
+  background: white;
+  box-sizing: border-box;
+}
+
+
+.welcome {
+  background: #eeeeee;
+  padding: 10px;
+  font-size: 20px;
+}
+
+.form-box2 {
+  background: #465158;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.form-box {
+  margin-top: 5px;
+  background: #eeeeee;
+  padding: 20px;
+  border-radius: 5px;
+  color: rgb(0, 0, 0);
+}
+
+.form-header {
+  align-items: center;
+  margin: 10px;
+  background-color: #eeeeee;
+}
+
+.form-title {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.form-inner {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  color: #333;
+}
+
+/* Contenedor para agrupar las fechas en fila */
+.date-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Estilo específico para inputs de fecha */
+.date-group input[type="date"] {
+  width: 30%;
+  border: 1px solid #017bab;
+  margin-bottom: 15px;
+  padding: 11px 11px;
+  background: #EEEEEE;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+
+.form-inner .full-width {
+  grid-column: 1 / -1;
+}
+
+.icon-preview {
+  text-align: center;
+}
+
+.icon-preview img {
+  width: 50px;
+  height: 50px;
+  color: #000000;
+}
+
+.controls {
+  width: 100%;
+  border: 1px solid #017bab;
+  margin-bottom: 15px;
+  padding: 11px 11px;
+  background: #EEEEEE;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.buttons {
+  width: 100%;
+  height: 40px;
+  background: #465158;
+  border: none;
+  color: white;
+  margin-bottom: 16px;
+}
