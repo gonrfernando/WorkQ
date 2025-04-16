@@ -21,6 +21,10 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
+    {% block styles %}
+<link rel="stylesheet" href="{{request.static_url('worq:static/assets/pm.css')}}">
+{% endblock %}
+
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
     <script>
