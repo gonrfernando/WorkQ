@@ -4,7 +4,7 @@ html, body{
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     margin: 0;
     padding: 0;
     background-color: #EFF0F2;
@@ -59,7 +59,13 @@ body {
 
 /*Search bar*/
 .sidebar:not(.expanded) .search-bar {
-    display: none;
+    visibility: hidden; /* Hide the search bar content */
+    pointer-events: none; /* Disable interaction */
+}
+
+.sidebar.expanded .search-bar {
+    visibility: visible; /* Make the search bar content visible */
+    pointer-events: auto; /* Enable interaction */
 }
 
 .sidebar.expanded .search-bar {
@@ -95,7 +101,7 @@ body {
     margin-top: 0; /* Remove extra margin */
     display: none;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    top: 21%; /* Position directly below the input field */
+    top: 20%; /* Position directly below the input field */
     left: 5%; /* Align with the input field */
 }
 
@@ -110,16 +116,12 @@ body {
 }
 
 /* Projects */
-.sidebar-projects{
-    padding: 0%;
-}
-
-.sidebar:not(.expanded) .sidebar-projects {
-    margin-top: 58%;
-}
-
-.sidebar.expanded .sidebar-projects {
-    margin-top: 5%;
+.sidebar-projects {
+    position: relative; /* Prevent content from adjusting dynamically */
+    top: 3vh; /* Adjust as needed */
+    left: 0;
+    width: 100%; /* Match the sidebar width */
+    padding: 0;
 }
 
 .project-item {
@@ -131,6 +133,7 @@ body {
     transition: background-color 0.2s;
     margin-bottom: 4px;
     justify-content: space-between;
+    height: 13vh;
 }
 
 .project-icon {
@@ -149,11 +152,18 @@ body {
     justify-content: center;
     flex-shrink: 0;
 }
+.project-icon-wrapper.selected{
+    border: 10px solid #D9D9D9;
+}
 
 .project-label {
     margin-left: 10px;
     display: none;
     font-size: 1.5rem;
+}
+
+.sidebar:not(.expanded) .material-icons-round {
+    display: none;
 }
 
 .sidebar.expanded .project-label {
@@ -205,7 +215,7 @@ body {
 
 .blur-overlay {
     z-index: 998;
-    pointer-events: auto;
+    pointer-events: none;
 }
 
 .sidebar {
@@ -233,7 +243,11 @@ body {
     width: 2.5vw;
     height: 5vh;
     margin-left: 20px;
+    margin-right: 5px;
     cursor: pointer;
+    padding: 0;
+    font-size: 2.5rem !important;
+    color: #3b3e3f;
 }
 
 .toolbar-separator {
@@ -254,7 +268,20 @@ body {
     height: 77%;
 }
 
+.sortable-placeholder {
+    background-color: #465158; 
+    height: 14vh; 
+    margin-bottom: 4px; 
+    border-radius: 6px; 
+}
 
+/* Dragging item style */
+.dragging {
+    opacity: 0.5;
+    transform: scale(1.05); 
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
 .profile {
     position: relative;
     display: inline-block;

@@ -23,19 +23,7 @@
     />
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
-    <script>
-    $( function() {
-      $( "#sortable" ).sortable({
-        revert: true
-      });
-      $( "#draggable" ).draggable({
-        connectToSortable: "#sortable",
-        helper: "clone",
-        revert: "invalid"
-      });
-      $( "ul, li" ).disableSelection();
-    } );
-    </script>
+    <script src="{{request.static_url('worq:static/sidebar-scripts.js')}}"></script>
   </head>
   <body>
     <div id="mySidebar" class="sidebar" onmouseleave="closeNav()"" onmouseover="openNav()">
@@ -52,9 +40,9 @@
 
       <!-- Project List -->
       <ul class="sidebar-projects" id="sortable">
-        {% for pid, project in projects.items() %}
-          <li class="ui-state-default project-item {% if pid == active_project_id %}selected{% endif %}">
-            <div class="project-icon-wrapper">
+        {% for project in projects %}
+          <li class="ui-state-default project-item {% if project.id == active_project_id %}selected{% endif %}">
+            <div class="project-icon-wrapper {% if project.id == active_project_id %}selected{% endif %}">
               <img src="{{ request.static_url('worq:static/icons/project' ~ pid ~ '.png') }}" class="project-icon">
             </div>
             <span class="project-label">{{ project.name }}</span>
@@ -68,10 +56,10 @@
     
     <div class="toolbar">
       <div class=notification>
-        <img src="{{request.static_url('worq:static/notif-icon.png')}}" class="toolbar-icon">
+        <span class="toolbar-icon material-icons-round">notifications</span>
       </div>
       <div class="calendar">
-        <img src="{{request.static_url('worq:static/calendar-icon.png')}}" class="toolbar-icon">
+        <span class="toolbar-icon material-icons-round">calendar_today</span>
       </div>
       <span class="toolbar-separator"></span>
       <div class="profile" id="profile-menu">

@@ -1,0 +1,56 @@
+{% extends "workq_main.jinja2" %}
+
+{% block content %}
+  <head>
+    <meta charset="utf-8">
+    <title>Func add user (Prueba)</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ request.static_url('worq:static/assets/style.css') }}">
+  </head>
+  <body>
+
+    <span class="material-symbols-outlined show-popup">person_add</span>
+
+    <div class="popup-container">
+      <div class="popup-box">
+        <div class="iconperson">
+          <span class="material-symbols-outlined">person</span>
+        </div>
+
+        <h5>New/Edit User</h5>
+
+        <!-- SIN acción, solo para pruebas visuales -->
+        <form>
+          <input class="controls" type="text" id="name" name="name" placeholder="Name">
+          <input class="controls" type="email" id="email_address" name="email_address" placeholder="Email Address">
+          <input class="controls" type="text" id="number" name="number" placeholder="Number">
+
+          <select class="controls" id="department" name="department">
+            <option value="" disabled selected>Select Department</option>
+            {% for department in departments %}
+              <option value="{{ department.id }}">{{ department.name }}</option>
+            {% endfor %}
+          </select>
+
+          <select class="controls" id="role" name="role">
+            <option value="" disabled selected>Select Role</option>
+            {% for role in roles %}
+              <option value="{{ role.id }}">{{ role.name }}</option>
+            {% endfor %}
+          </select>
+
+          <input class="close-btn" type="submit" value="Add User">
+        </form>
+      </div>
+    </div>
+    <script src="{{ request.static_url('worq:static/assets/functions.js') }}"></script>
+  </body>
+
+
+
+{% endblock content %}
