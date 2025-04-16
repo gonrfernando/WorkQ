@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="{{request.locale_name}}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pyramid web application">
+    <meta name="author" content="Pylons Project">
+    <link rel="shortcut icon" href="{{request.static_url('worq:static/workq.png')}}">
+    <link rel="stylesheet" href="{{request.static_url('worq:static/assets/pm.css')}}">
+    <title>WorkQ: Create a project</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <script src="static/scripts.js"></script>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Round|Material+Icons+Sharp|Material+Icons+Two+Tone"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+    <script>
+    $( function() {
+      $( "#sortable" ).sortable({
+        revert: true
+      });
+      $( "#draggable" ).draggable({
+        connectToSortable: "#sortable",
+        helper: "clone",
+        revert: "invalid"
+      });
+      $( "ul, li" ).disableSelection();
+    } );
+    </script>
+  </head>
+  <body>
+    <div id="mySidebar" class="sidebar" onmouseleave="closeNav()"" onmouseover="openNav()">
+      <!-- Top Branding -->
+      <div class="sidebar-header">
+        <img src="{{request.static_url('worq:static/workq.png')}}" class="sidebar-logo">
+        <span class="sidebar-title">WorkQ</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search..." oninput="handleSearchInput(event)">
+        <div id="autocomplete-results" class="autocomplete-results"></div>
+      </div>
+
+      <!-- Project List -->
+      <ul class="sidebar-projects" id="sortable">
+        {% for pid, project in projects.items() %}
+          <li class="ui-state-default project-item {% if pid == active_project_id %}selected{% endif %}">
+            <div class="project-icon-wrapper">
+              <img src="{{ request.static_url('worq:static/icons/project' ~ pid ~ '.png') }}" class="project-icon">
+            </div>
+            <span class="project-label">{{ project.name }}</span>
+            <span class="material-icons-round">drag_indicator</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div id="overlay-blur" class="blur-overlay"></div>
+    
+    <div class="toolbar">
+      <div class=notification>
+        <img src="{{request.static_url('worq:static/notif-icon.png')}}" class="toolbar-icon">
+      </div>
+      <div class="calendar">
+        <img src="{{request.static_url('worq:static/calendar-icon.png')}}" class="toolbar-icon">
+      </div>
+      <span class="toolbar-separator"></span>
+      <div class="profile">
+        <img src="{{request.static_url('worq:static/profile-icon.png')}}" class="toolbar-icon">
+      </div>
+    </div>
+
+    <div class="main">
+    {% block content %}
+    <div class="container">
+    <div class="welcome">WELCOME</div>
+    <br>
+    <div class="form-box2">
+    <div class="form-box">
+    <div class="form-header">
+      <h2 class="form-title">CREATE PROJECT</h2>
+      <div class="form-inner">
+  <input class="controls" type="text" name="p_name" placeholder="Name">
+  <div class="date-group">
+  <input type="date" name="start_date" placeholder="start date">
+  <input type="date" name="end_date" placeholder="end date">
+</div>
+  <textarea class="controls full-width" placeholder="Description"></textarea>
+  <input class="controls" type="file">
+  <div class="icon-preview full-width">
+    <img src="{{request.static_url('worq:static/img/upload.png')}}" alt="icon preview">
+    <input class="buttons" type="submit" value="CREATE">
+  </div>
+</div>
+    </div>
+  </div>
+</div>
+</div>
+    {% endblock content %}
+    </div>
+
+    <script>
+      const projects = {{ projects|tojson }};
+    </script>
+
+  </body>
+</html>
+
+
