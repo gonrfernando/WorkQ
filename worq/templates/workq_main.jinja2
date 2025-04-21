@@ -62,8 +62,13 @@
         <span class="toolbar-icon material-icons-round">calendar_today</span>
       </div>
       <span class="toolbar-separator"></span>
-      <div class="profile">
-        <span class="toolbar-icon material-icons-round">account_circle</span>
+      <div class="profile" id="profile-menu">
+        <span class="toolbar-icon material-icons-round" id="profile-icon">account_circle</span>
+        <ul id="dropdown-menu">
+          <li><a href="{{ request.route_url('info_user') }}">Profile</a></li>
+          <li><a href="">Tutorial</a></li>
+          <li><a href="">Logout</a></li>
+        </ul>
       </div>
     </div>
 
@@ -71,10 +76,28 @@
     {% block content %}
     {% endblock content %}
     </div>
-
     <script>
       const projects = {{ projects|tojson }};
     </script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const profileIcon = document.getElementById('profile-icon');
+          const dropdownMenu = document.getElementById('dropdown-menu');
+          const profileContainer = document.getElementById('profile-menu');
+      
+          // Alternar visibilidad al hacer clic en el ícono
+          profileIcon.addEventListener('click', function (event) {
+            event.stopPropagation(); // Evita que el clic se propague
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+          });
+      
+          // Cerrar el menú si clickeás fuera
+          document.addEventListener('click', function (event) {
+            if (!profileContainer.contains(event.target)) {
+              dropdownMenu.style.display = 'none';
+            }
+          });
+        });
+      </script>
   </body>
 </html>
