@@ -281,8 +281,6 @@ body {
     z-index: 1000;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-<<<<<<< HEAD
-=======
 
 .profile {
     position: relative;
@@ -323,8 +321,3 @@ body {
   #dropdown-menu li a:hover {
     color: #007BFF;
   }
-
-  
-
-
->>>>>>> user-info
