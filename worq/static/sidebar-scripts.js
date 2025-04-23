@@ -26,12 +26,10 @@ $(function () {
 
 function openNav() {
     document.getElementById("mySidebar").classList.add("expanded");
-    document.getElementById("main").style.marginLeft = "23%";
 }
 
 function closeNav() {
     document.getElementById("mySidebar").classList.remove("expanded");
-    document.getElementById("main").style.marginLeft = "6%";
 }
 
 function handleSearchInput(event) {

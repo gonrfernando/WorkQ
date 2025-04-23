@@ -12,7 +12,7 @@ body {
 
 .sidebar {
     height: 100%;
-    width: 6%;
+    width: clamp(70px, 6%, 100px);
     position: fixed;
     z-index: 1;
     top: 0;
@@ -26,7 +26,7 @@ body {
 }
 
 .sidebar.expanded {
-    width: 30%;
+    width: clamp(300px, 30%, 600px);
 }
 
 /* Header */
@@ -41,16 +41,14 @@ body {
 }
 
 .sidebar-logo {
-    width: 5vw;
-    height: 10vh;
+    width: clamp(50px, 5vw, 75px);
+    height: clamp(50px, 10vh, 75px);
 }
 
 .sidebar-title {
     color: #000000;
     font-size: 210%;
     display: none;
-    margin-left: 20%;
-    margin-top: 3%;
 }
 
 .sidebar.expanded .sidebar-title {
@@ -59,13 +57,13 @@ body {
 
 /*Search bar*/
 .sidebar:not(.expanded) .search-bar {
-    visibility: hidden; /* Hide the search bar content */
-    pointer-events: none; /* Disable interaction */
+    visibility: hidden; 
+    pointer-events: none; 
 }
 
 .sidebar.expanded .search-bar {
-    visibility: visible; /* Make the search bar content visible */
-    pointer-events: auto; /* Enable interaction */
+    visibility: visible; 
+    pointer-events: auto; 
 }
 
 .sidebar.expanded .search-bar {
@@ -97,12 +95,12 @@ body {
     max-height: 200px;
     overflow-y: auto;
     z-index: 1000;
-    width: 90%; /* Match the input field width */
-    margin-top: 0; /* Remove extra margin */
+    width: 90%; 
+    margin-top: 0; 
     display: none;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    top: 20%; /* Position directly below the input field */
-    left: 5%; /* Align with the input field */
+    top: 20%; 
+    left: 5%; 
 }
 
 .autocomplete-item {
@@ -117,33 +115,37 @@ body {
 
 /* Projects */
 .sidebar-projects {
-    position: relative; /* Prevent content from adjusting dynamically */
-    top: 3vh; /* Adjust as needed */
+    position: relative; 
+    top: 3vh;
     left: 0;
-    width: 100%; /* Match the sidebar width */
+    width: 100%; 
     padding: 0;
 }
 
 .project-item {
     display: flex;
     align-items: center;
-    padding: 10px 10px;
+    padding-left: clamp(1px, 11%, 15px);
     color: white;
     cursor: pointer;
     transition: background-color 0.2s;
     margin-bottom: 4px;
     justify-content: space-between;
-    height: 13vh;
+    height: clamp(50px, 13vh, 100px);;
 }
 
 .project-icon {
-    width: 4vw;
-    height: 8vh;
+    display: inline-block;
+    width: clamp(50px, 10vh, 75px);
+    height: clamp(50px, 10vh, 75px);
+    text-align: center;
+    margin-top: auto;
+    color: #3D464C;
 }
 
 .project-icon-wrapper {
-    width: 5vw;
-    height: 10vh;
+    width: clamp(50px, 10vh, 75px);
+    height: clamp(50px, 10vh, 75px);
     border-radius: 50%;
     background-color: white;
     border: 4px solid #D9D9D9;
@@ -162,7 +164,7 @@ body {
     font-size: 1.5rem;
 }
 
-.sidebar:not(.expanded) .material-icons-round {
+.sidebar:not(.expanded) #drag-indicator{
     display: none;
 }
 
@@ -170,7 +172,6 @@ body {
     display: inline-block;
 }
 
-/* Background color only in expanded */
 .sidebar.expanded .project-item {
     background-color: #3D464C;
 }
@@ -185,12 +186,12 @@ body {
 
 .sidebar.expanded .project-item.selected .project-label {
     background-color: white;
-    width: 80%;
+    width: clamp(50px, 80%, 500px);
     padding: 5% 1% 5% 1%;
     border-radius: 4px;
 }
 
-.project-item .material-icons-round {
+.project-item #drag-indicator {
     margin-left: auto;
 }
 
@@ -207,10 +208,10 @@ body {
     opacity: 0;
     transition: opacity 0.3s ease;
 }
-  /* Show the blur when sidebar is expanded */
+
 .sidebar.expanded ~ .blur-overlay {
     opacity: 1;
-    z-index: 0; /* stays below sidebar */
+    z-index: 0; 
 }
 
 .blur-overlay {

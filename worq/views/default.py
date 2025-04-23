@@ -6,6 +6,7 @@ from worq.models.models import Projects
 def my_view(request):
     projects = request.dbsession.query(Projects).all()
     json_projects = [{"id": project.id, "name": project.name} for project in projects]
+    #json_projects = [{"id": project.id, "name": project.name, 'icon_id':project.icon_name} for project in projects]
     active_project_id = request.params.get("project_id")
     active_project_id = 1
     return {
