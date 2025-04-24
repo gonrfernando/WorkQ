@@ -5,8 +5,5 @@ def includeme(config):
     config.add_route('sign_in', '/sign-in')
     config.add_route('sign_up', '/sign-up')
     config.add_route('add_user', '/add_user')
-<<<<<<< HEAD
     config.add_route('pm_main', '/pm_main')
-=======
     config.add_route('info_user', '/info_user')
->>>>>>> user-info
