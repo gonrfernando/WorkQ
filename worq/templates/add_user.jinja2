@@ -1,5 +1,6 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+{% extends "workq_main.jinja2" %}
+
+{% block content %}
   <head>
     <meta charset="utf-8">
     <title>Func add user (Prueba)</title>
@@ -23,16 +24,24 @@
 
         <h5>New/Edit User</h5>
 
-        <!-- SIN acción, solo para pruebas visuales -->
-        <form>
+        <!-- Método POST para enviar datos -->
+        <form method="POST" action="{{ request.route_url('add_user') }}">
           <input class="controls" type="text" id="name" name="name" placeholder="Name">
-          <input class="controls" type="email" id="email_address" name="email_address" placeholder="Email Address">
-          <input class="controls" type="text" id="number" name="number" placeholder="Number">
+          <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
+          <input class="controls" type="text" id="tel" name="tel" placeholder="Phone Number">
+          <input class="controls" type="password" id="passw" name="passw" placeholder="Password">
 
-          <select class="controls" id="department" name="department">
-            <option value="" disabled selected>Select Department</option>
-            {% for department in departments %}
-              <option value="{{ department.id }}">{{ department.name }}</option>
+          <select class="controls" id="country" name="country">
+            <option value="" disabled selected>Select Country</option>
+            {% for country in countries %}
+              <option value="{{ country.id }}">{{ country.name }}</option>
+            {% endfor %}
+          </select>
+
+          <select class="controls" id="area" name="area">
+            <option value="" disabled selected>Select Area</option>
+            {% for area in areas %}
+              <option value="{{ area.id }}">{{ area.area }}</option>
             {% endfor %}
           </select>
 
@@ -47,6 +56,6 @@
         </form>
       </div>
     </div>
-<script src="{{ request.static_url('worq:static/assets/functions.js') }}"></script>
+    <script src="{{ request.static_url('worq:static/assets/functions.js') }}"></script>
   </body>
-</html>
+{% endblock content %}
