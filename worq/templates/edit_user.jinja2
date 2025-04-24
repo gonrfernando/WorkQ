@@ -25,7 +25,12 @@
         <h5>New/Edit User</h5>
 
         <!-- Método POST para enviar datos -->
-        <form method="POST" action="{{ request.route_url('add_user') }}">
+        <form method="PUT" action="{{ request.route_url('edit_user') }}">
+        <div class="controls">
+        <input type="text" id="SeInput" placeholder="Search..." oninput="handleSearchInput(event)">
+        <div id="autocomplete-results" class="autocomplete-results"></div>
+        </div>
+
           <input class="controls" type="text" id="name" name="name" placeholder="Name">
           <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
           <input class="controls" type="text" id="tel" name="tel" placeholder="Phone Number">

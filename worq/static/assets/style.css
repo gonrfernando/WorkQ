@@ -301,3 +301,41 @@ padding: 18px, 40px;
   border-radius: 10%;
   float: right;
 }
+
+.search-bar2 input {
+  width: 100%;
+  border: 1px solid #017bab;
+  margin-bottom: 15px;
+  padding: 11px 11px;
+  background: #EEEEEE;
+  font-size: 14px;
+  font-weight: bold;
+  outline: none;
+  color: black;
+}
+
+.autocomplete-results2 {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  width: 90%; /* Match the input field width */
+  margin-top: 0; /* Remove extra margin */
+  display: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  top: 20%; /* Position directly below the input field */
+  left: 5%; /* Align with the input field */
+}
+
+.autocomplete-item2 {
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.autocomplete-item2:hover {
+  background-color: #f0f0f0;
+}
