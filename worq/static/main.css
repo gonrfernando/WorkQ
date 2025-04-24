@@ -11,6 +11,9 @@ body {
 }
 
 .sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     height: 100%;
     width: clamp(70px, 6%, 100px);
     position: fixed;
@@ -19,7 +22,8 @@ body {
     left: 0;
     background-color: #465158;
     overflow-x: hidden;
-    transition: 0.3s;
+    transform: translateX(0); 
+    transition: width 0.1s ease;
     padding-top: 0px;
     border-radius: 0 6px 6px 0;
     box-shadow: 8px 4px 4px rgba(0, 0, 0, 0.2);
@@ -29,23 +33,36 @@ body {
     width: clamp(300px, 30%, 600px);
 }
 
+.sidebar:not(.expanded){
+    align-items: center;
+    text-align: center;
+}
+
 /* Header */
-.sidebar-header {
-    display: flex;
-    padding: 10px;
-    border-radius: 6px;
+.sidebar:not(.expanded) .sidebar-header{
+    padding-top: 10px;
+    margin: 0 auto;
 }
 
 .sidebar.expanded .sidebar-header {
     background-color: #fefefe;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    width: 100%;
+    border-radius: 0 6px 6px 0;
 }
 
 .sidebar-logo {
-    width: clamp(50px, 5vw, 75px);
-    height: clamp(50px, 10vh, 75px);
+    width: clamp(50px, min(10vh, 10vw), 75px);
+    height: clamp(50px, min(10vh, 10vw), 75px);
 }
 
 .sidebar-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
     color: #000000;
     font-size: 210%;
     display: none;
@@ -64,17 +81,15 @@ body {
 .sidebar.expanded .search-bar {
     visibility: visible; 
     pointer-events: auto; 
-}
-
-.sidebar.expanded .search-bar {
     display: flex;
     align-items: center;
     background-color: #3D464C;
     border-radius: 6px;
     padding: 5px;
-    margin-top: 4%;
+    margin-top: clamp(10px, 4%, 20px);
     margin-left: 2%;
     margin-right: 2%;
+    width: 96%;
 }
 
 .search-bar input {
@@ -99,7 +114,7 @@ body {
     margin-top: 0; 
     display: none;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    top: 20%; 
+    top: clamp(130px, 22vh, 157px);
     left: 5%; 
 }
 
@@ -116,7 +131,7 @@ body {
 /* Projects */
 .sidebar-projects {
     position: relative; 
-    top: 3vh;
+    top: clamp(10px, 3vh, 20px);;
     left: 0;
     width: 100%; 
     padding: 0;
@@ -125,22 +140,33 @@ body {
 .project-item {
     display: flex;
     align-items: center;
-    padding-left: clamp(1px, 11%, 15px);
     color: white;
     cursor: pointer;
-    transition: background-color 0.2s;
     margin-bottom: 4px;
     justify-content: space-between;
-    height: clamp(50px, 13vh, 100px);;
+    height: clamp(80px, 13vh, 100px);
 }
 
+.sidebar.expanded .project-item{
+    padding-left: clamp(1px, 11%, 15px);
+}
+
+.sidebar:not(.expanded) .project-item {
+    justify-content: center; 
+    text-align: center; 
+}
+
+
 .project-icon {
-    display: inline-block;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(30px, 6vh, 50px) !important; 
     width: clamp(50px, 10vh, 75px);
     height: clamp(50px, 10vh, 75px);
     text-align: center;
-    margin-top: auto;
-    color: #3D464C;
+    color: #465158;
+    vertical-align: middle;
 }
 
 .project-icon-wrapper {
@@ -202,9 +228,9 @@ body {
     height: 100vh;
     width: 100vw;
     backdrop-filter: blur(4px);
-    background-color: rgba(0, 0, 0, 0.2); /* subtle dark tint */
+    background-color: rgba(0, 0, 0, 0.2);
     z-index: 0;
-    pointer-events: none; /* let clicks go through */
+    pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -226,28 +252,29 @@ body {
 /*Toolbar*/
 
 .toolbar {
-    margin-left: 7%;
-    width: 93%;
-    height: 10%;
+    margin-left: clamp(80px, 7%, 115px);
+    width: clamp(100vw-75px, 93%, 100vw-108px);
+    height: clamp(50px, 10%, 80px);
     background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: right;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-right: clamp(10px, 3%, 40px);
     box-shadow: 6px 4px 4px rgba(0, 0, 0, 0.2);
     border-radius: 6px;
-    gap: 1%;
+    gap: clamp(10px, 3%, 40px);
 }
 
 .toolbar-icon {
-    width: 2.5vw;
-    height: 5vh;
-    margin-left: 20px;
-    margin-right: 5px;
+    display: flex !important;
+    width: 3vh;
+    height: 3vh;
     cursor: pointer;
     padding: 0;
-    font-size: 2.5rem !important;
+    font-size: 2rem !important;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
     color: #3b3e3f;
 }
 
@@ -255,13 +282,19 @@ body {
     width: 1px;
     height: 50%;
     background-color: #0099d8;
-    margin-left: 20px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    display: flex !important;
 }
 
 /*main*/
 .main {
-    margin-left: 7%;
-    margin-top: 5%;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    margin-left: clamp(80px, 7%, 115px);
+    margin-top: clamp(50px, 5%, 70px);
     padding: 20px;
     background-color: #D9D9D9;
     border-radius: 6px;

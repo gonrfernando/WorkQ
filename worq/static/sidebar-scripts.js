@@ -1,16 +1,16 @@
 $(function () {
     $("#sortable").sortable({
-        axis: "y", // Allow vertical sorting only
-        revert: 200, // Smooth animation when dropping
-        placeholder: "sortable-placeholder", // Add a placeholder for better visual feedback
-        tolerance: "pointer", // Makes the drop position clearer
-        cursor: "move", // Change the cursor to indicate dragging
-        opacity: 0.8, // Make the dragged item semi-transparent
+        axis: "y", 
+        revert: 200, 
+        placeholder: "sortable-placeholder", 
+        tolerance: "pointer", 
+        cursor: "move", 
+        opacity: 0.8,
         start: function (event, ui) {
-            ui.item.addClass("dragging"); // Add a class to the dragged item
+            ui.item.addClass("dragging"); 
         },
         stop: function (event, ui) {
-            ui.item.removeClass("dragging"); // Remove the class after dropping
+            ui.item.removeClass("dragging"); 
         }
     });
 
