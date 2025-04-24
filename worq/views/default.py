@@ -1,17 +1,22 @@
 from pyramid.view import view_config
+from worq.models.models import Projects
 
 @view_config(route_name='home', renderer='worq:templates/workq_main.jinja2')
 def my_view(request):
-    #projects = DBSession.query(Project).all()
-    #active_project_id = request.params.get("project_id")
-    projects = {
-        1: {"name": "Project A", "id": "1"},
-        2: {"name": "Project B", "id": "2"},
-        3: {"name": "Project C", "id": "3"},
-    }
+    projects = request.dbsession.query(Projects).all()
+    json_projects = [{"id": project.id, "name": project.name} for project in projects]
+    active_project_id = request.params.get("project_id")
+    active_project_id = 1
     # Simulating a database query
     active_project_id = 1
+    session = request.session
+    user_name = session.get('user_name')
+    user_email = session.get('user_email')
+    user_role = session.get('user_role')
     return {
-        "projects": projects,
-        "active_project_id": active_project_id
+        "projects": json_projects,
+        "active_project_id": active_project_id,
+        'user_name': user_name,
+        'user_email': user_email,
+        'user_role': user_role
     }

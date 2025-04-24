@@ -242,7 +242,7 @@ body {
 /*main*/
 .main {
     margin-left: 7%;
-    margin-top: 5%;
+    margin-top: 1%;
     padding: 20px;
     background-color: #D9D9D9;
     border-radius: 6px;
@@ -284,4 +284,50 @@ body {
   
   #dropdown-menu li a:hover {
     color: #007BFF;
+  }
+  /* Color base para tabs no seleccionados */
+  .nav-tabs .nav-link {
+    color: #555;
+    background-color: #b3b3b3;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    margin-right: 5px;
+    font-size: 20px;       /* Tamaño del texto */
+    padding: 8px 16px;     /* Espaciado interno (vertical y horizontal) */
+    width: 150px;
+    text-align: center; /* Para que el texto quede centrado */
+  }
+
+  /* Hover para tabs no activos */
+  .nav-tabs .nav-link:hover {
+    background-color: #858585;
+    color: #000;
+  }
+
+  /* Estilo para tab activo */
+  .nav-item .nav-link.active {
+    color: #000000;
+    background-color: #ffffff;
+    border-color: #ffffff #ffffff #fff;
+  }
+
+  /* Quitar borde inferior a la lista de tabs para que se una con el contenido */
+  .nav-tabs {
+    border-bottom: 1px solid #ddd;
+  }
+
+  /* Contenido cuando el tab está activo */
+  .tab-content .tab-pane {
+    display: none;
+  }
+
+  .tab-content .tab-pane.active.show {
+    display: block;
+    background-color: #ffffff;
+    color: #000;
+    padding: 1.5rem;
+    border-radius: 0 0 0.5rem 0.5rem;
+  }
+  #navigation {
+    margin-top: 5px;
   }

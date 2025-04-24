@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from worq.models.add_models import *
+from worq.models.models import *
 
 @view_config(route_name='add_user', renderer='templates/add_user.jinja2', request_method='GET')
 def add_user_form_view(request):

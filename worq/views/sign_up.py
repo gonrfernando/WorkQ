@@ -1,5 +1,5 @@
 from pyramid.view import view_config
-from worq.models.modelos import Users
+from worq.models.models import Users
 import random
 import string
 from worq.scripts.emailsender import send_email
@@ -7,6 +7,10 @@ from worq.scripts.emailsender import send_email
 def sign_up_view(request):
     try:
         email = request.POST.get('email', '').strip()
+        if not email:
+             return {'message':'Email is required'}
+        if '@' and '.' not in email:
+                return {'message': 'Invalid email address'}
         user = request.dbsession.query(Users).filter(Users.email==email).first()
         if user:
             print(f"User with email {email} already exists.")
@@ -14,7 +18,7 @@ def sign_up_view(request):
         lenght = 8
         temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=lenght))
         dbsession = request.dbsession
-        new_user = Users(email=email, password=temp_password)
+        new_user = Users(email=email, passw=temp_password, role_id=4)
         dbsession.add(new_user)
         dbsession.flush()
 

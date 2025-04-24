@@ -200,3 +200,8 @@ padding: 18px, 40px;
   font-weight: bold;
   margin-bottom: 20px;
 }
+.buttons:disabled {
+  background-color: #ccc;
+  color: #5a5a5a;
+  cursor: not-allowed;
+}

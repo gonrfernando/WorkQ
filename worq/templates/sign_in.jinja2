@@ -36,21 +36,69 @@
         <h5>Sign-in</h5>
         <h6>Koch email address</h6>
         <form method="POST" action="{{ request.route_url('sign_in') }}">
-          <input class="controls" type="text" name="email" placeholder="Email">
+          <div>
+            <input class="controls" type="text" id="email" name="email" placeholder="Email" required>
+            <small id="email-error" style="color: red; display: none;">Invalid email address</small>
+          </div>
 
           <div class="password-container">
-            <input class="controls pass" type="password" name="password" placeholder="Password">
+            <input class="controls pass" type="password" name="password" placeholder="Password" required>
             <span class="material-symbols-outlined toggle-visibility" onclick="togglePasswordVisibility()">visibility</span>
           </div>
 
-          <input class="buttons" type="submit" value="Submit">
+          <input class="buttons" id="bnsubmit" type="submit" value="Submit">
         </form>
 
         <p>Don’t have an account? 
           <a href="{{ request.route_url('sign_up') }}">Sign-up</a>
         </p>
+         <!-- Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {{ message }}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
         <script>
+          // Validación en tiempo real del correo electrónico
+          document.addEventListener('DOMContentLoaded', function () {
+            const emailInput = document.getElementById('email');
+            const emailError = document.getElementById('email-error');
+            const btnsubmit = document.getElementById('bnsubmit');
+
+            emailInput.addEventListener('input', function () {
+              const emailValue = emailInput.value;
+              // Validar si el correo contiene "@" y "."
+              if (emailValue.includes('@') && emailValue.includes('.')) {
+                emailError.style.display = 'none'; // Ocultar mensaje de error
+                btnsubmit.disabled = false;
+              } else {
+                emailError.style.display = 'block'; // Mostrar mensaje de error
+                btnsubmit.disabled = true;
+              }
+            });
+          });
+          // Mostrar el modal si hay un mensaje de error
+          document.addEventListener('DOMContentLoaded', function () {
+            const message = "{{ message|default('') }}";
+              if (message) {
+                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+          }
+          });
+
+          // Alternar visibilidad de la contraseña
           function togglePasswordVisibility() {
             const passwordInput = document.querySelector('.pass');
             const visibilityIcon = document.querySelector('.toggle-visibility');
