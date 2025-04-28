@@ -303,18 +303,18 @@ padding: 18px, 40px;
 }
 
 .search-bar2 input {
-  width: 100%;
   border: 1px solid #017bab;
+  outline: none;
   margin-bottom: 15px;
   padding: 11px 11px;
-  background: #EEEEEE;
   font-size: 14px;
   font-weight: bold;
-  outline: none;
-  color: black;
+  width: 100%;
+  background: #EEEEEE;
+  color: rgb(0, 0, 0);
 }
 
-.autocomplete-results2 {
+.autocomplete-results {
   position: absolute;
   background-color: white;
   border: 1px solid #ccc;
@@ -330,12 +330,12 @@ padding: 18px, 40px;
   left: 5%; /* Align with the input field */
 }
 
-.autocomplete-item2 {
+.autocomplete-item {
   padding: 10px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
-.autocomplete-item2:hover {
+.autocomplete-item:hover {
   background-color: #f0f0f0;
 }

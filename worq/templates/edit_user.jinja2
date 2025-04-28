@@ -24,43 +24,52 @@
 
         <h5>New/Edit User</h5>
 
-        <!-- Método POST para enviar datos -->
-        <form method="PUT" action="{{ request.route_url('edit_user') }}">
-        <div class="controls">
-        <input type="text" id="SeInput" placeholder="Search..." oninput="handleSearchInput(event)">
-        <div id="autocomplete-results" class="autocomplete-results"></div>
-        </div>
+        <!-- Método PUT para enviar datos -->
+        <form method="POST" action="{{ request.route_url('update_user') }}">
+    <input type="hidden" id="user_id" name="user_id">
 
-          <input class="controls" type="text" id="name" name="name" placeholder="Name">
-          <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
-          <input class="controls" type="text" id="tel" name="tel" placeholder="Phone Number">
-          <input class="controls" type="password" id="passw" name="passw" placeholder="Password">
+    <div class="search-bar2">
+        <input type="text" id="form-search-input" placeholder="Search..." oninput="handleFormSearchInput(event)">
+        <div id="form-autocomplete-results" class="autocomplete-results"></div>
+    </div>
 
-          <select class="controls" id="country" name="country">
-            <option value="" disabled selected>Select Country</option>
-            {% for country in countries %}
-              <option value="{{ country.id }}">{{ country.name }}</option>
-            {% endfor %}
-          </select>
+    <input class="controls" type="text" id="name" name="name" placeholder="Name">
+    <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
+    <input class="controls" type="text" id="tel" name="tel" placeholder="Phone Number">
+    <input class="controls" type="password" id="passw" name="passw" placeholder="Password">
 
-          <select class="controls" id="area" name="area">
-            <option value="" disabled selected>Select Area</option>
-            {% for area in areas %}
-              <option value="{{ area.id }}">{{ area.area }}</option>
-            {% endfor %}
-          </select>
+    <select class="controls" id="country" name="country_id">
+        <option value="" disabled selected>Select Country</option>
+        {% for country in countries %}
+            <option value="{{ country.id }}">{{ country.name }}</option>
+        {% endfor %}
+    </select>
 
-          <select class="controls" id="role" name="role">
-            <option value="" disabled selected>Select Role</option>
-            {% for role in roles %}
-              <option value="{{ role.id }}">{{ role.name }}</option>
-            {% endfor %}
-          </select>
+    <select class="controls" id="area" name="area_id">
+        <option value="" disabled selected>Select Area</option>
+        {% for area in areas %}
+            <option value="{{ area.id }}">{{ area.area }}</option>
+        {% endfor %}
+    </select>
 
-          <input class="close-btn" type="submit" value="Add User">
-        </form>
+    <select class="controls" id="role" name="role_id">
+        <option value="" disabled selected>Select Role</option>
+        {% for role in roles %}
+            <option value="{{ role.id }}">{{ role.name }}</option>
+        {% endfor %}
+    </select>
+
+    <input class="close-btn" type="submit" value="Save Changes">
+</form>
       </div>
     </div>
+
+    <!-- Aquí inyectamos los usuarios en formato JavaScript antes del script de funciones -->
+    <script>
+      const users = {{ users | tojson }};
+    </script>
+
     <script src="{{ request.static_url('worq:static/assets/functions.js') }}"></script>
+
   </body>
 {% endblock content %}

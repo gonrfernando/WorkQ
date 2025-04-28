@@ -10,40 +10,17 @@ document.querySelector('.show-popup').addEventListener('click', () => {
     });
   });
 
-  let users = []; // Variable para almacenar los usuarios
-
-  // Obtener usuarios desde el servidor
-  function fetchUsers() {
-      fetch('/api/users')
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Error al obtener los usuarios');
-              }
-              return response.json();
-          })
-          .then(data => {
-              users = data; // Asignar los usuarios obtenidos
-          })
-          .catch(error => {
-              console.error('Error:', error);
-          });
-  }
-  
-  // Llamar a fetchUsers al cargar la página
-  document.addEventListener('DOMContentLoaded', fetchUsers);
-
-// Función de búsqueda
-function handleSearchInput(event) {
+  function handleFormSearchInput(event) {
     const query = event.target.value.toLowerCase();
-    const resultsContainer = document.getElementById("autocomplete-results");
-    resultsContainer.innerHTML = ""; // Limpiar resultados anteriores
+    const resultsContainer = document.getElementById("form-autocomplete-results");
+    resultsContainer.innerHTML = ""; // Clear previous results
 
     if (query.length < 1) {
         resultsContainer.style.display = "none";
         return;
     }
 
-    const filteredUsers = users.filter(user =>
+    const filteredUsers = Object.values(users).filter(user =>
         user.email.toLowerCase().includes(query)
     );
 
@@ -54,7 +31,15 @@ function handleSearchInput(event) {
             item.className = "autocomplete-item";
             item.textContent = user.email;
             item.onclick = () => {
-                document.getElementById("search-input").value = user.email;
+                document.getElementById("form-search-input").value = user.email;
+                document.getElementById("user_id").value = user.id; // Completa el campo oculto
+                document.getElementById("name").value = user.name;
+                document.getElementById("email").value = user.email;
+                document.getElementById("tel").value = user.tel;
+                document.getElementById("passw").value = user.passw;
+                document.getElementById("country").value = user.country_id || ""; // Selecciona el país
+                document.getElementById("area").value = user.area_id || ""; // Selecciona el área
+                document.getElementById("role").value = user.role_id || ""; // Selecciona el rol
                 resultsContainer.style.display = "none";
             };
             resultsContainer.appendChild(item);
