@@ -25,24 +25,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
-<<<<<<< Updated upstream
-    <script>
-    $( function() {
-      $( "#sortable" ).sortable({
-        revert: true
-      });
-      $( "#draggable" ).draggable({
-        connectToSortable: "#sortable",
-        helper: "clone",
-        revert: "invalid"
-      });
-      $( "ul, li" ).disableSelection();
-    } );
-    </script>
-=======
     <script src="{{request.static_url('worq:static/sidebar-scripts.js')}}"></script>
     <link rel="stylesheet" href="{{request.static_url('worq:static/main.css')}}">
->>>>>>> Stashed changes
   </head>
   <body>
     <div id="mySidebar" class="sidebar" onmouseleave="closeNav()"" onmouseover="openNav()">
@@ -59,7 +43,7 @@
 
       <!-- Project List -->
       <ul class="sidebar-projects" id="sortable">
-        {% for pid, project in projects.items() %}
+        {% for project in projects%}
           <li class="ui-state-default project-item {% if pid == active_project_id %}selected{% endif %}">
             <div class="project-icon-wrapper">
               <img src="{{ request.static_url('worq:static/icons/project' ~ pid ~ '.png') }}" class="project-icon">
@@ -107,7 +91,7 @@
                 <button class="nav-link {% if user_role == 'user'%}active{% endif %}" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab" aria-controls="tasks" aria-selected="false"><i class="fas fa-tasks me-1"></i> Tasks</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false"><i class="fas fa-chart-line me-1"></i> Stasts</button>
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false"><i class="fas fa-chart-line me-1"></i> Stats</button>
             </li>
             {% if user_role in ['superadmin', 'admin'] %}
             <li class="nav-item" role="presentation">
@@ -142,7 +126,29 @@
         </div>
       </div>
     </div>
-
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {{ message }}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% if redirect %}
+    <script>
+      setTimeout(function() {
+        window.location.href = "{{ request.route_url('home') }}";
+      }, 5000);
+    </script>
+    {% endif %}
     <script>
       const projects = {{ projects|tojson }};
     </script>
@@ -157,7 +163,13 @@
             event.stopPropagation(); // Evita que el clic se propague
             dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
           });
-      
+           document.addEventListener('DOMContentLoaded', function () {
+            const message = "{{ message|default('') }}";
+              if (message) {
+                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+          }
+          });
           // Cerrar el menú si clickeás fuera
           document.addEventListener('click', function (event) {
             if (!profileContainer.contains(event.target)) {

@@ -7,6 +7,15 @@ from worq.models.models import Users
 @view_config(route_name='sign_in', renderer='templates/sign_in.jinja2')
 def sign_in_view(request):
     try:
+        session = request.session
+        if 'user_name' in session:
+            return {
+                'message': 'You are already logged in. Redirecting to the home page in 5 seconds...',
+                'redirect': True  # Indicador para activar el redireccionamiento en la plantilla
+            }
+        error = request.params.get('error')
+        if error:
+            return {'message' : error }
         if request.method == 'POST':
             email = request.POST.get('email', '').strip()
             password = request.POST.get('password', '').strip()

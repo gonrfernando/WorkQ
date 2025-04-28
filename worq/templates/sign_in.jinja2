@@ -69,6 +69,13 @@
         </div>
       </div>
     </div>
+    {% if redirect %}
+    <script>
+      setTimeout(function() {
+        window.location.href = "{{ request.route_url('home') }}";
+      }, 5000);
+    </script>
+    {% endif %}
 
         <script>
           // Validación en tiempo real del correo electrónico

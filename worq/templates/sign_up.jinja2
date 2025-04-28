@@ -58,6 +58,13 @@
             </div>
           </div>
         </div>
+        {% if redirect %}
+            <script>
+              setTimeout(function() {
+                window.location.href = "{{ request.route_url('home') }}";
+              }, 5000);
+            </script>
+        {% endif %}
         <script>
         document.addEventListener('DOMContentLoaded', function () {
             const message = "{{ message|default('') }}";
