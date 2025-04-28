@@ -1,7 +1,37 @@
 {% extends "workq_main.jinja2" %}
 
 {% block content %}
-    <div class="project-bar">
-        
+<div class="container-fluid">
+    <div class="project-bar row">
+        <div class="col-6 bar-wrapper">
+            <div class="project-selector-bar dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
+                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                    {% for project in projects %}
+                        <a class="dropdown-item" href="{{ request.route_url('task_view', project_id=project.id) }}">{{ project.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-5"></div>
+        <div class="view_button col-1">
+            <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
+        </div>
     </div>
+    <div id="task-container" class="task-container card-view row">
+        {% for task in tasks %}
+        <div class="task-item col-3">
+            <h3 class="task-title">{{ task.title }}</h3>
+            <p class="task-element priority">Priority: {{ task.priority }}<span class="task-element task-priority {{ task.priority|lower }}"></span></p>
+            <p class="task-element task-due-date">Due: {{ task.due_date }}</p>
+            <p class="task-element task-description">{{ task.description }}</p>
+            <ul class="task-requirements">
+                {% for requirement in task.requirements %}
+                <li>{{ requirement }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock content%}

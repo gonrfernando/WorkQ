@@ -290,7 +290,9 @@ body {
 
 /*main*/
 .main {
+    height: clamp(calc(100vh - 170px), calc(85% - 20px), calc(100vh - 120px));
     display: flex;
+    flex-direction: column;
     align-content: center;
     justify-content: center;
     margin-left: clamp(80px, 7%, 115px);
