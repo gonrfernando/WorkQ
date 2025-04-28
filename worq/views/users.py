@@ -31,11 +31,11 @@ def my_view(request):
 @view_config(route_name='update_user', request_method='POST', renderer='json')
 def update_user(request):
     try:
-        user_id = request.params.get("user_id")
+        user_id = request.json_body.get("user_id")  # Cambiado para JSON
         print("User ID:", user_id)
-        print("Country ID:", request.params.get("country_id"))
-        print("Area ID:", request.params.get("area_id"))
-        print("Role ID:", request.params.get("role_id"))
+        print("Country ID:", request.json_body.get("country_id"))
+        print("Area ID:", request.json_body.get("area_id"))
+        print("Role ID:", request.json_body.get("role_id"))
 
         if not user_id:
             return {"error": "User ID is required"}
@@ -46,12 +46,12 @@ def update_user(request):
             return {"error": "User not found"}
 
         # Actualiza los campos del usuario con los datos del formulario
-        user.name = request.params.get("name", user.name)
-        user.email = request.params.get("email", user.email)
-        user.tel = request.params.get("tel", user.tel)
-        user.country_id = int(request.params.get("country_id", user.country_id))
-        user.area_id = int(request.params.get("area_id", user.area_id))
-        user.role_id = int(request.params.get("role_id", user.role_id))
+        user.name = request.json_body.get("name", user.name)
+        user.email = request.json_body.get("email", user.email)
+        user.tel = request.json_body.get("tel", user.tel)
+        user.country_id = int(request.json_body.get("country_id", user.country_id))
+        user.area_id = int(request.json_body.get("area_id", user.area_id))
+        user.role_id = int(request.json_body.get("role_id", user.role_id))
 
         # Confirma los cambios en la base de datos
         request.dbsession.flush()
