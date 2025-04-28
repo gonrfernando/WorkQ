@@ -18,20 +18,31 @@
             <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
         </div>
     </div>
-    <div id="task-container" class="task-container card-view row">
-        {% for task in tasks %}
-        <div class="task-item col-3">
-            <h3 class="task-title">{{ task.title }}</h3>
-            <p class="task-element priority">Priority: {{ task.priority }}<span class="task-element task-priority {{ task.priority|lower }}"></span></p>
-            <p class="task-element task-due-date">Due: {{ task.due_date }}</p>
-            <p class="task-element task-description">{{ task.description }}</p>
-            <ul class="task-requirements">
-                {% for requirement in task.requirements %}
-                <li>{{ requirement }}</li>
-                {% endfor %}
-            </ul>
+    {% for task in tasks %}
+        {% if loop.index0 % 4 == 0 %}
+        <div id="task-container" class="task-container card-view row gx-5">
+        {% endif %}
+            <div class="task-spacer col-3">
+                <div class="task-item">
+                    <h3 class="task-title">{{ task.title }}</h3>
+                    <p class="task-element priority">Priority: {{ task.priority }}<span class="task-element task-priority {{ task.priority|lower }}"></span></p>
+                    <p class="task-element task-due-date">Due: {{ task.due_date }}</p>
+                    <p class="task-element task-description">{{ task.description }}</p>
+                    <div class="task-requirements">
+                        {% for requirement in task.requirements %}
+                            <input type="checkbox" style="pointer-events: none;" id="{{ requirement.id }}"  
+                            {% if requirement.is_completed %}
+                                checked
+                            {% endif %}
+                            >
+                            <label for="{{ requirement.id }}">{{ requirement.requirement }}</label><br>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% if loop.index0 % 4 == 3 or loop.last %}
         </div>
-        {% endfor %}
-    </div>
+        {% endif %}
+    {% endfor %}
 </div>
 {% endblock content%}

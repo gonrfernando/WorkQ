@@ -227,22 +227,17 @@ body {
     left: 0;
     height: 100vh;
     width: 100vw;
-    backdrop-filter: blur(4px);
-    background-color: rgba(0, 0, 0, 0.2);
     z-index: 0;
     pointer-events: none;
-    opacity: 0;
+    opacity: 1;
     transition: opacity 0.3s ease;
 }
 
 .sidebar.expanded ~ .blur-overlay {
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
     opacity: 1;
-    z-index: 0; 
-}
-
-.blur-overlay {
-    z-index: 998;
-    pointer-events: none;
+    z-index: 998; 
 }
 
 .sidebar {
@@ -253,7 +248,7 @@ body {
 
 .toolbar {
     margin-left: clamp(80px, 7%, 115px);
-    width: clamp(100vw-75px, 93%, 100vw-108px);
+    width: clamp(calc(100vw - 75px), 93%, calc(100vw - 108px));
     height: clamp(50px, 10%, 80px);
     background-color: #ffffff;
     display: flex;
@@ -263,6 +258,9 @@ body {
     box-shadow: 6px 4px 4px rgba(0, 0, 0, 0.2);
     border-radius: 6px;
     gap: clamp(10px, 3%, 40px);
+    position: fixed;
+    top: 0;
+    z-index: 900; 
 }
 
 .toolbar-icon {
@@ -290,17 +288,19 @@ body {
 
 /*main*/
 .main {
-    height: clamp(calc(100vh - 170px), calc(85% - 20px), calc(100vh - 120px));
-    display: flex;
+    height: fit-content;
+    min-height: clamp(calc(100vh - 170px), calc(85% - 40px), calc(100vh - 120px));
     flex-direction: column;
     align-content: center;
     justify-content: center;
     margin-left: clamp(80px, 7%, 115px);
-    margin-top: clamp(50px, 5%, 70px);
-    padding: 20px;
+    margin-top: clamp(70px, 9%, 100px);
+    padding-top: 10px;
+    padding-left: 10px;
     background-color: #D9D9D9;
     border-radius: 6px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .sortable-placeholder {
@@ -316,4 +316,9 @@ body {
     transform: scale(1.05); 
     z-index: 1000;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+* {
+    scrollbar-width: none;
+    scrollbar-color: #6f6b6b #f1f1f1; 
 }

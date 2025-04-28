@@ -1,11 +1,7 @@
-from typing import List, Optional
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, String, Text
+from sqlalchemy.orm import declarative_base, relationship
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, String, Text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-import datetime
-
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 
 
 class Areas(Base):
@@ -14,10 +10,10 @@ class Areas(Base):
         PrimaryKeyConstraint('id', name='areas_pkey'),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    area: Mapped[str] = mapped_column(String)
+    id = Column(Integer)
+    area = Column(String, nullable=False)
 
-    users: Mapped[List['Users']] = relationship('Users', back_populates='area')
+    users = relationship('Users', back_populates='area')
 
 
 class Countries(Base):
@@ -26,10 +22,10 @@ class Countries(Base):
         PrimaryKeyConstraint('id', name='countries_pkey'),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String)
+    id = Column(Integer)
+    name = Column(String, nullable=False)
 
-    users: Mapped[List['Users']] = relationship('Users', back_populates='country')
+    users = relationship('Users', back_populates='country')
 
 
 class Roles(Base):
@@ -38,10 +34,10 @@ class Roles(Base):
         PrimaryKeyConstraint('id', name='roles_pkey'),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String)
+    id = Column(Integer)
+    name = Column(String, nullable=False)
 
-    users: Mapped[List['Users']] = relationship('Users', back_populates='role')
+    users = relationship('Users', back_populates='role')
 
 
 class States(Base):
@@ -50,10 +46,10 @@ class States(Base):
         PrimaryKeyConstraint('id', name='states_pkey'),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    state: Mapped[str] = mapped_column(String(100))
+    id = Column(Integer)
+    state = Column(String(100), nullable=False)
 
-    projects: Mapped[List['Projects']] = relationship('Projects', back_populates='state')
+    projects = relationship('Projects', back_populates='state')
 
 
 class Status(Base):
@@ -62,11 +58,11 @@ class Status(Base):
         PrimaryKeyConstraint('id', name='status_pkey'),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    status_name: Mapped[str] = mapped_column(String(100))
-    description: Mapped[str] = mapped_column(Text)
+    id = Column(Integer)
+    status_name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=False)
 
-    requests: Mapped[List['Requests']] = relationship('Requests', back_populates='status')
+    requests = relationship('Requests', back_populates='status')
 
 
 class Types(Base):
@@ -75,12 +71,12 @@ class Types(Base):
         PrimaryKeyConstraint('id', name='types_pkey'),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    type: Mapped[str] = mapped_column(String(100))
-    active: Mapped[bool] = mapped_column(Boolean)
+    id = Column(Integer)
+    type = Column(String(100), nullable=False)
+    active = Column(Boolean, nullable=False)
 
-    notifications: Mapped[List['Notifications']] = relationship('Notifications', back_populates='type')
-    actions: Mapped[List['Actions']] = relationship('Actions', back_populates='type')
+    notifications = relationship('Notifications', back_populates='type')
+    actions = relationship('Actions', back_populates='type')
 
 
 class Notifications(Base):
@@ -90,14 +86,14 @@ class Notifications(Base):
         PrimaryKeyConstraint('id', name='notifications_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    type_id: Mapped[int] = mapped_column(Integer)
-    date: Mapped[datetime.date] = mapped_column(Date)
-    state: Mapped[str] = mapped_column(String)
+    id = Column(Integer)
+    type_id = Column(Integer, nullable=False)
+    date = Column(Date, nullable=False)
+    state = Column(String, nullable=False)
 
-    type: Mapped['Types'] = relationship('Types', back_populates='notifications')
-    project_notifications: Mapped[List['ProjectNotifications']] = relationship('ProjectNotifications', back_populates='noti')
-    users_notifications: Mapped[List['UsersNotifications']] = relationship('UsersNotifications', back_populates='noti')
+    type = relationship('Types', back_populates='notifications')
+    project_notifications = relationship('ProjectNotifications', back_populates='noti')
+    users_notifications = relationship('UsersNotifications', back_populates='noti')
 
 
 class Projects(Base):
@@ -107,20 +103,20 @@ class Projects(Base):
         PrimaryKeyConstraint('id', name='projects_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    state_id: Mapped[int] = mapped_column(Integer)
-    name: Mapped[str] = mapped_column(String(200))
-    startdate: Mapped[datetime.date] = mapped_column(Date)
-    enddate: Mapped[datetime.date] = mapped_column(Date)
-    creationdate: Mapped[datetime.date] = mapped_column(Date)
+    id = Column(Integer)
+    state_id = Column(Integer, nullable=False)
+    name = Column(String(200), nullable=False)
+    startdate = Column(Date, nullable=False)
+    enddate = Column(Date, nullable=False)
+    creationdate = Column(Date, nullable=False)
 
-    state: Mapped['States'] = relationship('States', back_populates='projects')
-    actions: Mapped[List['Actions']] = relationship('Actions', back_populates='project')
-    chats: Mapped[List['Chats']] = relationship('Chats', back_populates='project')
-    project_notifications: Mapped[List['ProjectNotifications']] = relationship('ProjectNotifications', back_populates='project')
-    tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='project')
-    users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', back_populates='project')
-    requests: Mapped[List['Requests']] = relationship('Requests', back_populates='project')
+    state = relationship('States', back_populates='projects')
+    actions = relationship('Actions', back_populates='project')
+    chats = relationship('Chats', back_populates='project')
+    project_notifications = relationship('ProjectNotifications', back_populates='project')
+    tasks = relationship('Tasks', back_populates='project')
+    users_projects = relationship('UsersProjects', back_populates='project')
+    requests = relationship('Requests', back_populates='project')
 
 
 class Users(Base):
@@ -132,28 +128,28 @@ class Users(Base):
         PrimaryKeyConstraint('id', name='users_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    country_id: Mapped[int] = mapped_column(Integer)
-    role_id: Mapped[int] = mapped_column(Integer)
-    area_id: Mapped[int] = mapped_column(Integer)
-    name: Mapped[str] = mapped_column(String(100))
-    tel: Mapped[str] = mapped_column(String(20))
-    email: Mapped[str] = mapped_column(String(100))
-    passw: Mapped[str] = mapped_column(String(100))
+    id = Column(Integer)
+    country_id = Column(Integer, nullable=False)
+    role_id = Column(Integer, nullable=False)
+    area_id = Column(Integer, nullable=False)
+    name = Column(String(100), nullable=False)
+    tel = Column(String(20), nullable=False)
+    email = Column(String(100), nullable=False)
+    passw = Column(String(100), nullable=False)
 
-    area: Mapped['Areas'] = relationship('Areas', back_populates='users')
-    country: Mapped['Countries'] = relationship('Countries', back_populates='users')
-    role: Mapped['Roles'] = relationship('Roles', back_populates='users')
-    actions: Mapped[List['Actions']] = relationship('Actions', back_populates='user')
-    files: Mapped[List['Files']] = relationship('Files', back_populates='users')
-    users_notifications: Mapped[List['UsersNotifications']] = relationship('UsersNotifications', back_populates='user')
-    users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', back_populates='user')
-    chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='sender')
-    requests: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.accepted_by]', back_populates='users')
-    requests_: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.ex_user]', back_populates='users_')
-    requests1: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.rejected_by]', back_populates='users1')
-    requests2: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.user_id]', back_populates='user')
-    users_tasks: Mapped[List['UsersTasks']] = relationship('UsersTasks', back_populates='user')
+    area = relationship('Areas', back_populates='users')
+    country = relationship('Countries', back_populates='users')
+    role = relationship('Roles', back_populates='users')
+    actions = relationship('Actions', back_populates='user')
+    files = relationship('Files', back_populates='users')
+    users_notifications = relationship('UsersNotifications', back_populates='user')
+    users_projects = relationship('UsersProjects', back_populates='user')
+    chats_messages = relationship('ChatsMessages', back_populates='sender')
+    requests = relationship('Requests', foreign_keys='[Requests.accepted_by]', back_populates='users')
+    requests_ = relationship('Requests', foreign_keys='[Requests.ex_user]', back_populates='users_')
+    requests1 = relationship('Requests', foreign_keys='[Requests.rejected_by]', back_populates='users1')
+    requests2 = relationship('Requests', foreign_keys='[Requests.user_id]', back_populates='user')
+    users_tasks = relationship('UsersTasks', back_populates='user')
 
 
 class Actions(Base):
@@ -165,15 +161,15 @@ class Actions(Base):
         PrimaryKeyConstraint('id', name='actions_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    type_id: Mapped[int] = mapped_column(Integer)
-    user_id: Mapped[int] = mapped_column(Integer)
-    project_id: Mapped[int] = mapped_column(Integer)
-    date: Mapped[datetime.datetime] = mapped_column(DateTime)
+    id = Column(Integer)
+    type_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, nullable=False)
+    project_id = Column(Integer, nullable=False)
+    date = Column(DateTime, nullable=False)
 
-    project: Mapped['Projects'] = relationship('Projects', back_populates='actions')
-    type: Mapped['Types'] = relationship('Types', back_populates='actions')
-    user: Mapped['Users'] = relationship('Users', back_populates='actions')
+    project = relationship('Projects', back_populates='actions')
+    type = relationship('Types', back_populates='actions')
+    user = relationship('Users', back_populates='actions')
 
 
 class Chats(Base):
@@ -183,12 +179,12 @@ class Chats(Base):
         PrimaryKeyConstraint('id', name='chats_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    project_id: Mapped[int] = mapped_column(Integer)
-    creationdate: Mapped[datetime.date] = mapped_column(Date)
+    id = Column(Integer)
+    project_id = Column(Integer, nullable=False)
+    creationdate = Column(Date, nullable=False)
 
-    project: Mapped['Projects'] = relationship('Projects', back_populates='chats')
-    chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='chat')
+    project = relationship('Projects', back_populates='chats')
+    chats_messages = relationship('ChatsMessages', back_populates='chat')
 
 
 class Files(Base):
@@ -198,15 +194,15 @@ class Files(Base):
         PrimaryKeyConstraint('id', name='files_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    uploaded_by: Mapped[int] = mapped_column(Integer)
-    filename: Mapped[str] = mapped_column(String(200))
-    filepath: Mapped[str] = mapped_column(Text)
-    uploaded_at: Mapped[datetime.datetime] = mapped_column(DateTime(True))
+    id = Column(Integer)
+    uploaded_by = Column(Integer, nullable=False)
+    filename = Column(String(200), nullable=False)
+    filepath = Column(Text, nullable=False)
+    uploaded_at = Column(DateTime(True), nullable=False)
 
-    users: Mapped['Users'] = relationship('Users', back_populates='files')
-    task_files: Mapped[List['TaskFiles']] = relationship('TaskFiles', back_populates='file')
-    chat_files: Mapped[List['ChatFiles']] = relationship('ChatFiles', back_populates='file')
+    users = relationship('Users', back_populates='files')
+    task_files = relationship('TaskFiles', back_populates='file')
+    chat_files = relationship('ChatFiles', back_populates='file')
 
 
 class ProjectNotifications(Base):
@@ -217,12 +213,12 @@ class ProjectNotifications(Base):
         PrimaryKeyConstraint('id', name='project_notifications_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    project_id: Mapped[int] = mapped_column(Integer)
-    noti_id: Mapped[int] = mapped_column(Integer)
+    id = Column(Integer)
+    project_id = Column(Integer, nullable=False)
+    noti_id = Column(Integer, nullable=False)
 
-    noti: Mapped['Notifications'] = relationship('Notifications', back_populates='project_notifications')
-    project: Mapped['Projects'] = relationship('Projects', back_populates='project_notifications')
+    noti = relationship('Notifications', back_populates='project_notifications')
+    project = relationship('Projects', back_populates='project_notifications')
 
 
 class Tasks(Base):
@@ -232,18 +228,19 @@ class Tasks(Base):
         PrimaryKeyConstraint('id', name='tasks_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    project_id: Mapped[int] = mapped_column(Integer)
-    title: Mapped[str] = mapped_column(String)
-    description: Mapped[str] = mapped_column(Text)
-    creation_date: Mapped[datetime.datetime] = mapped_column(DateTime)
-    started_date: Mapped[datetime.datetime] = mapped_column(DateTime)
-    finished_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    id = Column(Integer)
+    project_id = Column(Integer, nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    creation_date = Column(DateTime, nullable=False)
+    started_date = Column(DateTime, nullable=False)
+    finished_date = Column(DateTime)
 
-    project: Mapped['Projects'] = relationship('Projects', back_populates='tasks')
-    requests: Mapped[List['Requests']] = relationship('Requests', back_populates='task')
-    task_files: Mapped[List['TaskFiles']] = relationship('TaskFiles', back_populates='task')
-    users_tasks: Mapped[List['UsersTasks']] = relationship('UsersTasks', back_populates='task')
+    project = relationship('Projects', back_populates='tasks')
+    requests = relationship('Requests', back_populates='task')
+    task_files = relationship('TaskFiles', back_populates='task')
+    task_requirements = relationship('TaskRequirements', back_populates='task')
+    users_tasks = relationship('UsersTasks', back_populates='task')
 
 
 class UsersNotifications(Base):
@@ -254,12 +251,12 @@ class UsersNotifications(Base):
         PrimaryKeyConstraint('id', name='users_notifications_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    noti_id: Mapped[int] = mapped_column(Integer)
-    user_id: Mapped[int] = mapped_column(Integer)
+    id = Column(Integer)
+    noti_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, nullable=False)
 
-    noti: Mapped['Notifications'] = relationship('Notifications', back_populates='users_notifications')
-    user: Mapped['Users'] = relationship('Users', back_populates='users_notifications')
+    noti = relationship('Notifications', back_populates='users_notifications')
+    user = relationship('Users', back_populates='users_notifications')
 
 
 class UsersProjects(Base):
@@ -270,12 +267,12 @@ class UsersProjects(Base):
         PrimaryKeyConstraint('id', name='users_projects_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer)
-    project_id: Mapped[int] = mapped_column(Integer)
+    id = Column(Integer)
+    user_id = Column(Integer, nullable=False)
+    project_id = Column(Integer, nullable=False)
 
-    project: Mapped['Projects'] = relationship('Projects', back_populates='users_projects')
-    user: Mapped['Users'] = relationship('Users', back_populates='users_projects')
+    project = relationship('Projects', back_populates='users_projects')
+    user = relationship('Users', back_populates='users_projects')
 
 
 class ChatsMessages(Base):
@@ -286,15 +283,15 @@ class ChatsMessages(Base):
         PrimaryKeyConstraint('id', name='chats_messages_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    chat_id: Mapped[int] = mapped_column(Integer)
-    sender_id: Mapped[int] = mapped_column(Integer)
-    message: Mapped[str] = mapped_column(Text)
-    sent_time: Mapped[datetime.datetime] = mapped_column(DateTime(True))
+    id = Column(Integer)
+    chat_id = Column(Integer, nullable=False)
+    sender_id = Column(Integer, nullable=False)
+    message = Column(Text, nullable=False)
+    sent_time = Column(DateTime(True), nullable=False)
 
-    chat: Mapped['Chats'] = relationship('Chats', back_populates='chats_messages')
-    sender: Mapped['Users'] = relationship('Users', back_populates='chats_messages')
-    chat_files: Mapped[List['ChatFiles']] = relationship('ChatFiles', back_populates='chat_message')
+    chat = relationship('Chats', back_populates='chats_messages')
+    sender = relationship('Users', back_populates='chats_messages')
+    chat_files = relationship('ChatFiles', back_populates='chat_message')
 
 
 class Requests(Base):
@@ -310,25 +307,25 @@ class Requests(Base):
         PrimaryKeyConstraint('id', name='requests_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer)
-    project_id: Mapped[int] = mapped_column(Integer)
-    status_id: Mapped[int] = mapped_column(Integer)
-    action_type: Mapped[str] = mapped_column(String(50))
-    reason: Mapped[str] = mapped_column(Text)
-    request_date: Mapped[datetime.datetime] = mapped_column(DateTime(True))
-    ex_user: Mapped[Optional[int]] = mapped_column(Integer)
-    task_id: Mapped[Optional[int]] = mapped_column(Integer)
-    accepted_by: Mapped[Optional[int]] = mapped_column(Integer)
-    rejected_by: Mapped[Optional[int]] = mapped_column(Integer)
+    id = Column(Integer)
+    user_id = Column(Integer, nullable=False)
+    project_id = Column(Integer, nullable=False)
+    status_id = Column(Integer, nullable=False)
+    action_type = Column(String(50), nullable=False)
+    reason = Column(Text, nullable=False)
+    request_date = Column(DateTime(True), nullable=False)
+    ex_user = Column(Integer)
+    task_id = Column(Integer)
+    accepted_by = Column(Integer)
+    rejected_by = Column(Integer)
 
-    users: Mapped[Optional['Users']] = relationship('Users', foreign_keys=[accepted_by], back_populates='requests')
-    users_: Mapped[Optional['Users']] = relationship('Users', foreign_keys=[ex_user], back_populates='requests_')
-    project: Mapped['Projects'] = relationship('Projects', back_populates='requests')
-    users1: Mapped[Optional['Users']] = relationship('Users', foreign_keys=[rejected_by], back_populates='requests1')
-    status: Mapped['Status'] = relationship('Status', back_populates='requests')
-    task: Mapped[Optional['Tasks']] = relationship('Tasks', back_populates='requests')
-    user: Mapped['Users'] = relationship('Users', foreign_keys=[user_id], back_populates='requests2')
+    users = relationship('Users', foreign_keys=[accepted_by], back_populates='requests')
+    users_ = relationship('Users', foreign_keys=[ex_user], back_populates='requests_')
+    project = relationship('Projects', back_populates='requests')
+    users1 = relationship('Users', foreign_keys=[rejected_by], back_populates='requests1')
+    status = relationship('Status', back_populates='requests')
+    task = relationship('Tasks', back_populates='requests')
+    user = relationship('Users', foreign_keys=[user_id], back_populates='requests2')
 
 
 class TaskFiles(Base):
@@ -339,12 +336,27 @@ class TaskFiles(Base):
         PrimaryKeyConstraint('id', name='task_files_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    file_id: Mapped[int] = mapped_column(Integer)
-    task_id: Mapped[int] = mapped_column(Integer)
+    id = Column(Integer)
+    file_id = Column(Integer, nullable=False)
+    task_id = Column(Integer, nullable=False)
 
-    file: Mapped['Files'] = relationship('Files', back_populates='task_files')
-    task: Mapped['Tasks'] = relationship('Tasks', back_populates='task_files')
+    file = relationship('Files', back_populates='task_files')
+    task = relationship('Tasks', back_populates='task_files')
+
+
+class TaskRequirements(Base):
+    __tablename__ = 'task_requirements'
+    __table_args__ = (
+        ForeignKeyConstraint(['task_id'], ['tasks.id'], name='task_fk'),
+        PrimaryKeyConstraint('id', name='task_requirements_pkey')
+    )
+
+    id = Column(Integer)
+    task_id = Column(Integer, nullable=False)
+    requirement = Column(String(250), nullable=False)
+    is_completed = Column(Boolean, nullable=False)
+
+    task = relationship('Tasks', back_populates='task_requirements')
 
 
 class UsersTasks(Base):
@@ -355,12 +367,12 @@ class UsersTasks(Base):
         PrimaryKeyConstraint('id', name='users_tasks_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer)
-    task_id: Mapped[int] = mapped_column(Integer)
+    id = Column(Integer)
+    user_id = Column(Integer, nullable=False)
+    task_id = Column(Integer, nullable=False)
 
-    task: Mapped['Tasks'] = relationship('Tasks', back_populates='users_tasks')
-    user: Mapped['Users'] = relationship('Users', back_populates='users_tasks')
+    task = relationship('Tasks', back_populates='users_tasks')
+    user = relationship('Users', back_populates='users_tasks')
 
 
 class ChatFiles(Base):
@@ -371,9 +383,9 @@ class ChatFiles(Base):
         PrimaryKeyConstraint('id', name='chat_files_pkey')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    chat_message_id: Mapped[int] = mapped_column(Integer)
-    file_id: Mapped[int] = mapped_column(Integer)
+    id = Column(Integer)
+    chat_message_id = Column(Integer, nullable=False)
+    file_id = Column(Integer, nullable=False)
 
-    chat_message: Mapped['ChatsMessages'] = relationship('ChatsMessages', back_populates='chat_files')
-    file: Mapped['Files'] = relationship('Files', back_populates='chat_files')
+    chat_message = relationship('ChatsMessages', back_populates='chat_files')
+    file = relationship('Files', back_populates='chat_files')

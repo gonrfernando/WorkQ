@@ -2,7 +2,8 @@
     background-color: #f9f9f9;
     border-radius: 6px;
     padding: 20px;
-    flex: 1;
+    height: fit-content;
+    min-height: clamp(calc(100vh - 190px), calc(85vh - 60px), calc(100vh - 140px));
 }
 
 .bar-wrapper{
@@ -16,6 +17,8 @@
 .project-selector-bar{
     background-color: #f9f9f9;
     border-radius: 6px;
+    position: relative;
+    z-index: 5;
 }
 
 .dropdown-toggle {
@@ -27,6 +30,8 @@
     width: 100%;
     text-align: left;
     padding-right: 1.5rem;
+    position: relative !important;
+    z-index: 10 !important;
 }
 
 .dropdown-menu {
@@ -67,12 +72,19 @@
     margin-top: clamp(10px, 2%, 20px);
     margin-left: 0 !important;
     margin-right: 0 !important;
+    overflow-y: auto; 
+    overflow-x: hidden; 
+    height: auto;
+}
+
+.task-spacer{
+    padding-left: 0;
+    padding-right: 10px;
 }
 
 .task-container.card-view {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
 }
 
 .task-container.card-view .task-item {
@@ -104,7 +116,7 @@
     background: #fff;
     border-bottom: 1px solid #ddd;
     padding: 1rem;
-    margin-left: 0 !important;
+    margin-left: 10px !important;
     margin-right: 0 !important;
 }
 
