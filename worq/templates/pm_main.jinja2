@@ -2,27 +2,33 @@
 
 {% block content %}
 <div class="container">
-    <br>
-    <div class="form-box2">
-      <div class="form-box">
-        <div class="form-header">
-          <h2 class="form-title">CREATE PROJECT</h2>
+  <br>
+  <div class="form-box2">
+    <div class="form-box">
+      <div class="form-header">
+        <h2 class="form-title">CREATE PROJECT</h2>
+        <form id="create-project-form" method="POST" enctype="multipart/form-data">
           <div class="form-inner">
-            <input class="controls" type="text" name="p_name" placeholder="Name">
+            <input class="controls" type="text" id="p_name" name="p_name" placeholder="Name" required>
+
             <div class="date-group">
-            <input type="date" name="start_date" placeholder="start date">
-            <input type="date" name="end_date" placeholder="end date">
+              <input type="date" id="start_date" name="start_date" required>
+              <input type="date" id="end_date" name="end_date" required>
+            </div>
+
+            <textarea class="controls full-width" id="description" name="description" placeholder="Description" required></textarea>
+
+            <div class="icon-preview full-width">
+              <img src="{{ request.static_url('worq:static/img/upload.png') }}" alt="icon preview">
+              <input class="buttons" type="submit" value="CREATE">
+            </div>
           </div>
-          <textarea class="controls full-width" placeholder="Description"></textarea>
-          <input class="controls" type="file">
-          <div class="icon-preview full-width">
-            <img src="{{request.static_url('worq:static/img/upload.png')}}" alt="icon preview">
-            <input class="buttons" type="submit" value="CREATE">
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   </div>
 </div>
+<script src="{{ request.static_url('worq:static/assets/functions.js') }}"></script>
 {% endblock %}
+
 

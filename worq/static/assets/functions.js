@@ -83,3 +83,29 @@ document.getElementById('edit-user-form').addEventListener('submit', async funct
   function closeSuccessPopup() {
     document.getElementById('success-popup').style.display = 'none';
   }
+
+  //Projects
+  document.getElementById('create-project-form').addEventListener('submit', async function(event) {
+    event.preventDefault(); // Evita que recargue la página
+  
+    const form = event.target;
+    const formData = new FormData(form);
+  
+    try {
+      const response = await fetch("{{ request.route_url('create_project') }}", {
+        method: "POST",
+        body: formData,
+      });
+  
+      const result = await response.json();
+  
+      if (result.success) {
+        // Limpiar los campos del formulario
+        form.reset();
+      } else {
+        console.error("Error al crear el proyecto:", result.error);
+      }
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+    }
+  });
