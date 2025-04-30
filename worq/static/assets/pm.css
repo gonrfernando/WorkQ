@@ -1,49 +1,42 @@
 .container {
   padding: 20px;
   width: 100%;
-  margin: 0;
+  margin: 50px auto; 
   border-radius: 10px;
   background: white;
   box-sizing: border-box;
-}
-
-
-.welcome {
-  background: #eeeeee;
-  padding: 10px;
-  font-size: 20px;
+  display: flex; 
+  justify-content: center;
+  align-items: center;
 }
 
 .form-box2 {
+  width: 100%;
   height: auto;
   background: #465158;
-  padding: 8px;
+  padding: 16px;
   border-radius: 8px;
 }
 
 .form-box {
   margin-top: 5px;
   background: #eeeeee;
-  padding: 20px;
+  padding: 30px;
   border-radius: 5px;
   color: rgb(0, 0, 0);
-}
-
-.form-header {
-  align-items: center;
-  margin: 10px;
-  background-color: #eeeeee;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  min-height: 0vh;
 }
 
 .form-title {
   text-align: center;
-  font-size: 22px;
-  margin-bottom: 20px;
+  font-size: 28px; 
+  margin-bottom: 30px;
 }
 
 .form-inner {
   background: white;
-  padding: 30px;
+  padding: 40px; 
   border-radius: 10px;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -51,14 +44,12 @@
   color: #333;
 }
 
-/* Contenedor para agrupar las fechas en fila */
 .date-group {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
 }
 
-/* Estilo específico para inputs de fecha */
 .date-group input[type="date"] {
   width: 30%;
   border: 1px solid #017bab;

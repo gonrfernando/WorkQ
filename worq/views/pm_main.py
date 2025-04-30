@@ -1,5 +1,8 @@
 from pyramid.view import view_config
+from pyramid.response import Response
 from worq.models.models import Projects
+import datetime
+from sqlalchemy.exc import SQLAlchemyError
 
 @view_config(route_name='pm_main', renderer='templates/pm_main.jinja2', request_method='GET')
 def pm_main_view(request):
@@ -11,28 +14,40 @@ def pm_main_view(request):
         "active_project_id": active_project_id
     }
 
-@view_config(route_name='create_project', request_method='POST', renderer='json')
+@view_config(route_name='pm_main', request_method='POST', renderer='json')
 def create_project(request):
     try:
-        name = request.POST.get('p_name')
-        start_date = request.POST.get('start_date')
-        end_date = request.POST.get('end_date')
-        description = request.POST.get('description')
+        if not request.body:
+            return Response("Empty request body", content_type='text/plain', status=400)
 
-        if not name or not start_date or not description:
-            return {"success": False, "error": "Missing fields"}
+        # Intentar obtener los datos JSON
+        try:
+            data = request.json_body
+        except ValueError:
+            return Response("Invalid JSON", content_type='text/plain', status=400)
 
+        # Obtener datos del formulario
+        name = data.get('name')
+        startdate = data.get('startdate')
+        enddate = data.get('enddate')
+
+        # Validar campos obligatorios
+        if not name or not startdate:
+            return Response("Missing required fields", content_type='text/plain', status=400)
+
+        # Crear un nuevo proyecto
         new_project = Projects(
             name=name,
-            startdate=start_date,
-            enddate=end_date,  # Pones enddate igual a startdate si no se usa
+            startdate=datetime.datetime.strptime(startdate, '%Y-%m-%d').date(),
+            enddate=datetime.datetime.strptime(enddate, '%Y-%m-%d').date() if enddate else None,
             creationdate=datetime.date.today(),
-            state_id=1  # o el estado por defecto
+            state_id=1  # Valor predeterminado
         )
 
+        # Guardar en la base de datos
         request.dbsession.add(new_project)
         request.dbsession.flush()
 
-        return {"success": True}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+        return {"success": True, "message": "Project created successfully"}
+    except SQLAlchemyError as e:
+        return Response(str(e), content_type='text/plain', status=500)
