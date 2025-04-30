@@ -66,7 +66,7 @@
 </div>
 
 <!-- Modal de éxito -->
-<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
@@ -84,7 +84,7 @@
 </div>
 
 <!-- Modal de error -->
-<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
@@ -109,22 +109,24 @@ document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('edit-user-form');
 
   form.addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevenir el envío normal
+    event.preventDefault();
 
     const formData = new FormData(form);
+    const jsonData = Object.fromEntries(formData.entries());
 
     fetch('{{ request.route_url("update_user") }}', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(jsonData)
     })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Mostrar el modal de éxito
         const successModal = new bootstrap.Modal(document.getElementById('successModal'));
         successModal.show();
       } else {
-        // Mostrar el modal de error con mensaje
         document.getElementById('errorMessage').innerText = data.error || 'Unknown error';
         const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
         errorModal.show();
@@ -135,6 +137,34 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('errorMessage').innerText = 'Request failed!';
       const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
       errorModal.show();
+    });
+  });
+});
+document.addEventListener('DOMContentLoaded', function() {
+  // Botón para mostrar el popup
+  const showPopupBtn = document.querySelector('.show-popup');
+  const form = document.getElementById('edit-user-form');
+
+  // Esta función limpia todos los campos del formulario
+  function resetFormFields() {
+    form.reset(); // Borra todos los campos input/select
+    document.getElementById('user_id').value = '';
+    document.getElementById('form-search-input').value = '';
+    document.getElementById('form-autocomplete-results').innerHTML = '';
+  }
+
+  // Cuando se hace clic en el botón para abrir el popup
+  showPopupBtn.addEventListener('click', () => {
+    document.querySelector('.popup-container').classList.add('active');
+    resetFormFields(); // Limpia el formulario cada vez que se abre
+  });
+
+  // Cierre del popup al hacer clic fuera del popup o en el botón de cerrar
+  document.querySelectorAll('.popup-container, .close-btn').forEach((element) => {
+    element.addEventListener('click', (e) => {
+      if (e.target.classList.contains('popup-container') || e.target.classList.contains('close-btn')) {
+        document.querySelector('.popup-container').classList.remove('active');
+      }
     });
   });
 });

@@ -50,36 +50,32 @@ document.querySelector('.show-popup').addEventListener('click', () => {
 }
 
 document.getElementById('edit-user-form').addEventListener('submit', async function(event) {
-    event.preventDefault(); // Evita que el formulario recargue la página
+  event.preventDefault(); // Evita que el formulario recargue la página
 
-    // Obtén los datos del formulario
-    const formData = new FormData(this);
-    const jsonData = Object.fromEntries(formData.entries()); // Convierte a JSON
+  // Obtén los datos del formulario
+  const formData = new FormData(this);
+  const jsonData = Object.fromEntries(formData.entries()); // Convierte a JSON
 
-    try {
+  try {
       // Realiza la solicitud POST con fetch
       const response = await fetch(this.action, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(jsonData),
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(jsonData), // Enviar como JSON
       });
 
+      // Asegúrate de que la respuesta sea JSON
       const result = await response.json();
 
       if (result.success) {
-        // Muestra el popup de éxito
-        document.getElementById('success-popup').style.display = 'block';
+          // Muestra el popup de éxito
+          document.getElementById('success-popup').style.display = 'block';
       } else {
-        console.error('Error al guardar los cambios:', result.error || 'Unknown error');
+          console.error('Error al guardar los cambios:', result.error || 'Unknown error');
       }
-    } catch (error) {
+  } catch (error) {
       console.error('Error en la solicitud:', error);
-    }
-  });
-
-  // Función para cerrar el popup de éxito
-  function closeSuccessPopup() {
-    document.getElementById('success-popup').style.display = 'none';
   }
+});
