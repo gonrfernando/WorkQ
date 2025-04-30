@@ -103,6 +103,7 @@
 
 <!-- Scripts -->
 <script>
+const countries = {{ countries | tojson }};
 const users = {{ users | tojson }};
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -126,10 +127,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if (data.success) {
         const successModal = new bootstrap.Modal(document.getElementById('successModal'));
         successModal.show();
+        document.querySelector('.modal-backdrop').remove();
       } else {
         document.getElementById('errorMessage').innerText = data.error || 'Unknown error';
         const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
         errorModal.show();
+        document.querySelector('.modal-backdrop').remove();
       }
     })
     .catch(error => {
@@ -137,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('errorMessage').innerText = 'Request failed!';
       const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
       errorModal.show();
+      document.querySelector('.modal-backdrop').remove();
     });
   });
 });
@@ -164,6 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
     element.addEventListener('click', (e) => {
       if (e.target.classList.contains('popup-container') || e.target.classList.contains('close-btn')) {
         document.querySelector('.popup-container').classList.remove('active');
+        document.querySelector('.modal-backdrop').remove();
       }
     });
   });

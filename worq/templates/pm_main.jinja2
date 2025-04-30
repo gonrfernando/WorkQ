@@ -53,6 +53,7 @@
         const result = await response.json();
         alert('Project created successfully!');
         console.log(result);
+        window.location.reload();
       } else {
         const error = await response.text();
         alert('Error: ' + error);

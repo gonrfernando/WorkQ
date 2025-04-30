@@ -20,22 +20,19 @@ def create_project(request):
         if not request.body:
             return Response("Empty request body", content_type='text/plain', status=400)
 
-        # Intentar obtener los datos JSON
         try:
             data = request.json_body
         except ValueError:
             return Response("Invalid JSON", content_type='text/plain', status=400)
 
-        # Obtener datos del formulario
         name = data.get('name')
         startdate = data.get('startdate')
         enddate = data.get('enddate')
 
-        # Validar campos obligatorios
+
         if not name or not startdate:
             return Response("Missing required fields", content_type='text/plain', status=400)
 
-        # Crear un nuevo proyecto
         new_project = Projects(
             name=name,
             startdate=datetime.datetime.strptime(startdate, '%Y-%m-%d').date(),
@@ -44,7 +41,6 @@ def create_project(request):
             state_id=1  # Valor predeterminado
         )
 
-        # Guardar en la base de datos
         request.dbsession.add(new_project)
         request.dbsession.flush()
 
