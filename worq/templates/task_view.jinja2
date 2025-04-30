@@ -25,12 +25,17 @@
             <div class="task-spacer col-3">
                 <div class="task-item">
                     <h3 class="task-title">{{ task.title }}</h3>
-                    <p class="task-element priority">Priority: {{ task.priority }}<span class="task-element task-priority {{ task.priority|lower }}"></span></p>
-                    <p class="task-element task-due-date">Due: {{ task.due_date }}</p>
+                    <div class="task-element task-subheader row">
+                        <p class="priority col-4"> {{ task.priority }}<span class="task-priority {{ task.priority|lower }}"></span></p>
+                        <div class="task-due-date col-8">
+                            <span class="material-icons clock-icon">schedule</span>
+                            <span class="due-date-text">{{ task.due_date }}</span>
+                        </div>
+                    </div>
                     <p class="task-element task-description">{{ task.description }}</p>
                     <div class="task-requirements">
                         {% for requirement in task.requirements %}
-                            <input type="checkbox" style="pointer-events: none;" id="{{ requirement.id }}"  
+                            <input type="checkbox" id="{{ requirement.id }}"  
                             {% if requirement.is_completed %}
                                 checked
                             {% endif %}
@@ -44,5 +49,47 @@
         </div>
         {% endif %}
     {% endfor %}
+    <div id="task-modal" class="task-modal">
+        <div class="task-modal-content">
+            <span id="close-modal" class="material-icons close-icon">close</span>
+            <h1 class="task-title-modal">Task Title</h1>
+            <div class="task-subheader-modal row">
+                <p class="task-priority-modal col">
+                    Priority: <span class="task-priority high"></span>
+                </p>
+                <p class="task-due-date-modal col-4">
+                    <span class="material-icons clock-icon">schedule</span>
+                    <span class="due-date-text">Due Date</span>
+                </p>
+            </div>
+            <p class="task-description-modal">Task Description</p>
+            <div class="task-details-modal">
+                <div class="task-requirements-modal">
+                    <h4>Requirements</h4>
+                    <div id="requirements-list">
+                        <!-- Requirements will be dynamically added here -->
+                    </div>
+                    <div class="task-files-modal">
+                        <input type="file" id="file-input" multiple>
+                    </div>
+                </div>
+                <div class="task-stats-modal">
+                </div>
+            </div>
+            <div class="task-footer-modal">
+                <div class="task-comments-modal">
+                    <h4>Comments</h4>
+                    <div id="comments-list">
+                        <!-- Comments will be dynamically added here -->
+                    </div>
+                    <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+                </div>
+                <div class="task-modal-buttons">
+                    <button id="save-task" class="btn btn-primary">Save</button>
+                    <button id="deliver-task" class="btn btn-success">Deliver</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock content%}

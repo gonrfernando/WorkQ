@@ -12,10 +12,16 @@ def my_view(request):
     active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
     
     dbtasks = request.dbsession.query(Tasks).filter_by(project_id = active_project_id).all()
+    priorities = {
+        1: "Low",
+        2: "Medium",
+        3: "High"
+    }
     json_tasks = [{
         "id": task.id, 
         "title":task.title, 
         "description":task.description,
+        "priority":priorities[task.priority],
         "due_date":task.finished_date,
         "requirements":[{
             "id":requirement.id,

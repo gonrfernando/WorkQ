@@ -235,6 +235,7 @@ class Tasks(Base):
     creation_date = Column(DateTime, nullable=False)
     started_date = Column(DateTime, nullable=False)
     finished_date = Column(DateTime)
+    priority = Column(Integer, nullable=True)
 
     project = relationship('Projects', back_populates='tasks')
     requests = relationship('Requests', back_populates='task')

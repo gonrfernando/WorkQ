@@ -248,13 +248,13 @@ body {
 
 .toolbar {
     margin-left: clamp(80px, 7%, 115px);
-    width: clamp(calc(100vw - 75px), 93%, calc(100vw - 108px));
+    width: clamp(calc(100vw - 80px), 92%, calc(100vw - 115px));
     height: clamp(50px, 10%, 80px);
     background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: right;
-    padding-right: clamp(10px, 3%, 40px);
+    padding-right: clamp(25px, 4%, 80px);
     box-shadow: 6px 4px 4px rgba(0, 0, 0, 0.2);
     border-radius: 6px;
     gap: clamp(10px, 3%, 40px);
