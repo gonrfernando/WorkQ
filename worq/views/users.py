@@ -1,6 +1,7 @@
 from pyramid.view import view_config
+from pyramid.response import Response
 from worq.models.models import Projects, Users, Countries, Areas, Roles
-
+from sqlalchemy.exc import SQLAlchemyError
 
 @view_config(route_name='edit_user', renderer='templates/edit_user.jinja2')
 def my_view(request):

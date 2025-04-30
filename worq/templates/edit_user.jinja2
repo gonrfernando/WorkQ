@@ -40,21 +40,21 @@
       <input class="controls" type="password" id="passw" name="passw" placeholder="Password">
 
       <select class="controls" id="country" name="country_id">
-        <option value="" disabled selected>Select Country</option>
+        <option value="" disabled selected>Select a Country</option>
         {% for country in countries %}
           <option value="{{ country.id }}">{{ country.name }}</option>
         {% endfor %}
       </select>
 
       <select class="controls" id="area" name="area_id">
-        <option value="" disabled selected>Select Area</option>
+        <option value="" disabled selected>Select an Area</option>
         {% for area in areas %}
           <option value="{{ area.id }}">{{ area.area }}</option>
         {% endfor %}
       </select>
 
       <select class="controls" id="role" name="role_id">
-        <option value="" disabled selected>Select Role</option>
+        <option value="" disabled selected>Select a Role</option>
         {% for role in roles %}
           <option value="{{ role.id }}">{{ role.name }}</option>
         {% endfor %}
