@@ -42,12 +42,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 taskPriorities.forEach(priority => {
                     priority.classList.remove("col-4");
-                    priority.classList.add("col-5");
+                    priority.classList.add("col-3");
                 });
 
                 taskDueDates.forEach(dueDate => {
                     dueDate.classList.remove("col-8");
-                    dueDate.classList.add("col-5");
+                    dueDate.classList.add("col-6");
                 });
 
             } else {
@@ -69,12 +69,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 taskPriorities.forEach(priority => {
-                    priority.classList.remove("col-5");
+                    priority.classList.remove("col-3");
                     priority.classList.add("col-4");
                 });
 
                 taskDueDates.forEach(dueDate => {
-                    dueDate.classList.remove("col-5");
+                    dueDate.classList.remove("col-6");
                     dueDate.classList.add("col-8");
                 });
 
