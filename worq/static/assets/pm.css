@@ -1,0 +1,240 @@
+.container {
+  padding: 20px;
+  width: 100%;
+  margin: 50px auto; 
+  border-radius: 10px;
+  background: white;
+  box-sizing: border-box;
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+}
+
+.form-box2 {
+  width: 100%;
+  height: auto;
+  background: #465158;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.form-box {
+  margin-top: 5px;
+  background: #eeeeee;
+  padding: 30px;
+  border-radius: 5px;
+  color: rgb(0, 0, 0);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  min-height: 0vh;
+}
+
+.form-title {
+  text-align: center;
+  font-size: 28px; 
+  margin-bottom: 30px;
+}
+
+.form-inner {
+  background: white;
+  padding: 40px; 
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  color: #333;
+}
+
+.date-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.date-group input[type="date"] {
+  width: 30%;
+  border: 1px solid #017bab;
+  margin-bottom: 15px;
+  padding: 11px 11px;
+  background: #EEEEEE;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+
+.form-inner .full-width {
+  grid-column: 1 / -1;
+}
+
+.icon-preview {
+  text-align: center;
+}
+
+.icon-preview img {
+  width: 50px;
+  height: 50px;
+  color: #000000;
+}
+
+.controls {
+  width: 100%;
+  border: 1px solid #017bab;
+  margin-bottom: 15px;
+  padding: 11px 11px;
+  background: #EEEEEE;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.buttons {
+  width: 100%;
+  height: 40px;
+  background: #465158;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.TCreation1 {
+  max-width: 3000px;
+  padding-left: clamp(1rem, 5vw, 3rem);
+  padding-right: clamp(1rem, 5vw, 3rem);
+  background: #D9D9D9;
+  margin: auto;
+  margin-top: 30px;
+  border-top: 4px solid #D9D9D9;
+  color: #000000;
+  height: auto; 
+}
+
+.TCreation2 {
+  max-width: 1200px;
+  padding-left: clamp(1rem, 5vw, 3rem);
+  padding-right: clamp(1rem, 5vw, 3rem);
+  background: #FEFEFE;
+  margin: auto;
+  margin-top: 30px;
+  border-top: 4px solid #FEFEFE;
+  color: #000000;
+  height: auto;
+  border-radius: 20px 20px 20px 20px;
+}
+
+.TCreation3 {
+  max-width: 3050px;
+  background: #FEFEFE;
+  margin: auto;
+  margin-top: 30px;
+  border-top: 4px solid #D9D9D9;
+  display: flex;
+  justify-content: center; 
+  flex-wrap: wrap;
+}
+
+.in-nametask {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  background-color: #F3F3F3;
+}
+
+.add-tasks {
+  width: 600px;
+  height: 340px;
+  background: #EEEEEE;
+  margin: auto;
+  padding: 20px 30px;
+  border: 10px solid #465158; 
+  border-radius: 5px;
+}
+
+.add-users {
+  width: 400px;
+  height: 290px;
+  background: #EEEEEE;
+  margin: auto;
+  padding: 20px 30px;
+  border: 10px solid #465158; 
+  border-radius: 5px;
+}
+
+.outside-task {
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  gap: 60px;
+  flex-wrap: wrap; 
+}
+
+.add-tasks .buttons{
+  width: 50%;
+  height: 27px;
+  background: #465158;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  margin-left: 125px;
+  margin-bottom: 16px;
+}
+
+.add-users .buttons{
+  width: 50%;
+  height: 27px;
+  background: #465158;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  margin-left: 85px;
+  margin-bottom: 16px;
+}
+
+.add-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.add-group label {
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+  color: #000000;
+}
+
+.add-group input[type="date"] {
+  width: 30%;
+  border: 1px solid #017bab;
+  margin-bottom: 15px;
+  padding: 11px 11px;
+  background: #EEEEEE;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.add-user-autocomplete-results {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  width: 15%; 
+  margin-top: 5px;
+  display: none; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-user-autocomplete-results .autocomplete-item {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #000000;
+}
+
+.add-user-autocomplete-results .autocomplete-item:hover {
+  background-color: #f0f0f0;
+}
