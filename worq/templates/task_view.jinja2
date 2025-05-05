@@ -35,12 +35,17 @@
                     <p class="task-element task-description">{{ task.description }}</p>
                     <div class="task-requirements">
                         {% for requirement in task.requirements %}
-                            <input type="checkbox" id="{{ requirement.id }}"  
-                            {% if requirement.is_completed %}
-                                checked
-                            {% endif %}
-                            >
-                            <label for="{{ requirement.id }}">{{ requirement.requirement }}</label><br>
+                            <div style="display:flex">
+                                <label class="checkbox-container">
+                                    <input class="custom-checkbox" id="requirement-{{ requirement.id }}"  
+                                    {% if requirement.is_completed %} 
+                                        checked 
+                                    {% endif %} 
+                                    type="checkbox">
+                                    <span class="checkmark"></span>
+                                </label>
+                                <label class="custom-checkbox-label" for="requirement-{{ requirement.id }}">{{ requirement.requirement }}</label>
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
