@@ -1,5 +1,5 @@
 def includeme(config):
-    config.add_static_view('static', 'static', cache_max_age=3600)
+    config.add_static_view('static', 'static')
     config.add_route('home', '/')
     config.add_route('startpage','/start')
     config.add_route('sign_in', '/sign-in')
@@ -11,5 +11,4 @@ def includeme(config):
     config.add_route('add_task', '/add_task')
     config.add_route('info_user', '/info_user')
     config.add_route('add_user', '/add_user')
-
-
+    config.add_route('task_view', '/task_view')

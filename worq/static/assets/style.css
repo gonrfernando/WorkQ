@@ -129,10 +129,11 @@ body {
   height: 100%;
   opacity: 0;
   pointer-events: none;
-  display: flex; 
+  display: flex !important; 
   justify-content: center; 
   align-items: center; 
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
 }
 
 .popup-container.active {
