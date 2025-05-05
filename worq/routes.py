@@ -3,9 +3,13 @@ def includeme(config):
     config.add_route('home', '/')
     config.add_route('startpage','/start')
     config.add_route('sign_in', '/sign-in')
+    config.add_route('logout', '/logout')
     config.add_route('sign_up', '/sign-up')
     config.add_route('edit_user', '/edit_user')
     config.add_route('update_user', '/update_user')
     config.add_route('pm_main', '/pm_main')
     config.add_route('add_task', '/add_task')
     config.add_route('info_user', '/info_user')
+    config.add_route('add_user', '/add_user')
+
+
