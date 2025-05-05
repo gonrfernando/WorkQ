@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const priority = task.querySelector(".task-priority").classList[1];
             const dueDate = task.querySelector(".due-date-text").textContent;
             const description = task.querySelector(".task-description").textContent;
-            const requirements = task.querySelectorAll(".task-requirements input[type='checkbox']");
+            const requirements = task.querySelectorAll(".custom-checkbox-label");
 
             taskTitleModal.textContent = title;
             taskPriorityModal.className = `task-priority ${priority}`;
@@ -98,12 +98,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
             requirementsList.innerHTML = "";
             requirements.forEach(req => {
-                const li = document.createElement("li");
-                li.innerHTML = `
-                    <input type="checkbox" ${req.checked ? "checked" : ""}>
-                    <label>${req.nextElementSibling.textContent}</label>
+                const div = document.createElement("div");
+                div.style.display = "flex";
+                div.style.marginBottom = "2px";
+                div.innerHTML = `
+                    <label class="checkbox-container">
+                        <input class="custom-checkbox" id="requirement-${req.id}" type="checkbox" ${req.checked ? "checked" : ""}>
+                        <span class="checkmark"></span>
+                        </label>
+                    <label for="${req.id}">${req.textContent}</label>
                 `;
-                requirementsList.appendChild(li);
+                requirementsList.appendChild(div);
             });
 
             modal.style.display = "flex";
