@@ -53,7 +53,7 @@
       <!-- Project List -->
       <ul class="sidebar-projects" id="sortable">
         {% for project in projects %}
-          <li class="ui-state-default project-item {% if project.id == active_project_id %}selected{% endif %}">
+          <li id="{{ project.id }}" class="ui-state-default project-item {% if project.id == active_project_id %}selected{% endif %}">
             <div class="project-icon-wrapper {% if project.id == active_project_id %}selected{% endif %}">
               <span class="project-icon material-icons-round">&#xea25</span>
             </div>
@@ -67,7 +67,7 @@
     <div id="overlay-blur" class="blur-overlay"></div>
     
     <div class="toolbar">
-      <div class=notification>
+      <div class="notification">
         <span class="toolbar-icon material-icons-round">notifications</span>
       </div>
       <div class="calendar">

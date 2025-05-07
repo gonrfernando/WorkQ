@@ -32,6 +32,10 @@ function closeNav() {
     document.getElementById("mySidebar").classList.remove("expanded");
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    handleCurrentProject();
+});
+
 function handleSearchInput(event) {
     const query = event.target.value.toLowerCase();
     const resultsContainer = document.getElementById("autocomplete-results");
@@ -61,4 +65,27 @@ function handleSearchInput(event) {
     } else {
         resultsContainer.style.display = "none";
     }
+}
+
+function handleCurrentProject() {
+    const projects = document.querySelectorAll(".project-item, .dropdown-project-item");
+    projects.forEach(project => {
+        const projectId = project.getAttribute("id");
+        project.addEventListener("click", function () {
+            console.log("project clicked")
+            fetch(`/set_active_project`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ project_id: projectId }),
+            }).then(response => {
+                if (response.ok) {
+                    location.reload(); 
+                } else {
+                    console.error("Failed to set the active project.");
+                }
+            });
+        });
+    });
 }

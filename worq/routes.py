@@ -12,3 +12,4 @@ def includeme(config):
     config.add_route('info_user', '/info_user')
     config.add_route('add_user', '/add_user')
     config.add_route('task_view', '/task_view')
+    config.add_route('set_active_project', '/set_active_project')

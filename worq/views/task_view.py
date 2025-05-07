@@ -1,19 +1,23 @@
 from pyramid.view import view_config
 from worq.models.models import Projects, Tasks, TaskRequirements
-
+from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPInternalServerError
 
 @view_config(route_name='task_view', renderer='worq:templates/task_view.jinja2')
 def my_view(request):
-    
+    session = request.session
     projects = request.dbsession.query(Projects).all()
+    #if not 'user_name' in session:
+            #return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+    #user_name = session.get('user_name')
+    #user_email = session.get('user_email')
+    #user_role = session.get('user_role')
     
     json_projects = [{"id": project.id, "name": project.name} for project in projects]
-    active_project_id = request.params.get("project_id")
-    active_project_id = 1
+    active_project_id = session.get("project_id")
     active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
     
     dbtasks = request.dbsession.query(Tasks).filter_by(project_id = active_project_id).all()
-    
     priorities = {
         1: "Low",
         2: "Avg",
@@ -36,6 +40,9 @@ def my_view(request):
     return {
         "projects": json_projects,
         "active_project": active_project,
-        "tasks": json_tasks
+        "tasks": json_tasks,
+        #'user_name': user_name,
+        #'user_email': user_email,
+        #'user_role': user_role
     }
 
