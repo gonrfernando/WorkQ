@@ -1,0 +1,107 @@
+.calendar-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.calendar-header h2 {
+    font-family: 'Plus Jakarta Sans', Poppins, sans-serif;
+    font-weight: 700;
+    color: #465158;
+    margin: 0;
+}
+.calendar-header .btn {
+    margin-right: 0.5rem;
+}
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+.calendar-grid .calendar-weekday {
+    text-align: center;
+    font-weight: 600;
+    color: #465158;
+    background: #EFF0F2;
+    border-radius: 6px;
+    padding: 0.5rem 0;
+}
+.calendar-day {
+    background: #f8f9fa;
+    border: 1px solid #D9D9D9;
+    border-radius: 8px;
+    min-height: 90px;
+    padding: 0.5rem;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+}
+.calendar-day .calendar-day-number {
+    font-weight: 600;
+    color: #0099d8;
+}
+.calendar-task-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.calendar-task-list li {
+    background: #e3f2fd;
+    color: #222;
+    border-left: 4px solid #0099d8;
+    border-radius: 4px;
+    margin: 0.25rem 0;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.calendar-task-list li .calendar-task-title {
+    font-weight: 600;
+}
+.calendar-task-title {
+    border-radius: 4px;
+    margin: 0.25rem 0;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #222;
+    background: #e3f2fd;
+    border-left: 4px solid #bdbdbd;
+}
+.priority-low {
+    border-left-color: #4caf50 !important;
+    background: #e8f5e9 !important;
+}
+.priority-avg {
+    border-left-color: #ffb300 !important;
+    background: #fff8e1 !important;
+}
+.priority-high {
+    border-left-color: #e53935 !important;
+    background: #ffebee !important;
+}
+.priority-none {
+    border-left-color: #bdbdbd !important;
+    background: #e3f2fd !important;
+}
+.calendar-task-list li .calendar-task-desc {
+    font-size: 0.85em;
+    color: #465158;
+}
+.calendar-no-tasks {
+    text-align: center;
+    margin-top: 2rem;
+}

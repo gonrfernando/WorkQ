@@ -1,0 +1,47 @@
+{% extends "workq_main.jinja2" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ request.static_url('worq:static/assets/calendar.css') }}">
+<div class="calendar-container">
+    <div class="calendar-header">
+        <div>
+            <h2>{{ year }}-{{ '%02d' % month }}</h2>
+        </div>
+        <div>
+            <a href="?year={{ year if month > 1 else year-1 }}&month={{ month-1 if month > 1 else 12 }}" class="btn btn-outline-secondary btn-sm me-2">&lt;</a>
+            <a href="?year={{ year if month < 12 else year+1 }}&month={{ month+1 if month < 12 else 1 }}" class="btn btn-outline-secondary btn-sm">&gt;</a>
+        </div>
+    </div>
+    <div class="calendar-grid">
+        {% set week_days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+        {% for wd in week_days %}
+            <div class="calendar-weekday">{{ wd }}</div>
+        {% endfor %}
+        {% set first_weekday = (date(year, month, 1).weekday() + 1) % 7 %}
+        {% set days_in_month = (date(year if month < 12 else year+1, month+1 if month < 12 else 1, 1) - timedelta(days=1)).day %}
+        {% for _ in range((first_weekday-1) if first_weekday > 0 else 6) %}
+            <div></div>
+        {% endfor %}
+        {% for day in range(1, days_in_month+1) %}
+            <div class="calendar-day">
+                <div class="calendar-day-number">{{ day }}</div>
+                {% if tasks_by_day.get(day) %}
+                    <ul class="calendar-task-list">
+                        {% for task in tasks_by_day[day] %}
+                            {% set priority_class = {
+                                1: 'priority-low',
+                                2: 'priority-avg',
+                                3: 'priority-high'
+                            }[task.priority] if task.priority in [1,2,3] else 'priority-none' %}
+                            <li class="calendar-task-title {{ priority_class }}">{{ task.title }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    {% if tasks_by_day|length == 0 %}
+    <div class="alert alert-info calendar-no-tasks" role="alert">No tasks found for this month.</div>
+    {% endif %}
+</div>
+{% endblock content %}
