@@ -24,7 +24,7 @@
         <div class="task-container card-view row gx-5">
         {% endif %}
             <div class="task-spacer col-3">
-                <div class="task-item">
+                <div class="task-item" data-task-id="{{ task.id }}" onclick="openTaskModalFromCard(this)">
                     <h3 class="task-title">{{ task.title }}</h3>
                     <div class="task-element task-subheader row">
                         <p class="priority col-4">
@@ -50,14 +50,6 @@
                             </div>
                         {% endfor %}
                     </div>
-
-                    <div class="task-actions d-flex justify-content-end">
-                        <span class="material-icons"
-                              onclick="openTaskModal({{ task.id }})"
-                              style="cursor: pointer;">
-                              open_in_new
-                        </span>
-                    </div>
                 </div>
             </div>
         {% if loop.index0 % 4 == 3 or loop.last %}
@@ -68,7 +60,10 @@
     <!-- Modal de tarea -->
     <div id="task-modal" class="task-modal">
         <div class="task-modal-content">
-            <span id="close-modal" class="material-icons close-icon" onclick="closeTaskModal()">close</span>
+            <div class="position-absolute top-0 end-0 p-2 d-flex align-items-center gap-2">
+                <span class="material-icons" onclick="openSettingsModal()" style="cursor: pointer;">settings</span>
+                <span class="material-icons" id="close-modal" onclick="closeTaskModal()" style="cursor: pointer;">close</span>
+            </div>
             <h1 class="task-title-modal">Task Title</h1>
             <div class="task-subheader-modal row">
                 <p class="task-priority-modal col">Priority: <span class="task-priority high"></span></p>
@@ -100,12 +95,6 @@
                     <button id="deliver-task" class="btn btn-success">Deliver</button>
                 </div>
             </div>
-
-            <div class="task-actions d-flex justify-content-end">
-                <span class="material-icons"
-                      onclick="openSettingsModal()"
-                      style="cursor: pointer;">settings</span>
-            </div>
         </div>
     </div>
 
@@ -115,19 +104,11 @@
             <form method="POST" action="{{ request.route_url('submit_request') }}">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="settingsModalLabel">Task Settings</h5>
+                        <h5 class="modal-title" id="settingsModalLabel">Task Settings Request</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="task_id" id="modal-task-id" value="">
-                        <div class="mb-3">
-                            <label for="status-select" class="form-label">Status</label>
-                            <select class="form-select" id="status-select" name="status_id" required>
-                                {% for status in statuses %}
-                                    <option value="{{ status.id }}">{{ status.status_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
                         <div class="mb-3">
                             <label for="action-type" class="form-label">Action Type</label>
                             <input type="text" class="form-control" id="action-type" name="action_type" placeholder="Enter action type">
@@ -149,9 +130,18 @@
 
 <!-- Scripts -->
 <script>
-    function openTaskModal(taskId) {
-        document.getElementById('task-modal').style.display = 'block';
+    function openTaskModalFromCard(element) {
+        const taskId = element.getAttribute('data-task-id');
+        if (!taskId) {
+            console.warn("No task ID found.");
+            return;
+        }
+
+        // Guardar task_id oculto para usarlo en el formulario del modal de configuración
         document.getElementById('modal-task-id').value = taskId;
+
+        // Mostrar el modal de tarea
+        document.getElementById('task-modal').style.display = 'block';
     }
 
     function closeTaskModal() {
@@ -168,7 +158,6 @@
         modal.show();
     }
 
-    // Previene apertura directa si no hay tarea
     document.addEventListener('DOMContentLoaded', function () {
         const settingsModal = document.getElementById('settingsModal');
         settingsModal.addEventListener('show.bs.modal', function (event) {

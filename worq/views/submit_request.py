@@ -1,7 +1,7 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPBadRequest
 from datetime import datetime
-from worq.models.models import Requests
+from worq.models.models import Requests, Status
 
 @view_config(route_name='submit_request', request_method='POST')
 def submit_request(request):
@@ -17,13 +17,12 @@ def submit_request(request):
         user_id = request.session.get('user_id')
         project_id = request.session.get('project_id')
 
+        status_id = 1
         missing_fields = []
 
         # Verificar si faltan campos y agregarlos a la lista
         if not task_id_str:
             missing_fields.append("task_id")
-        if not status_id_str:
-            missing_fields.append("status_id")
         if not action_type:
             missing_fields.append("action_type")
         if not reason:
@@ -39,7 +38,6 @@ def submit_request(request):
 
         # Convertir strings a enteros
         task_id = int(task_id_str)
-        status_id = int(status_id_str)
 
         # Crear nueva solicitud
         new_request = Requests(

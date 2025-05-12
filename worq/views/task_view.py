@@ -33,12 +33,10 @@ def my_view(request):
         } for req in request.dbsession.query(TaskRequirements).filter_by(task_id=task.id).all()]
     } for task in dbtasks]
 
-    statuses = request.dbsession.query(Status).all()
 
     return {
         "projects": json_projects,
         "active_project": active_project,
         "tasks": json_tasks,
-        "statuses": statuses
     }
 
