@@ -38,7 +38,7 @@ def sign_in_view(request):
                 session['user_name'] = user.name
                 session['user_email'] = user.email
                 session['user_role'] = user.role.name
-                return HTTPFound(location=request.route_url('home'))
+                return HTTPFound(location=request.route_url('task_view'))
             else:
                 return {'message': 'Invalid email or password.'}
 

@@ -112,12 +112,12 @@
             {% endblock content %}
             <!-- Tab 1 -->
             {% if user_role in ['superadmin', 'admin', 'projectmanager'] %}
-            <div class="tab-pane fade {% if user_role == 'superadmin' or user_role == 'admin' or user_role == 'projectmanager' %}show active{% endif %}" id="pm" role="tabpanel" aria-labelledby="pm-tab">
+            <div class="tab-pane fade" id="pm" role="tabpanel" aria-labelledby="pm-tab">
                 <h3>Project Management</h3>
             </div>
             {% endif %}
             <!-- Tab 2 -->
-            <div class="tab-pane fade {% if user_role == 'user' %}show active{% endif %}" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
+            <div class="tab-pane fade show active" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
                 {% block tasks %}
                 {% endblock tasks %}
             </div>
@@ -188,5 +188,56 @@
           });
         });
       </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('.nav-link[data-bs-toggle="tab"]');
+
+        // Obtener el tab activo de la sesión
+        fetch('/get_active_tab')
+          .then(response => response.json())
+          .then(data => {
+            const activeTabId = data.active_tab || 'tasks-tab'; // Si no hay tab guardado, usar "tasks-tab" como predeterminado
+
+            const activeTab = document.getElementById(activeTabId);
+            const activeContent = document.querySelector(activeTab.getAttribute('data-bs-target'));
+
+            // Activar el tab y su contenido
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(content => content.classList.remove('show', 'active'));
+
+            activeTab.classList.add('active');
+            activeContent.classList.add('show', 'active');
+          })
+          .catch(error => {
+            console.error('Error restoring active tab:', error);
+
+            // Si hay un error, activar el tab "Tasks" por defecto
+            const defaultTab = document.getElementById('tasks-tab');
+            const defaultContent = document.querySelector(defaultTab.getAttribute('data-bs-target'));
+
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(content => content.classList.remove('show', 'active'));
+
+            defaultTab.classList.add('active');
+            defaultContent.classList.add('show', 'active');
+          });
+
+        // Guardar el tab activo en la sesión al hacer clic
+        tabs.forEach(tab => {
+          tab.addEventListener('click', function () {
+            const activeTabId = this.id; // Obtén el ID del tab activo
+
+            // Enviar una solicitud AJAX para guardar el tab activo en la sesión
+            fetch('/save_active_tab', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ active_tab: activeTabId }),
+            }).catch(error => console.error('Error saving active tab:', error));
+          });
+        });
+      });
+    </script>
   </body>
 </html>
