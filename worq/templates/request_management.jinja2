@@ -1,0 +1,88 @@
+{% extends "workq_main.jinja2" %}
+
+{% block tasks %}
+<div class="container-fluid">
+    <div class="project-bar row">
+        <div class="view_button col-1">
+            <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
+        </div>
+    </div>
+    {% for task in tasks %}
+        {% if loop.index0 % 4 == 0 %}
+        <div id="task-container" class="task-container card-view row gx-5">
+        {% endif %}
+            <div class="task-spacer col-3">
+                <div class="task-item">
+                    <h3 class="task-title">{{ task.title }}</h3>
+                    <div class="task-element task-subheader row">
+                        <p class="priority col-4"> {{ task.priority }}<span class="task-priority {{ task.priority|lower }}"></span></p>
+                        <div class="task-due-date col-8">
+                            <span class="material-icons clock-icon">schedule</span>
+                            <span class="due-date-text">{{ task.due_date }}</span>
+                        </div>
+                    </div>
+                    <p class="task-element task-description">{{ task.description }}</p>
+                    <div class="task-requirements">
+                        {% for requirement in task.requirements %}
+                            <div style="display:flex">
+                                <label class="checkbox-container">
+                                    <input class="custom-checkbox" id="requirement-{{ requirement.id }}"  
+                                    {% if requirement.is_completed %} 
+                                        checked 
+                                    {% endif %} 
+                                    type="checkbox">
+                                    <span class="checkmark"></span>
+                                </label>
+                                <label class="custom-checkbox-label" for="requirement-{{ requirement.id }}">{{ requirement.requirement }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% if loop.index0 % 4 == 3 or loop.last %}
+        </div>
+        {% endif %}
+    {% endfor %}
+    <div id="task-modal" class="task-modal">
+        <div class="task-modal-content">
+            <span id="close-modal" class="material-icons close-icon">close</span>
+            <h1 class="task-title-modal">Task Title</h1>
+            <div class="task-subheader-modal row">
+                <p class="task-priority-modal col">
+                    Priority: <span class="task-priority high"></span>
+                </p>
+                <div class="due-date-wrapper col">
+                    <p class="task-due-date-modal">
+                        <span class="material-icons clock-icon">schedule</span>
+                        <span class="due-date-text">Due Date</span>
+                    </p>
+                </div>
+            </div>
+            <p class="task-description-modal">Task Description</p>
+            <div class="task-details-modal">
+                <div class="task-requirements-modal">
+                    <h4>Requirements</h4>
+                    <div id="requirements-list">
+                        <!-- Requirements will be dynamically added here -->
+                    </div>
+                    <div class="task-files-modal">
+                        <input type="file" id="file-input" multiple>
+                    </div>
+                </div>
+                <div class="task-stats-modal">
+                </div>
+            </div>
+            <div class="task-footer-modal">
+                <div class="task-comments-modal">
+                    <h4>Comments</h4>
+                    <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+                </div>
+                <div class="task-modal-buttons">
+                    <button id="save-task" class="btn btn-primary">Save</button>
+                    <button id="deliver-task" class="btn btn-success">Deliver</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock tasks %}

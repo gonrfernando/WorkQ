@@ -67,6 +67,11 @@
     <div id="overlay-blur" class="blur-overlay"></div>
     
     <div class="toolbar">
+      {% if user_role in ['superadmin', 'admin'] %}
+        <a href="{{ request.route_url('request_management') }}">
+          <span class="toolbar-icon material-icons-round">reply</span>
+        </a>
+      {% endif %}
       <div class="notification">
         <span class="toolbar-icon material-icons-round">notifications</span>
       </div>

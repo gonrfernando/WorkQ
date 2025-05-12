@@ -1,5 +1,5 @@
 from pyramid.view import view_config
-from worq.models.models import Projects, Tasks, TaskRequirements
+from worq.models.models import Projects, Tasks, TaskRequirements, Status
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPInternalServerError
 
@@ -16,33 +16,29 @@ def my_view(request):
     json_projects = [{"id": project.id, "name": project.name} for project in projects]
     active_project_id = session.get("project_id")
     active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
-    
-    dbtasks = request.dbsession.query(Tasks).filter_by(project_id = active_project_id).all()
-    priorities = {
-        1: "Low",
-        2: "Avg",
-        3: "High"
-    }
-    
+
+    dbtasks = request.dbsession.query(Tasks).filter_by(project_id=active_project_id).all()
+    priorities = {1: "Low", 2: "Avg", 3: "High"}
+
     json_tasks = [{
-        "id": task.id, 
-        "title":task.title, 
-        "description":task.description,
-        "priority": priorities.get(task.priority, "None"), 
-        "due_date":task.finished_date,
-        "requirements":[{
-            "id":requirement.id,
-            "requirement":requirement.requirement,
-            "is_completed":requirement.is_completed
-        } for requirement in request.dbsession.query(TaskRequirements).filter_by(task_id = task.id).all()]
-        } for task in dbtasks]
-    
+        "id": task.id,
+        "title": task.title,
+        "description": task.description,
+        "priority": priorities.get(task.priority, "None"),
+        "due_date": task.finished_date,
+        "requirements": [{
+            "id": req.id,
+            "requirement": req.requirement,
+            "is_completed": req.is_completed
+        } for req in request.dbsession.query(TaskRequirements).filter_by(task_id=task.id).all()]
+    } for task in dbtasks]
+
+    statuses = request.dbsession.query(Status).all()
+
     return {
         "projects": json_projects,
         "active_project": active_project,
         "tasks": json_tasks,
-        #'user_name': user_name,
-        #'user_email': user_email,
-        #'user_role': user_role
+        "statuses": statuses
     }
 

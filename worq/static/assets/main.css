@@ -344,6 +344,12 @@ body {
     z-index: 1000;
 }
 
+a, a .toolbar-icon {
+  text-decoration: none;
+  border: none;
+  outline: none;
+}
+
 #dropdown-menu li {
     margin: 5px 0;
 }

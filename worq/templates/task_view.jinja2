@@ -15,18 +15,22 @@
         </div>
         <div class="col-5"></div>
         <div class="view_button col-1">
-            <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
+            <span id="toggle-view" class="material-icons btn" title="Change task display">view_list</span>
         </div>
     </div>
+
     {% for task in tasks %}
         {% if loop.index0 % 4 == 0 %}
-        <div id="task-container" class="task-container card-view row gx-5">
+        <div class="task-container card-view row gx-5">
         {% endif %}
             <div class="task-spacer col-3">
                 <div class="task-item">
                     <h3 class="task-title">{{ task.title }}</h3>
                     <div class="task-element task-subheader row">
-                        <p class="priority col-4"> {{ task.priority }}<span class="task-priority {{ task.priority|lower }}"></span></p>
+                        <p class="priority col-4">
+                            {{ task.priority }}
+                            <span class="task-priority {{ task.priority|lower }}"></span>
+                        </p>
                         <div class="task-due-date col-8">
                             <span class="material-icons clock-icon">schedule</span>
                             <span class="due-date-text">{{ task.due_date }}</span>
@@ -37,16 +41,22 @@
                         {% for requirement in task.requirements %}
                             <div style="display:flex">
                                 <label class="checkbox-container">
-                                    <input class="custom-checkbox" id="requirement-{{ requirement.id }}"  
-                                    {% if requirement.is_completed %} 
-                                        checked 
-                                    {% endif %} 
-                                    type="checkbox">
+                                    <input class="custom-checkbox" id="requirement-{{ requirement.id }}"
+                                           {% if requirement.is_completed %}checked{% endif %}
+                                           type="checkbox">
                                     <span class="checkmark"></span>
                                 </label>
                                 <label class="custom-checkbox-label" for="requirement-{{ requirement.id }}">{{ requirement.requirement }}</label>
                             </div>
                         {% endfor %}
+                    </div>
+
+                    <div class="task-actions d-flex justify-content-end">
+                        <span class="material-icons"
+                              onclick="openTaskModal({{ task.id }})"
+                              style="cursor: pointer;">
+                              open_in_new
+                        </span>
                     </div>
                 </div>
             </div>
@@ -54,14 +64,14 @@
         </div>
         {% endif %}
     {% endfor %}
+
+    <!-- Modal de tarea -->
     <div id="task-modal" class="task-modal">
         <div class="task-modal-content">
-            <span id="close-modal" class="material-icons close-icon">close</span>
+            <span id="close-modal" class="material-icons close-icon" onclick="closeTaskModal()">close</span>
             <h1 class="task-title-modal">Task Title</h1>
             <div class="task-subheader-modal row">
-                <p class="task-priority-modal col">
-                    Priority: <span class="task-priority high"></span>
-                </p>
+                <p class="task-priority-modal col">Priority: <span class="task-priority high"></span></p>
                 <div class="due-date-wrapper col">
                     <p class="task-due-date-modal">
                         <span class="material-icons clock-icon">schedule</span>
@@ -73,15 +83,12 @@
             <div class="task-details-modal">
                 <div class="task-requirements-modal">
                     <h4>Requirements</h4>
-                    <div id="requirements-list">
-                        <!-- Requirements will be dynamically added here -->
-                    </div>
+                    <div id="requirements-list"></div>
                     <div class="task-files-modal">
                         <input type="file" id="file-input" multiple>
                     </div>
                 </div>
-                <div class="task-stats-modal">
-                </div>
+                <div class="task-stats-modal"></div>
             </div>
             <div class="task-footer-modal">
                 <div class="task-comments-modal">
@@ -93,7 +100,84 @@
                     <button id="deliver-task" class="btn btn-success">Deliver</button>
                 </div>
             </div>
+
+            <div class="task-actions d-flex justify-content-end">
+                <span class="material-icons"
+                      onclick="openSettingsModal()"
+                      style="cursor: pointer;">settings</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de configuración -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ request.route_url('submit_request') }}">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="settingsModalLabel">Task Settings</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="task_id" id="modal-task-id" value="">
+                        <div class="mb-3">
+                            <label for="status-select" class="form-label">Status</label>
+                            <select class="form-select" id="status-select" name="status_id" required>
+                                {% for status in statuses %}
+                                    <option value="{{ status.id }}">{{ status.status_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="action-type" class="form-label">Action Type</label>
+                            <input type="text" class="form-control" id="action-type" name="action_type" placeholder="Enter action type">
+                        </div>
+                        <div class="mb-3">
+                            <label for="request-reason" class="form-label">Request Reason</label>
+                            <textarea class="form-control" id="request-reason" name="reason" placeholder="Enter reason"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Send Request</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<!-- Scripts -->
+<script>
+    function openTaskModal(taskId) {
+        document.getElementById('task-modal').style.display = 'block';
+        document.getElementById('modal-task-id').value = taskId;
+    }
+
+    function closeTaskModal() {
+        document.getElementById('task-modal').style.display = 'none';
+    }
+
+    function openSettingsModal() {
+        const taskId = document.getElementById('modal-task-id').value;
+        if (!taskId) {
+            console.warn("No task selected.");
+            return;
+        }
+        const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        modal.show();
+    }
+
+    // Previene apertura directa si no hay tarea
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsModal = document.getElementById('settingsModal');
+        settingsModal.addEventListener('show.bs.modal', function (event) {
+            const taskId = document.getElementById('modal-task-id').value;
+            if (!taskId) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+
 {% endblock tasks %}
