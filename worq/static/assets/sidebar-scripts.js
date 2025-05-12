@@ -89,3 +89,10 @@ function handleCurrentProject() {
         });
     });
 }
+
+function tabStyleAdapter() {
+    const tasks_tab = document.querySelectorAll("#tasks");
+    if( sessionStorage.getItem("user_role") === "user" ) {
+        tasks_tab.style.borderRadius = "0px 0px 0px 0px";
+    }
+}

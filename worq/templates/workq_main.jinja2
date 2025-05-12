@@ -18,6 +18,7 @@
     />
     {% block styles %}
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Round|Material+Icons+Sharp|Material+Icons+Two+Tone" rel="stylesheet"/>
       <link rel="stylesheet" href="{{request.static_url('worq:static/assets/pm.css')}}">
       <link rel="stylesheet" href="{{request.static_url('worq:static/assets/style.css')}}">
@@ -67,6 +68,9 @@
     <div id="overlay-blur" class="blur-overlay"></div>
     
     <div class="toolbar">
+      {% if user_role in ['superadmin', 'admin'] %}
+      <span class="material-symbols-outlined show-popup toolbar-add-user">person_add</span>
+      {% endif %}
       <div class="notification">
         <span class="toolbar-icon material-icons-round">notifications</span>
       </div>
@@ -76,13 +80,12 @@
       <span class="toolbar-separator"></span>
       <div class="profile" id="profile-menu">
         <img src="{{request.static_url('worq:static/profile-icon.png')}}" class="toolbar-icon" id="profile-icon">
-        <p>Welcome, {{ user_name }}</p>
         <ul id="dropdown-menu">
+          <li><p style="margin-bottom: 0;">Welcome {{ user_name }}</p></li>
           <li><p class="Role">{{user_role}}</p></li>
           <li><a href="">Profile</a></li>
           <li><a href="">Tutorial</a></li>
           <li><a href="{{ request.route_url('logout') }}">Logout</a></li>
-
         </ul>
       </div>
     </div>
@@ -114,7 +117,8 @@
             <!-- Tab 1 -->
             {% if user_role in ['superadmin', 'admin', 'projectmanager'] %}
             <div class="tab-pane fade {% if user_role == 'superadmin' or user_role == 'admin' or user_role == 'projectmanager' %}show active{% endif %}" id="pm" role="tabpanel" aria-labelledby="pm-tab">
-                <h3>Project Management</h3>
+                {% block add_task %}
+                {% endblock add_task %}
             </div>
             {% endif %}
             <!-- Tab 2 -->

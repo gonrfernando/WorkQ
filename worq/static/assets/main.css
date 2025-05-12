@@ -253,7 +253,7 @@ body {
     background-color: #ffffff;
     display: flex;
     align-items: center;
-    justify-content: right;
+    justify-content: flex-end;
     padding-right: clamp(25px, 4%, 80px);
     box-shadow: 6px 4px 4px rgba(0, 0, 0, 0.2);
     border-radius: 6px;
@@ -284,6 +284,13 @@ body {
     align-items: center;
     justify-content: center;
     display: flex !important;
+}
+
+.toolbar-add-user {
+    font-size: 2rem !important;
+    color: #222;
+    cursor: pointer;
+    font-family: 'Material Symbols Outlined', 'Material Icons', Arial, sans-serif !important;
 }
 
 /*main*/
@@ -402,6 +409,8 @@ body {
     padding: 8px 16px;     /* Espaciado interno (vertical y horizontal) */
     width: 150px;
     text-align: center; /* Para que el texto quede centrado */
+    border-radius: 0.5rem 0.5rem 0 0;
+    margin-bottom: 0;
 }
 
   /* Hover para tabs no activos */
@@ -419,13 +428,20 @@ body {
 
   /* Quitar borde inferior a la lista de tabs para que se una con el contenido */
 .nav-tabs {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 0 !important;
+    margin-bottom: 0;
+    background: transparent;
+    border-radius: 0.5rem 0.5rem 0 0;
 }
 
 .tab-content{
     width: 100%;
     height: fit-content;
     min-height: clamp(calc(100vh - 190px), calc(85vh - 60px), calc(100vh - 140px));
+    background: #fff;
+    border-radius: 6px;
+    margin-top: 0;
+    box-shadow: none;
 }
 
   /* Contenido cuando el tab está activo */
@@ -439,6 +455,7 @@ body {
     color: #000;
     padding: 1.5rem;
     border-radius: 0 0 0.5rem 0.5rem;
+    margin-top: 0;
 }
 
 #navigation {
@@ -446,17 +463,40 @@ body {
     min-height: clamp(calc(100vh - 190px), calc(85vh - 60px), calc(100vh - 140px));
     max-width: unset;
     margin: 0;
-    margin-top: 5px;
     padding: 0;
     display: flex;
     flex-direction: column;
+    padding-top: 0;
+    background: none;
+}
+
+#myTabs{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    /* Remove position absolute so tabs are part of the flow */
+    position: static;
+    border-radius: 0.5rem 0.5rem 0 0;
+    margin-bottom: 0;
+    z-index: 1;
 }
 
 .tab-pane.fade.active.show{
     padding: 10px;
     margin: 0;
     width: 100%;
+    border-radius: 6px;
 }
+
+/* Remove any gap between tabs and content */
+#navigation > #myTabs + .tab-content {
+    margin-top: 0;
+}
+
 
 * {
     scrollbar-width: none;

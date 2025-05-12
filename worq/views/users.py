@@ -1,18 +1,29 @@
 from pyramid.view import view_config
 from pyramid.response import Response
 from countryinfo import CountryInfo
-from worq.models.models import Projects, Users, Countries, Areas, Roles
+from pyramid.httpexceptions import HTTPFound
+from worq.models.models import UsersProjects, Users, Countries, Areas, Roles
 from sqlalchemy.exc import SQLAlchemyError
 
 @view_config(route_name='edit_user', renderer='templates/edit_user.jinja2')
 def my_view(request):
-    projects = request.dbsession.query(Projects).all()
+    session = request.session
+    if not 'user_name' in session:
+        return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+    active_project_id = session.get("project_id")
+    user_name = session.get('user_name')
+    user_email = session.get('user_email')
+    user_role = session.get('user_role')
+    user_id = session.get('user_id')
+    
+    
     users = request.dbsession.query(Users).all()
     countries = request.dbsession.query(Countries).all()
     areas = request.dbsession.query(Areas).all()
     roles = request.dbsession.query(Roles).all()
-
-    json_projects = [{"id": project.id, "name": project.name} for project in projects]
+    project_ids = request.dbsession.query(UsersProjects).filter_by(user_id=user_id).all()
+    json_projects = [{"id": project.project_id, "name": project.project.name} for project in project_ids]
+    
     json_users = [{"id": user.id, 
                    "name": user.name, 
                    "email": user.email,
@@ -34,6 +45,10 @@ def my_view(request):
 
     return {
         "projects": json_projects,
+        "active_project_id": active_project_id,
+        'user_name': user_name,
+        'user_email': user_email,
+        'user_role': user_role,
         "users": json_users,
         "countries": json_countries,
         "areas": [{"id": area.id, "area": area.area} for area in areas],

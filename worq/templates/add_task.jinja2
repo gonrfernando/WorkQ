@@ -1,11 +1,16 @@
 {% extends "workq_main.jinja2" %}
 
-{% block content %}
+{% block add_task %}
 <section class="creation1">
         <section class="TCreation2">
-          <section class="in-name">
-            <h1>Project Title</h1>
-          </section>
+          <div class="project-selector-bar dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
+                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                    {% for project in projects %}
+                        <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
           <section class="TCreation3">
           <div class="outside-task">
             <section class="add-tasks">
@@ -14,7 +19,7 @@
               <input class="controls" type="text" id="descrip" name="descrip" placeholder="Description"required>
               <input class="controls" type="" id="requer" name="requer" placeholder="Requeriment" required>
               <div class="add-group">
-               <label for="duedate">Due Date</label>
+              <label for="duedate">Due Date</label>
               <input type="date" id="duedate" name="duedate" required>
               <input class="buttons" type="submit" name="" value="Submit">
                 </div>

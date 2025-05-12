@@ -142,7 +142,7 @@
 .add-tasks {
   width: 600px;
   height: 340px;
-  background: #EEEEEE;
+  background: #fff;
   margin: auto;
   padding: 20px 30px;
   border: 10px solid #465158; 
@@ -152,7 +152,7 @@
 .add-users {
   width: 400px;
   height: 290px;
-  background: #EEEEEE;
+  background: #fff;
   margin: auto;
   padding: 20px 30px;
   border: 10px solid #465158; 

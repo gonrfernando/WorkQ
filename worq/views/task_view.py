@@ -7,14 +7,20 @@ from pyramid.httpexceptions import HTTPInternalServerError
 def my_view(request):
     session = request.session
     projects = request.dbsession.query(Projects).all()
-    #if not 'user_name' in session:
-            #return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
-    #user_name = session.get('user_name')
-    #user_email = session.get('user_email')
-    #user_role = session.get('user_role')
+    if not 'user_name' in session:
+            return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+    user_name = session.get('user_name')
+    user_email = session.get('user_email')
+    user_role = session.get('user_role')
+    active_project_id = session.get("project_id")
+    if not active_project_id and projects:
+        # Fallback to first project if not set
+        active_project_id = projects[0].id
+        session["project_id"] = active_project_id
+    if active_project_id is not None:
+        active_project_id = int(active_project_id)
     
     json_projects = [{"id": project.id, "name": project.name} for project in projects]
-    active_project_id = session.get("project_id")
     active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
     
     dbtasks = request.dbsession.query(Tasks).filter_by(project_id = active_project_id).all()
@@ -41,8 +47,8 @@ def my_view(request):
         "projects": json_projects,
         "active_project": active_project,
         "tasks": json_tasks,
-        #'user_name': user_name,
-        #'user_email': user_email,
-        #'user_role': user_role
+        'user_name': user_name,
+        'user_email': user_email,
+        'user_role': user_role
     }
 

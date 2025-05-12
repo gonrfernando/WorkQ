@@ -129,11 +129,11 @@ class Users(Base):
     )
 
     id = Column(Integer)
-    country_id = Column(Integer, nullable=False)
+    country_id = Column(Integer)
     role_id = Column(Integer, nullable=False)
-    area_id = Column(Integer, nullable=False)
-    name = Column(String(100), nullable=False)
-    tel = Column(String(20), nullable=False)
+    area_id = Column(Integer)
+    name = Column(String(100))
+    tel = Column(String(20))
     email = Column(String(100), nullable=False)
     passw = Column(String(100), nullable=False)
 
