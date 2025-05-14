@@ -44,6 +44,7 @@ def my_view(request):
         "tasks": json_tasks,
         'user_name': user_name,
         'user_email': user_email,
-        'user_role': user_role
+        'user_role': user_role,
+        'active_tab': "tasks"
     }
 

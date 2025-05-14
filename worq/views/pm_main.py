@@ -6,12 +6,20 @@ from sqlalchemy.exc import SQLAlchemyError
 
 @view_config(route_name='pm_main', renderer='templates/pm_main.jinja2', request_method='GET')
 def pm_main_view(request):
+    session = request.session    
     projects = request.dbsession.query(Projects).all()
     json_projects = [{"id": project.id, "name": project.name} for project in projects]
     active_project_id = request.params.get("project_id")
+    user_name = session.get('user_name')
+    user_email = session.get('user_email')
+    user_role = session.get('user_role')
     return {
         "projects": json_projects,
-        "active_project_id": active_project_id
+        "active_project_id": active_project_id,
+        'user_name': user_name,
+        'user_email': user_email,
+        'user_role': user_role,
+        'active_tab': "pm"
     }
 
 @view_config(route_name='pm_main', request_method='POST', renderer='json')
