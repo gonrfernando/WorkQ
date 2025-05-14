@@ -32,6 +32,7 @@
       <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
       <script src="{{request.static_url('worq:static/assets/sidebar-scripts.js')}}"></script>
       <script src="{{request.static_url('worq:static/assets/task_view.js')}}"></script>
+      <script src="{{request.static_url('worq:static/assets/pm_main.js')}}"></script>
     {% endblock %}
       
 
@@ -108,10 +109,10 @@
             {% endif %}
         </ul>
         <div class="tab-content" id="myTabsContent">
+              {% block content %}
+              {% endblock content %}
             <!-- Tab 1 -->
             <div class="tab-pane fade" id="pm" role="tabpanel" aria-labelledby="pm-tab">
-                {% block content %}
-                {% endblock content %}
             </div>
 
             <!-- Tab 2 -->
@@ -185,6 +186,14 @@
             }
           });
         });
+        // Mostrar el modal si hay un mensaje de error
+          document.addEventListener('DOMContentLoaded', function () {
+            const message = "{{ message|default('') }}";
+            if (message && message !== "None") {
+              const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+              errorModal.show();
+            }
+          });
       </script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
@@ -206,8 +215,8 @@
             const tabRoutes = {
               'pm-tab': '/pm_main',
               'tasks-tab': '/task_view',
-              'stats-tab': '/stats',
-              'actions-tab': '/actions'
+              'stats-tab': '/stats_view',
+              'actions-tab': '/actions_view'
             };
 
             // Redirige si existe una ruta asignada

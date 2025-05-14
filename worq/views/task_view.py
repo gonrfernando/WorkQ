@@ -8,6 +8,7 @@ def my_view(request):
     if not 'user_name' in session:
         return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
     projects = request.dbsession.query(Projects).all()
+    error = request.params.get('error')
     
     json_projects = [{"id": project.id, "name": project.name} for project in projects]
     active_project_id = request.params.get("project_id")
@@ -42,9 +43,10 @@ def my_view(request):
         "projects": json_projects,
         "active_project": active_project,
         "tasks": json_tasks,
-        'user_name': user_name,
-        'user_email': user_email,
-        'user_role': user_role,
-        'active_tab': "tasks"
+        "user_name": user_name,
+        "user_email": user_email,
+        "user_role": user_role,
+        "active_tab": "tasks",
+        "message": error if error else None  # Agrega 'message' solo si 'error' tiene un valor
     }
 

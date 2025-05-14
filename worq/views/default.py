@@ -12,6 +12,7 @@ def my_view(request):
         session = request.session
         if not 'user_name' in session:
             return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+        error = request.params.get('error')
         projects = request.dbsession.query(Projects).all()
         json_projects = [{"id": project.id, "name": project.name} for project in projects]
         active_project_id = request.params.get("project_id")
@@ -24,7 +25,8 @@ def my_view(request):
             "active_project_id": active_project_id,
             'user_name': user_name,
             'user_email': user_email,
-            'user_role': user_role
+            'user_role': user_role,
+            'message': error if error else None
         }
     except Exception as e:
         print(f"Error: {e}")

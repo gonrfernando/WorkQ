@@ -12,5 +12,8 @@ def includeme(config):
     config.add_route('info_user', '/info_user')
     config.add_route('add_user', '/add_user')
     config.add_route('task_view', '/task_view')
+    config.add_route('stats_view', '/stats_view')
+    config.add_route('actions_view', '/actions_view')
     config.add_route('save_active_tab', '/save_active_tab')
     config.add_route('get_active_tab', '/get_active_tab')
+    config.add_route('upload_file', '/upload_file')

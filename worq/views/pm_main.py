@@ -1,18 +1,26 @@
 from pyramid.view import view_config
 from pyramid.response import Response
 from worq.models.models import Projects
+from pyramid.httpexceptions import HTTPFound
 import datetime
 from sqlalchemy.exc import SQLAlchemyError
 
 @view_config(route_name='pm_main', renderer='templates/pm_main.jinja2', request_method='GET')
 def pm_main_view(request):
-    session = request.session    
+    session = request.session
+    if not 'user_name' in session:
+        return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+    error = request.params.get('error')
+    if error:
+            return {'message' : error }
     projects = request.dbsession.query(Projects).all()
     json_projects = [{"id": project.id, "name": project.name} for project in projects]
     active_project_id = request.params.get("project_id")
     user_name = session.get('user_name')
     user_email = session.get('user_email')
     user_role = session.get('user_role')
+    if user_role == "user" :
+        return HTTPFound(location=request.route_url('task_view', _query={'error': 'You do not have permision'}))
     return {
         "projects": json_projects,
         "active_project_id": active_project_id,
