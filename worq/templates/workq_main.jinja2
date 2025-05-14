@@ -71,10 +71,10 @@
       {% if user_role in ['superadmin', 'admin'] %}
       <span class="material-symbols-outlined show-popup toolbar-add-user">person_add</span>
       {% endif %}
-      <div class="notification">
+      <div class="notification-icon">
         <span class="toolbar-icon material-icons-round">notifications</span>
       </div>
-      <div class="calendar">
+      <div class="calendar-icon">
         <span class="toolbar-icon material-icons-round">calendar_today</span>
       </div>
       <span class="toolbar-separator"></span>
@@ -91,6 +91,18 @@
     </div>
 
     <div class="main">
+      {% if request.matched_route.name == 'calendar' %}
+        <style>
+          #navigation {
+            display: none;
+          }
+        </style>
+        <div id="calendar-content">
+          {% block mainContent %}
+          
+          {% endblock mainContent %}
+        </div>
+      {% else %}
       <div class="container" id="navigation">
         <ul class="nav nav-tabs" id="myTabs" role="tablist">
 
@@ -140,6 +152,7 @@
             {% endif %}
         </div>
       </div>
+      {% endif %}
     </div>
     <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -193,5 +206,15 @@
           });
         });
       </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const calendarIcon = document.querySelector('.calendar-icon .toolbar-icon');
+
+        // Redirect to the calendar URL when the calendar icon is clicked
+        calendarIcon.addEventListener('click', function () {
+          window.location.href = "{{ request.route_url('calendar') }}";
+        });
+      });
+    </script>
   </body>
 </html>

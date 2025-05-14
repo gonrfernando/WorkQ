@@ -1,6 +1,6 @@
 {% extends "workq_main.jinja2" %}
 
-{% block content %}
+{% block mainContent %}
 <link rel="stylesheet" href="{{ request.static_url('worq:static/assets/calendar.css') }}">
 <div class="calendar-container">
     <div class="calendar-header">
@@ -8,6 +8,11 @@
             <h2>{{ year }}-{{ '%02d' % month }}</h2>
         </div>
         <div>
+            <select id="project-selector" class="form-select form-select-sm d-inline-block w-auto me-2">
+                {% for project in projects %}
+                    <option value="{{ project.id }}" {% if project.id == active_project_id %}selected{% endif %}>{{ project.name }}</option>
+                {% endfor %}
+            </select>
             <a href="?year={{ year if month > 1 else year-1 }}&month={{ month-1 if month > 1 else 12 }}" class="btn btn-outline-secondary btn-sm me-2">&lt;</a>
             <a href="?year={{ year if month < 12 else year+1 }}&month={{ month+1 if month < 12 else 1 }}" class="btn btn-outline-secondary btn-sm">&gt;</a>
         </div>
@@ -27,15 +32,32 @@
                 <div class="calendar-day-number">{{ day }}</div>
                 {% if tasks_by_day.get(day) %}
                     <ul class="calendar-task-list">
-                        {% for task in tasks_by_day[day] %}
+                        {% for task in tasks_by_day[day][:3] %}
                             {% set priority_class = {
                                 1: 'priority-low',
                                 2: 'priority-avg',
                                 3: 'priority-high'
                             }[task.priority] if task.priority in [1,2,3] else 'priority-none' %}
-                            <li class="calendar-task-title {{ priority_class }}">{{ task.title }}</li>
+                            <li class="calendar-task-title {{ priority_class }}" data-priority="{{ task.priority }}" data-project="{{ task.project }}">{{ task.title }}</li>
                         {% endfor %}
                     </ul>
+                    {% if tasks_by_day[day]|length > 3 %}
+                        <div class="calendar-task-dots">
+                            {% for task in tasks_by_day[day][3:] %}
+                                {% set priority_class = {
+                                    1: 'priority-low',
+                                    2: 'priority-avg',
+                                    3: 'priority-high'
+                                }[task.priority] if task.priority in [1,2,3] else 'priority-none' %}
+                                <span class="calendar-task-dot {{ priority_class }}" data-title="{{ task.title }}"></span>
+                            {% endfor %}
+                            <div class="calendar-task-extra">
+                                <span class="calendar-task-more" title="More tasks"></span>
+                                <span class="calendar-task-more" title="More tasks"></span>
+                                <span class="calendar-task-more" title="More tasks"></span>
+                            </div>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         {% endfor %}
@@ -44,4 +66,73 @@
     <div class="alert alert-info calendar-no-tasks" role="alert">No tasks found for this month.</div>
     {% endif %}
 </div>
-{% endblock content %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tasksByDay = {{ tasks_by_day | tojson }};
+        const days = document.querySelectorAll('.calendar-day');
+        days.forEach(day => {
+            day.addEventListener('click', function() {
+                const dayNumber = this.querySelector('.calendar-day-number').textContent;
+                const modalContent = document.getElementById('modal-content');
+                modalContent.innerHTML = `<h3 style="margin-bottom: 15px;">Tasks for {{ year }}-{{ '%02d' % month }}-${dayNumber.padStart(2, '0')}</h3>`;
+                if (tasksByDay[dayNumber]) {
+                    tasksByDay[dayNumber].forEach(task => {
+                        const priorityText = {
+                            1: 'low',
+                            2: 'avg',
+                            3: 'high'
+                        }[task.priority] || 'none';
+                        modalContent.innerHTML += `
+                            <div class="day-modal-row row">
+                                <div class="col-md-4">
+                                    <p style="font-size:1.3rem; font-weight:400;">${task.title}<p>
+                                </div>
+                                <div class="col-md-3 text-dark text-center rounded">Priority: <span class="priority-dot ${priorityText}"></span> ${priorityText}</div>
+                                <div class="col-md-5">${task.decription || 'No description available'}</div>
+                            </div>`;
+                    });
+                } else {
+                    modalContent.innerHTML += `<p>No tasks for this day.</p>`;
+                }
+                modalContent.innerHTML += `
+                    <div class="text-end mt-3">
+                        <button id="close-modal" class="btn btn-secondary">Close</button>
+                    </div>`;
+                const modal = document.getElementById('task-modal');
+                modal.style.display = 'flex';
+            });
+        });
+
+        const modal = document.getElementById('task-modal');
+        modal.addEventListener('click', function(event) {
+            if (event.target.id === 'close-modal' || event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+
+    document.getElementById('project-selector').addEventListener('change', function() {
+        const projectId = this.value;
+        fetch(`/set_active_project`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ project_id: projectId }),
+        }).then(response => {
+            if (response.ok) {
+                location.reload(); 
+            } else {
+                console.error("Failed to set the active project.");
+            }
+        });
+    });
+</script>
+
+<div id="task-modal" class="modal">
+    <div class="modal-content" id="modal-content">
+    </div>
+</div>
+
+{% endblock mainContent %}

@@ -72,7 +72,6 @@ function handleCurrentProject() {
     projects.forEach(project => {
         const projectId = project.getAttribute("id");
         project.addEventListener("click", function () {
-            console.log("project clicked")
             fetch(`/set_active_project`, {
                 method: "POST",
                 headers: {
@@ -95,4 +94,13 @@ function tabStyleAdapter() {
     if( sessionStorage.getItem("user_role") === "user" ) {
         tasks_tab.style.borderRadius = "0px 0px 0px 0px";
     }
+}
+
+function toolbarIcons(){
+    document.addEventListener("DOMContentLoaded", function () {
+        const calendar = document.querySelector(".calendar-icon");
+        calendar.addEventListener("click", function () {
+            window.location.href = "/calendar"
+        });
+    });
 }

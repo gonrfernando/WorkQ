@@ -301,7 +301,7 @@ body {
     align-content: center;
     justify-content: center;
     margin-left: clamp(80px, 7%, 115px);
-    margin-top: clamp(70px, 9%, 100px);
+    margin-top: clamp(70px, 6%, 100px);
     padding-top: 10px;
     padding-left: 10px;
     background-color: #D9D9D9;
