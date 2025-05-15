@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 from worq.models.models import Users
-from pyramid.httpexceptions import HTTPFound
+
 import random
 import string
 from worq.scripts.emailsender import send_email

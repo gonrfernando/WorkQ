@@ -20,7 +20,7 @@ def pm_main_view(request):
     user_email = session.get('user_email')
     user_role = session.get('user_role')
     if user_role == "user" :
-        return HTTPFound(location=request.route_url('task_view', _query={'error': 'You do not have permision'}))
+        return HTTPFound(location=request.route_url('task_view', _query={'error': 'Sorry, it looks like you don’t have permission to view this content.'}))
     return {
         "projects": json_projects,
         "active_project_id": active_project_id,
