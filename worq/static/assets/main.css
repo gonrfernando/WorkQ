@@ -468,3 +468,78 @@ a, a .toolbar-icon {
     scrollbar-width: none;
     scrollbar-color: #6f6b6b #f1f1f1; 
 }
+
+.members-sidebar {
+    width: 60px; /* Pequeño inicialmente */
+    height: 100px;
+    background-color: #465158;
+    transition: 0.3s;
+    position: fixed;
+    top: 220px; /* Ajusta donde quieres */
+    right: 20px;
+    border-radius: 10px;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 4px 4px 8px rgba(0,0,0,0.2);
+    z-index: 500;
+}
+
+.members-sidebar .icon {
+    font-size: 30px;
+    color: white;
+}
+
+
+/* Contenido oculto al inicio */
+.members-content {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    width: 100%;
+    color: white;
+    overflow-y: auto;
+    max-height: calc(100vh - 60px);
+}
+
+
+.members-sidebar.expanded {
+    width: 300px; /* Expandido */
+    height: 100vh; /* Toda la altura */
+    top: 0;
+    right: 0;
+    border-radius: 0;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 60px;
+}
+
+
+/* Mostrar contenido al expandir */
+.members-sidebar.expanded .members-content {
+    display: flex;
+}
+
+
+/* Ocultar icono cuando expande si quieres */
+.members-sidebar.expanded .icon {
+    display: none;
+}
+
+
+/* Estilo de la lista de miembros */
+.members-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.members-content li {
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+    width: 100%;
+}
