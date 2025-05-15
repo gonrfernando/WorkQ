@@ -109,10 +109,11 @@
             {% endif %}
         </ul>
         <div class="tab-content" id="myTabsContent">
-              {% block content %}
-              {% endblock content %}
+              
             <!-- Tab 1 -->
-            <div class="tab-pane fade" id="pm" role="tabpanel" aria-labelledby="pm-tab">
+            <div class="tab-pane fade show active" id="pm" role="tabpanel" aria-labelledby="pm-tab">
+                {% block content %}
+                {% endblock content %}
             </div>
 
             <!-- Tab 2 -->
@@ -121,17 +122,15 @@
                 {% endblock tasks %}
             </div>
             <!-- Tab 3 -->
-            <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
-                <h3>Stats View</h3>
-                <p>Stats View</p>
+            <div class="tab-pane fade show active" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+                {% block stats %}
+                {% endblock stats %}
             </div>
             <!-- Tab 4 -->
-            {% if user_role in ['superadmin', 'admin'] %}
-            <div class="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="actions-tab">
-                <h3>Actions History</h3>
-                <p>Actions History View</p>
+            <div class="tab-pane fade show active" id="actions" role="tabpanel" aria-labelledby="actions-tab">
+                
             </div>
-            {% endif %}
+        
         </div>
       </div>
     </div>
