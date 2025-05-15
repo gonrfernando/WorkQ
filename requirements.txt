@@ -24,3 +24,4 @@ urllib3==2.3.0
 waitress==3.0.2
 psycopg2==2.9.10
 countryinfo==0.1.2
+werkzeug==3.1.3
