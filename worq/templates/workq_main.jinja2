@@ -128,7 +128,6 @@
             {% block content %}
             {% endblock content %}
             <!-- Tab 1 -->
-            {% if user_role in ['superadmin', 'admin', 'projectmanager'] %}
             <div class="tab-pane fade {% if user_role == 'superadmin' or user_role == 'admin' or user_role == 'projectmanager' %}show active{% endif %}" id="pm" role="tabpanel" aria-labelledby="pm-tab">
                 {% block add_task %}
                 {% endblock add_task %}
