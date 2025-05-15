@@ -2,87 +2,118 @@
 
 {% block add_task %}
 <section class="creation1">
-        <section class="TCreation2">
-          <div class="project-selector-bar dropdown">
-                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
-                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-                    {% for project in projects %}
-                        <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
-                    {% endfor %}
-                </div>
-            </div>
-          <section class="TCreation3">
-          <div class="outside-task">
-            <section class="add-tasks">
-              <h5>Add Task</h5>
-              <input class="controls" type="text" id="name"  name="name" placeholder="Name" required>
-              <input class="controls" type="text" id="descrip" name="descrip" placeholder="Description"required>
-              <input class="controls" type="" id="requer" name="requer" placeholder="Requeriment" required>
-              <div class="add-group">
-              <label for="duedate">Due Date</label>
-              <input type="date" id="duedate" name="duedate" required>
-              <input class="buttons" type="submit" name="" value="Submit">
-                </div>
-            </section>
-            <section class="add-users">
-              <h5>Add User</h5>
-              <input type="hidden" id="user_id" name="user_id">
-              <div class="search-bar2">
-                <input type="text" id="email-search-input" placeholder="Search User Email" oninput="handleEmailSearchInput(event)">
-                <div id="email-autocomplete-results" class="add-user-autocomplete-results"></div>
-              </div>
-              <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
-              <select class="controls" id="role" name="role_id">
-                <option value="" disabled selected>Select a Role</option>
-                {% for role in roles %}
-                <option value="{{ role.id }}">{{ role.name }}</option>
+    <section class="TCreation2">
+        <div class="project-selector-bar dropdown">
+            <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
+            <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                {% for project in projects %}
+                    <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
                 {% endfor %}
-              </select>
-              <input class="buttons" type="submit" name="" value="Submit">
-            </section>
             </div>
-          </section>
-          <br>
-          <input class="buttons" type="button" name="" value="Back" onclick="history.back();">
+        </div>
 
+        <section class="TCreation3">
+            <div class="outside-task">
+
+                <!-- FORMULARIO DE TAREA -->
+              <div class="scrollable-task-form">
+                <form method="POST" class="add-tasks">
+                    <h5>Add Task</h5>
+                    <input type="hidden" name="form_type" value="add_task">
+
+                    <input class="controls" type="text" id="title" name="title" placeholder="Title" required>
+                    <input class="controls" type="text" id="description" name="description" placeholder="Description" required>
+
+                    <div id="requirements-container">
+                        <input class="controls requirement-input" type="text" name="requirements" placeholder="Requirement" required>
+                    </div>
+                    <button type="button" onclick="addRequirementInput()">+ Add Requirement</button>
+
+                    <div class="add-group">
+                        <label for="finished_date">Due Date</label>
+                        <input type="datetime-local" id="finished_date" name="finished_date" required>
+                        <input type="hidden" name="started_date" value="{{ started_date_value }}">
+                        <input type="hidden" name="priority" value="1">
+                        <input class="buttons" type="submit" value="Submit Task">
+                    </div>
+                </form>
+              </div>
+
+                <!-- FORMULARIO DE USUARIO -->
+                <form method="POST" class="add-users">
+                    <h5>Add User</h5>
+                    <input type="hidden" name="form_type" value="add_user">
+                    <input type="hidden" id="user_id" name="user_id">
+
+                    <div class="search-bar2">
+                        <input type="text" id="email-search-input" placeholder="Search User Email" oninput="handleEmailSearchInput(event)">
+                        <div id="email-autocomplete-results" class="add-user-autocomplete-results"></div>
+                    </div>
+
+                    <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
+                    <select class="controls" id="role" name="role_id">
+                        <option value="" disabled selected>Select a Role</option>
+                        {% for role in roles %}
+                            <option value="{{ role.id }}">{{ role.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <input class="buttons" type="submit" value="Assign to Project">
+                </form>
+
+            </div>
         </section>
+
+        <br>
+        <input class="buttons" type="button" value="Back" onclick="history.back();">
+
     </section>
+</section>
 
-    <script>
-    const users = {{ users | tojson }}; // Asegúrate de que los datos estén correctamente pasados desde el servidor
+<script>
+const users = {{ users | tojson }};
 
-    function handleEmailSearchInput(event) {
-        const query = event.target.value.toLowerCase();
-        const resultsContainer = document.getElementById("email-autocomplete-results");
-        resultsContainer.innerHTML = ""; 
+function handleEmailSearchInput(event) {
+    const query = event.target.value.toLowerCase();
+    const resultsContainer = document.getElementById("email-autocomplete-results");
+    resultsContainer.innerHTML = "";
 
-        if (query.length < 1) {
-            resultsContainer.style.display = "none";
-            return;
-        }
-
-        const filteredUsers = users.filter(user =>
-            user.email.toLowerCase().includes(query)
-        );
-
-        if (filteredUsers.length > 0) {
-            resultsContainer.style.display = "block";
-            filteredUsers.forEach(user => {
-                const item = document.createElement("div");
-                item.className = "autocomplete-item";
-                item.textContent = user.email;
-                item.onclick = () => {
-                    document.getElementById("email-search-input").value = user.email;
-                    document.getElementById("user_id").value = user.id;
-                    document.getElementById("email").value = user.email;
-                    document.getElementById("role").value = user.role_id || ""; 
-                    resultsContainer.style.display = "none";
-                };
-                resultsContainer.appendChild(item);
-            });
-        } else {
-            resultsContainer.style.display = "none";
-        }
+    if (query.length < 1) {
+        resultsContainer.style.display = "none";
+        return;
     }
+
+    const filteredUsers = users.filter(user =>
+        user.email.toLowerCase().includes(query)
+    );
+
+    if (filteredUsers.length > 0) {
+        resultsContainer.style.display = "block";
+        filteredUsers.forEach(user => {
+            const item = document.createElement("div");
+            item.className = "autocomplete-item";
+            item.textContent = user.email;
+            item.onclick = () => {
+                document.getElementById("email-search-input").value = user.email;
+                document.getElementById("user_id").value = user.id;
+                document.getElementById("email").value = user.email;
+                document.getElementById("role").value = user.role_id || "";
+                resultsContainer.style.display = "none";
+            };
+            resultsContainer.appendChild(item);
+        });
+    } else {
+        resultsContainer.style.display = "none";
+    }
+}
+function addRequirementInput() {
+    const container = document.getElementById('requirements-container');
+    const input = document.createElement('input');
+    input.className = 'controls requirement-input';
+    input.type = 'text';
+    input.name = 'requirements';
+    input.placeholder = 'Requirement';
+    container.appendChild(input);
+}
 </script>
 {% endblock %}

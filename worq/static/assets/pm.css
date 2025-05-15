@@ -141,7 +141,7 @@
 
 .add-tasks {
   width: 600px;
-  height: 340px;
+  max-height: 400px;
   background: #fff;
   margin: auto;
   padding: 20px 30px;
@@ -237,4 +237,22 @@
 
 .add-user-autocomplete-results .autocomplete-item:hover {
   background-color: #f0f0f0;
+}
+
+.scrollable-task-form {
+  max-height: 500px; /* Puedes ajustar según lo que necesites */
+  overflow: auto;
+  padding-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #ffffff;
+  margin-bottom: 16px;
+}
+
+/* Asegura que los campos dentro del formulario scrolleable no se deformen */
+.scrollable-task-form .controls,
+.scrollable-task-form input,
+.scrollable-task-form button {
+  width: 100%;
+  box-sizing: border-box;
 }
