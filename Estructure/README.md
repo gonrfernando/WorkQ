@@ -8,32 +8,32 @@ icon: cubes
 
 * **Login & Sign-up**
 * **Project Creation**
-* **Super Admin Change Request Management**
+* <mark style="color:yellow;">**Super Admin Change Request Management**</mark>
 * **Concurrent Layout Elements:**
   * Sidebar of Projects, Search Projects Template
   * List of Projects (select one instead of the sidebar)
   * Change the Projects’ Places
   * Icons
   * Toolbar
-* **Actions History (PM and God)**
+* <mark style="color:red;">**Actions History (PM and God)**</mark>
 * **Calendar**
 * **User View**
-* **Create Users (Roles and Permissions)**
+* <mark style="color:yellow;">**Create Users (Roles and Permissions)**</mark>
 
 ***
 
 **Dependent Features**
 
-* **Modification & Request**
+* <mark style="color:red;">**Modification & Request**</mark>
 * **Assign Members**
 * **Task Creation**
-* **Task Modification & Request**
-* **Task Revision**
-* **Stats Module**
-* **Chat Module**
+* <mark style="color:yellow;">**Task Modification & Request**</mark>
+* <mark style="color:red;">**Task Revision**</mark>
+* <mark style="color:red;">**Stats Module**</mark>
+* <mark style="color:red;">**Chat Module**</mark>
 * **Members Sidebar:**
   * User Preview
   * Sidebar User Click
-* **Files** (dependent on chat and tasks)
-* **Notifications** (dependent on almost everything)
-* **Priority of Notifications, Tasks, and Projects** (TBD, how it will be defined)
+* <mark style="color:yellow;">**Files**</mark> <mark style="color:yellow;"></mark><mark style="color:yellow;">( tasks)</mark>
+* <mark style="color:purple;">**Notifications**</mark> <mark style="color:purple;"></mark><mark style="color:purple;">(dependent on almost everything)</mark>
+* <mark style="color:purple;">**Priority of Notifications, Tasks, and Projects**</mark> <mark style="color:purple;"></mark><mark style="color:purple;">(TBD, how it will be defined)</mark>
