@@ -25,14 +25,13 @@
                     <input class="controls" type="text" id="description" name="description" placeholder="Description" required>
 
                     <div id="requirements-container">
-                        <input class="controls requirement-input" type="text" name="requirements" placeholder="Requirement" required>
+                        <input class="controls requirement-input" type="text" name="requirements" placeholder="Requirement">
                     </div>
                     <button type="button" onclick="addRequirementInput()">+ Add Requirement</button>
 
                     <div class="add-group">
                         <label for="finished_date">Due Date</label>
-                        <input type="datetime-local" id="finished_date" name="finished_date" required>
-                        <input type="hidden" name="started_date" value="{{ started_date_value }}">
+                        <input type="datetime-local" id="finished_date" name="finished_date">
                         <input type="hidden" name="priority" value="1">
                         <input class="buttons" type="submit" value="Submit Task">
                     </div>
@@ -51,12 +50,13 @@
                     </div>
 
                     <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
-                    <select class="controls" id="role" name="role_id">
+                    <select class="controls" id="role" name="role_id" required>
                         <option value="" disabled selected>Select a Role</option>
                         {% for role in roles %}
                             <option value="{{ role.id }}">{{ role.name }}</option>
                         {% endfor %}
                     </select>
+
 
                     <input class="buttons" type="submit" value="Assign to Project">
                 </form>
@@ -97,7 +97,6 @@ function handleEmailSearchInput(event) {
                 document.getElementById("email-search-input").value = user.email;
                 document.getElementById("user_id").value = user.id;
                 document.getElementById("email").value = user.email;
-                document.getElementById("role").value = user.role_id || "";
                 resultsContainer.style.display = "none";
             };
             resultsContainer.appendChild(item);

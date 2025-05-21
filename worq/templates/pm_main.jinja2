@@ -10,15 +10,21 @@
           <div class="form-inner">
             <input class="controls" type="text" id="name" name="name" placeholder="Name" required>
 
-            <div class="date-group">
-              <input type="date" id="startdate" name="startdate" required>
-              <input type="date" id="enddate" name="enddate">
-            </div>
+            <div class="add-group">
+                    <label for="startdate">Start Date</label>
+                    <input type="date" id="startdate" name="startdate">
+              </div>
+
+
+              <div class="add-group">
+                    <label for="finished_date">End Date</label>
+                    <input type="date" id="enddate" name="enddate">
+                </div>
 
             <textarea class="controls full-width" id="description" name="description" placeholder="Description"></textarea>
 
             <div class="icon-preview full-width">
-              <button class="buttons" type="button" id="submit-button">Create</button>
+              <button class="buttons" type="submit" id="submit-button">Create</button>
             </div>
           </div>
         </form>

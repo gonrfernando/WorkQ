@@ -19,24 +19,29 @@ def task_creation_view(request):
         form_type = request.POST.get('form_type')
 
         if form_type == 'add_user':
-            user_id_selected = request.POST.get('user_id')
-            if user_id_selected and active_project_id:
-                try:
-                    exists = dbsession.query(UsersProjects).filter_by(
-                        user_id=user_id_selected, project_id=active_project_id
-                    ).first()
-                    if not exists:
-                        new_user_project = UsersProjects(user_id=user_id_selected, project_id=active_project_id)
-                        dbsession.add(new_user_project)
-                        dbsession.flush()
-                except SQLAlchemyError as e:
-                    print(f"[ERROR] Error al asignar usuario: {e}")
-                    return Response("Error al asignar usuario al proyecto", status=500)
+                user_id_selected = request.POST.get('user_id')
+                role_id_selected = request.POST.get('role_id')  # <-- Nuevo: obtener el rol
+                if user_id_selected and active_project_id:
+                    try:
+                        exists = dbsession.query(UsersProjects).filter_by(
+                            user_id=user_id_selected, project_id=active_project_id
+                        ).first()
+                        if not exists:
+                            new_user_project = UsersProjects(
+                                user_id=user_id_selected,
+                                project_id=active_project_id,
+                                role_id=role_id_selected  # <-- Nuevo: asignar rol
+                            )
+                            dbsession.add(new_user_project)
+                            dbsession.flush()
+                    except SQLAlchemyError as e:
+                        print(f"[ERROR] Error al asignar usuario: {e}")
+                        return Response("Error al asignar usuario al proyecto", status=500)
+
 
         elif form_type == 'add_task':
             title = request.POST.get('title')
             description = request.POST.get('description')
-            started_date = request.POST.get('started_date')
             finished_date = request.POST.get('finished_date')
             priority = request.POST.get('priority')
             requirements = request.POST.getall('requirements')
@@ -47,7 +52,6 @@ def task_creation_view(request):
                 description=description,
                 project_id=active_project_id,
                 creation_date=datetime.datetime.utcnow(),
-                started_date=datetime.datetime.strptime(started_date, '%Y-%m-%dT%H:%M'),
                 finished_date=datetime.datetime.strptime(finished_date, '%Y-%m-%dT%H:%M') if finished_date else None,
                 priority=int(priority) if priority else None
             )

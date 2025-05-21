@@ -7,34 +7,17 @@ from sqlalchemy.exc import SQLAlchemyError
 from pyramid.httpexceptions import HTTPFound
 from worq.models.models import UsersProjects
 
-@view_config(route_name='pm_main', renderer='templates/pm_main.jinja2', request_method='GET')
-def pm_main_view(request):
-    session = request.session
-    if not 'user_name' in session:
-        return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
-    error = request.params.get('error')
-    if error:
-            return {'message' : error }
-    active_project_id = session.get("project_id")
-    user_name = session.get('user_name')
-    user_email = session.get('user_email')
-    user_role = session.get('user_role')
-    user_id = session.get('user_id')
-    project_ids = request.dbsession.query(UsersProjects).filter_by(user_id=user_id).all()
-    json_projects = [{"id": project.project_id, "name": project.project.name} for project in project_ids]
-    if user_role == "user" :
-        return HTTPFound(location=request.route_url('task_view', _query={'error': 'You do not have permision'}))
-    return {
-        "projects": json_projects,
-        "active_project_id": active_project_id,
-        'user_name': user_name,
-        'user_email': user_email,
-        'user_role': user_role,
-        'active_tab': "pm"
-    }
-
 @view_config(route_name='pm_main', request_method='POST', renderer='json')
 def create_project(request):
+    session = request.session
+    if 'user_name' not in session:
+        return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+
+    dbsession = request.dbsession
+    active_project_id = session.get("project_id")
+    user_id = session.get('user_id')
+
+    
     try:
         if not request.body:
             return Response("Empty request body", content_type='text/plain', status=400)
