@@ -38,8 +38,8 @@ def my_view(request):
     return {
         "projects": json_projects,
         "tasks": json_tasks,
-        #'user_name': user_name,
-        #'user_email': user_email,
-        #'user_role': user_role
+        'user_name': user_name,
+        'user_email': user_email,
+        'user_role': user_role
     }
 
