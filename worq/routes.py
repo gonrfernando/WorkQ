@@ -15,7 +15,7 @@ def includeme(config):
     config.add_route('set_active_project', '/set_active_project')
     config.add_route('calendar', '/calendar')
     config.add_route('stats_view', '/stats_view')
-    config.add_route('actions_view', '/actions_view')
+    config.add_route('action_view', '/action_view')
     config.add_route('save_active_tab', '/save_active_tab')
     config.add_route('get_active_tab', '/get_active_tab')
     config.add_route('upload_file', '/upload_file')
