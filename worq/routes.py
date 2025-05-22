@@ -14,3 +14,6 @@ def includeme(config):
     config.add_route('task_view', '/task_view')
     config.add_route('set_active_project', '/set_active_project')
     config.add_route('calendar', '/calendar')
+    config.add_route('request_management', '/request_management')
+    config.add_route('submit_request', '/submit-request')
+    config.add_route('handle_request_action', '/handle-request-action')

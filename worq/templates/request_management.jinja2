@@ -3,27 +3,10 @@
 {% block tasks %}
 <div class="container-fluid">
     <div class="project-bar row">
-        <div class="col-6 bar-wrapper">
-            <div class="project-selector-bar dropdown">
-                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
-                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-                    {% for project in projects %}
-                        <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        <div class="col-5"></div>
         <div class="view_button col-1">
-            <span id="toggle-view" class="material-icons btn" title="Change task display">view_list</span>
+            <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
         </div>
     </div>
-    {% if tasks|length == 0 %}
-        <div class="alert alert-info mt-4" role="alert">
-            No tasks found for this project.
-        </div>
-    {% endif %}
-
     {% for task in tasks %}
         {% if loop.index0 % 4 == 0 %}
         <div class="task-container card-view row gx-5">
@@ -102,33 +85,45 @@
             </div>
         </div>
     </div>
+    <style>
+    .modal-body-scrollable {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .request-accepted {
+        background-color: #d4edda; /* Verde claro */
+        border-left: 5px solid #28a745;
+    }
+
+    .request-rejected {
+        background-color: #f8d7da; /* Rosa claro */
+        border-left: 5px solid #dc3545;
+    }
+    </style>
 
     <!-- Modal de configuración -->
     <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" action="{{ request.route_url('submit_request') }}">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="settingsModalLabel">Task Settings Request</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="task_id" id="modal-task-id" value="">
-                        <div class="mb-3">
-                            <label for="action-type" class="form-label">Action Type</label>
-                            <input type="text" class="form-control" id="action-type" name="action_type" placeholder="Enter action type">
-                        </div>
-                        <div class="mb-3">
-                            <label for="request-reason" class="form-label">Request Reason</label>
-                            <textarea class="form-control" id="request-reason" name="reason" placeholder="Enter reason"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Send Request</button>
-                    </div>
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Task Requests</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </form>
+                <div class="modal-body modal-body-scrollable">
+                    <input type="hidden" name="task_id" id="modal-task-id" value="">
+                    <div class="mb-3">
+                        <div id="task-requests-container">
+                            <!-- Requests se llenan con JS desde la tarea seleccionada -->
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -145,7 +140,41 @@
         // Guardar task_id oculto para usarlo en el formulario del modal de configuración
         document.getElementById('modal-task-id').value = taskId;
 
-        // Mostrar el modal de tarea
+        // Buscar la tarea desde la variable `tasks`
+        const tasks = {{ tasks | tojson }};
+        const selectedTask = tasks.find(t => t.id == taskId);
+
+        if (selectedTask) {
+            // Llenar el contenedor de requests
+            const container = document.getElementById('task-requests-container');
+            container.innerHTML = '';
+
+            selectedTask.requests.forEach(req => {
+                let statusClass = '';
+                if (req.accepted_by) {
+                    statusClass = 'request-accepted';
+                } else if (req.rejected_by) {
+                    statusClass = 'request-rejected';
+                }
+
+                const requestHtml = `
+                    <div class="border p-2 mb-2 ${statusClass}">
+                        <strong>Action:</strong> ${req.action_type}<br>
+                        <strong>Status:</strong> ${req.status}<br>
+                        <strong>Reason:</strong> ${req.reason}<br>
+                        <strong>Date:</strong> ${req.date}<br>
+                        ${!req.accepted_by && !req.rejected_by ? `
+                            <button class="btn btn-success btn-sm" onclick="handleRequestAction(${req.id}, 'accept')">Accept</button>
+                            <button class="btn btn-danger btn-sm" onclick="handleRequestAction(${req.id}, 'reject')">Reject</button>
+                        ` : ''}
+                    </div>
+                `;
+                container.innerHTML += requestHtml;
+            });
+        } else {
+            document.getElementById('task-requests-container').innerHTML = "<p>No requests for this task.</p>";
+        }
+
         document.getElementById('task-modal').style.display = 'block';
     }
 
@@ -172,6 +201,25 @@
             }
         });
     });
+
+    function handleRequestAction(requestId, action) {
+        fetch("/handle-request-action", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": "{{ request.session.get_csrf_token() }}"
+            },
+            body: JSON.stringify({ request_id: requestId, action: action })
+        })
+        .then(response => {
+            if (response.ok) {
+                alert(`Request ${action}ed successfully`);
+                location.reload();  // Recarga para ver los cambios
+            } else {
+                alert("Something went wrong.");
+            }
+        });
+    }
 </script>
 
 {% endblock tasks %}
