@@ -57,6 +57,14 @@
     padding: 0;
 }
 
+#add-task{
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 0.5rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 20%;
+}
+
 #toggle-view{
     background-color: #f9f9f9;
     border-radius: 6px;
@@ -142,7 +150,7 @@
     background-color: #ff4d4d;
 }
 
-.task-priority.avg {
+.task-priority.average {
     background-color: #ffc107; 
 }
 

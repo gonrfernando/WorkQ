@@ -95,6 +95,16 @@
   margin-bottom: 16px;
 }
 
+.date-button {
+  width: 30%;
+  border: 1px solid #017bab;
+  margin-bottom: 15px;
+  padding: 11px 11px;
+  background: #EEEEEE;
+  font-size: 14px;
+  font-weight: bold;
+}
+
 .TCreation1 {
   max-width: 3000px;
   padding-left: clamp(1rem, 5vw, 3rem);
@@ -141,7 +151,6 @@
 
 .add-tasks {
   width: 600px;
-  max-height: 400px;
   background: #fff;
   margin: auto;
   padding: 20px 30px;
@@ -158,6 +167,39 @@
   border: 10px solid #465158; 
   border-radius: 5px;
 }
+
+.task-priority.high {
+    background-color: #ff4d4d;
+}
+
+.task-priority.average {
+    background-color: #ffc107; 
+}
+
+.task-priority.low {
+    background-color: #28a745; 
+}
+
+.task-priority.none {
+    background-color: #28a745; 
+}
+
+/* Alinea input y delete en línea */
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#delete-req {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 0.5rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 10%;
+}
+
 
 .outside-task {
   border-radius: 10px;
@@ -242,7 +284,6 @@
 .scrollable-task-form {
   max-height: 500px; /* Puedes ajustar según lo que necesites */
   overflow: auto;
-  padding-right: 10px;
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: #ffffff;

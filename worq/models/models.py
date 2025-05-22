@@ -84,6 +84,18 @@ class Status(Base):
     requests: Mapped[List['Requests']] = relationship('Requests', back_populates='status')
 
 
+class TaskPriorities(Base):
+    __tablename__ = 'task_priorities'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='task_priorities_pkey'),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    priority: Mapped[str] = mapped_column(String(100))
+
+    tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='priority')
+
+
 class Types(Base):
     __tablename__ = 'types'
     __table_args__ = (
@@ -259,6 +271,7 @@ class ProjectNotifications(Base):
 class Tasks(Base):
     __tablename__ = 'tasks'
     __table_args__ = (
+        ForeignKeyConstraint(['priority_id'], ['task_priorities.id'], name='priority_fk'),
         ForeignKeyConstraint(['project_id'], ['projects.id'], name='project'),
         PrimaryKeyConstraint('id', name='tasks_pkey')
     )
@@ -268,9 +281,10 @@ class Tasks(Base):
     title: Mapped[str] = mapped_column(String)
     description: Mapped[str] = mapped_column(Text)
     creation_date: Mapped[datetime.datetime] = mapped_column(DateTime)
+    priority_id: Mapped[int] = mapped_column(Integer)
     finished_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
-    priority: Mapped[Optional[int]] = mapped_column(Integer)
 
+    priority: Mapped['TaskPriorities'] = relationship('TaskPriorities', back_populates='tasks')
     project: Mapped['Projects'] = relationship('Projects', back_populates='tasks')
     requests: Mapped[List['Requests']] = relationship('Requests', back_populates='task')
     task_files: Mapped[List['TaskFiles']] = relationship('TaskFiles', back_populates='task')

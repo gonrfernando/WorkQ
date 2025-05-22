@@ -2,77 +2,118 @@
 
 {% block add_task %}
 <section class="creation1">
-    <section class="TCreation2">
-        <div class="project-selector-bar dropdown">
-            <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
-            <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-                {% for project in projects %}
-                    <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
-                {% endfor %}
+  <section class="TCreation2">
+    <div class="project-selector-bar dropdown">
+      <button class="btn dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton"
+              data-bs-toggle="dropdown"
+              data-bs-container="body"
+              aria-haspopup="true"
+              aria-expanded="false">
+        {{ active_project.name }}
+      </button>
+      <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+        {% for project in projects %}
+          <a class="dropdown-item dropdown-project-item"
+             id="{{ project.id }}">{{ project.name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <section class="TCreation3">
+      <div class="outside-task">
+
+        <!-- FORMULARIO DE TAREA -->
+        <div class="scrollable-task-form">
+          <form method="POST" class="add-tasks">
+            <h5 class="task-header-container">
+                <span class="task-header">Add Task</span>
+
+                <!-- Select de Priority junto al título -->
+                <div class="priority-select">
+                    <label for="priority-select">Priority</label>
+                    <select id="priority-select" name="priority-select" class="controls">
+                    {% for p in priorities %}
+                        <option value="{{ p.id }}" class="priority-{{ p.id }}">
+                        {{ p.priority }}
+                        </option>
+                    {% endfor %}
+                    </select>
+                    <!-- Campo oculto para enviar prioridad -->
+                    <input type="hidden" name="priority" id="priority-hidden" value="{{ priorities[0].id }}">
+                </div>
+                </h5>
+
+
+            <input type="hidden" name="form_type" value="add_task">
+
+            <input class="controls" type="text" id="title" name="title" placeholder="Title" required>
+            <input class="controls" type="text" id="description" name="description" placeholder="Description" required>
+
+            <div id="requirements-container">
+              <div class="requirement-item">
+                <input class="controls requirement-input"
+                       type="text"
+                       name="requirements"
+                       placeholder="Requirement">
+                <span class="material-symbols-outlined btn"
+                      id="delete-req"
+                      title="Delete requirement">
+                  delete
+                </span>
+              </div>
             </div>
+
+            <button id="add-req" class="buttons" type="button">+ Add Requirement</button>
+
+            <div class="add-group">
+              <label for="finished_date">Due Date</label>
+              <input class="date-button"
+                     type="datetime-local"
+                     id="finished_date"
+                     name="finished_date">
+              <input class="buttons" type="submit" value="Submit Task">
+            </div>
+          </form>
         </div>
 
-        <section class="TCreation3">
-            <div class="outside-task">
+        <!-- FORMULARIO DE USUARIO (sin cambios) -->
+        <form method="POST" class="add-users">
+          <h5>Add User</h5>
+          <input type="hidden" name="form_type" value="add_user">
+          <input type="hidden" id="user_id" name="user_id">
+          <div class="search-bar2">
+            <input type="text"
+                   id="email-search-input"
+                   placeholder="Search User Email"
+                   oninput="handleEmailSearchInput(event)">
+            <div id="email-autocomplete-results"
+                 class="add-user-autocomplete-results"></div>
+          </div>
+          <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
+          <select class="controls" id="role" name="role_id" required>
+            <option value="" disabled selected>Select a Role</option>
+            {% for role in roles %}
+              <option value="{{ role.id }}">{{ role.name }}</option>
+            {% endfor %}
+          </select>
+          <input class="buttons" type="submit" value="Assign to Project">
+        </form>
 
-                <!-- FORMULARIO DE TAREA -->
-              <div class="scrollable-task-form">
-                <form method="POST" class="add-tasks">
-                    <h5>Add Task</h5>
-                    <input type="hidden" name="form_type" value="add_task">
-
-                    <input class="controls" type="text" id="title" name="title" placeholder="Title" required>
-                    <input class="controls" type="text" id="description" name="description" placeholder="Description" required>
-
-                    <div id="requirements-container">
-                        <input class="controls requirement-input" type="text" name="requirements" placeholder="Requirement">
-                    </div>
-                    <button type="button" onclick="addRequirementInput()">+ Add Requirement</button>
-
-                    <div class="add-group">
-                        <label for="finished_date">Due Date</label>
-                        <input type="datetime-local" id="finished_date" name="finished_date">
-                        <input type="hidden" name="priority" value="1">
-                        <input class="buttons" type="submit" value="Submit Task">
-                    </div>
-                </form>
-              </div>
-
-                <!-- FORMULARIO DE USUARIO -->
-                <form method="POST" class="add-users">
-                    <h5>Add User</h5>
-                    <input type="hidden" name="form_type" value="add_user">
-                    <input type="hidden" id="user_id" name="user_id">
-
-                    <div class="search-bar2">
-                        <input type="text" id="email-search-input" placeholder="Search User Email" oninput="handleEmailSearchInput(event)">
-                        <div id="email-autocomplete-results" class="add-user-autocomplete-results"></div>
-                    </div>
-
-                    <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
-                    <select class="controls" id="role" name="role_id" required>
-                        <option value="" disabled selected>Select a Role</option>
-                        {% for role in roles %}
-                            <option value="{{ role.id }}">{{ role.name }}</option>
-                        {% endfor %}
-                    </select>
-
-
-                    <input class="buttons" type="submit" value="Assign to Project">
-                </form>
-
-            </div>
-        </section>
-
-        <br>
-        <input class="buttons" type="button" value="Back" onclick="history.back();">
-
+      </div>
     </section>
+
+    <br>
+    <input class="buttons" type="button" value="Back" onclick="history.back();">
+
+  </section>
 </section>
 
 <script>
 const users = {{ users | tojson }};
 
+// Autocompletado de usuarios (sin cambios)
 function handleEmailSearchInput(event) {
     const query = event.target.value.toLowerCase();
     const resultsContainer = document.getElementById("email-autocomplete-results");
@@ -105,14 +146,51 @@ function handleEmailSearchInput(event) {
         resultsContainer.style.display = "none";
     }
 }
+
+// Agregar nuevo input de requisito
 function addRequirementInput() {
     const container = document.getElementById('requirements-container');
+
+    const item = document.createElement('div');
+    item.className = 'requirement-item';
+
     const input = document.createElement('input');
     input.className = 'controls requirement-input';
     input.type = 'text';
     input.name = 'requirements';
     input.placeholder = 'Requirement';
-    container.appendChild(input);
+
+    const del = document.createElement('span');
+    del.className = 'material-symbols-outlined btn delete-req';
+    del.title = 'Delete requirement';
+    del.textContent = 'delete';
+
+    item.appendChild(input);
+    item.appendChild(del);
+    container.appendChild(item);
 }
+
+// Eliminar requisito (delegado)
+document.getElementById('requirements-container').addEventListener('click', function(e) {
+    if (e.target.classList.contains('delete-req')) {
+        const item = e.target.closest('.requirement-item');
+        if (item) item.remove();
+    }
+});
+
+document.getElementById('requirements-container')
+  .addEventListener('click', function(e) {
+    if (e.target.id === 'delete-req') {
+      const item = e.target.closest('.requirement-item');
+      if (item) item.remove();
+    }
+});
+document.getElementById('add-req')
+  .addEventListener('click', addRequirementInput);
+
+// — NUEVO: sincronizar el select con el hidden
+const sel = document.getElementById('priority-select');
+const hid = document.getElementById('priority-hidden');
+sel.addEventListener('change', () => hid.value = sel.value);
 </script>
 {% endblock %}
