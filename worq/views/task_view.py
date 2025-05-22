@@ -45,7 +45,8 @@ def my_view(request):
         "title": task.title,
         "description": task.description,
         "priority": priorities.get(task.priority, "None"),
-        "due_date": task.finished_date,
+        "due_date": task.finished_date.strftime('%Y-%m-%d %H:%M:%S') if task.finished_date else "N/A",
+        "project_id": task.project_id, 
         "requirements": [
             {
                 "id": req.id,

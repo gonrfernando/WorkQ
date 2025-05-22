@@ -90,6 +90,15 @@
         max-height: 400px;
         overflow-y: auto;
     }
+    .request-accepted {
+        background-color: #d4edda; /* Verde claro */
+        border-left: 5px solid #28a745;
+    }
+
+    .request-rejected {
+        background-color: #f8d7da; /* Rosa claro */
+        border-left: 5px solid #dc3545;
+    }
     </style>
 
     <!-- Modal de configuración -->
@@ -131,7 +140,41 @@
         // Guardar task_id oculto para usarlo en el formulario del modal de configuración
         document.getElementById('modal-task-id').value = taskId;
 
-        // Mostrar el modal de tarea
+        // Buscar la tarea desde la variable `tasks`
+        const tasks = {{ tasks | tojson }};
+        const selectedTask = tasks.find(t => t.id == taskId);
+
+        if (selectedTask) {
+            // Llenar el contenedor de requests
+            const container = document.getElementById('task-requests-container');
+            container.innerHTML = '';
+
+            selectedTask.requests.forEach(req => {
+                let statusClass = '';
+                if (req.accepted_by) {
+                    statusClass = 'request-accepted';
+                } else if (req.rejected_by) {
+                    statusClass = 'request-rejected';
+                }
+
+                const requestHtml = `
+                    <div class="border p-2 mb-2 ${statusClass}">
+                        <strong>Action:</strong> ${req.action_type}<br>
+                        <strong>Status:</strong> ${req.status}<br>
+                        <strong>Reason:</strong> ${req.reason}<br>
+                        <strong>Date:</strong> ${req.date}<br>
+                        ${!req.accepted_by && !req.rejected_by ? `
+                            <button class="btn btn-success btn-sm" onclick="handleRequestAction(${req.id}, 'accept')">Accept</button>
+                            <button class="btn btn-danger btn-sm" onclick="handleRequestAction(${req.id}, 'reject')">Reject</button>
+                        ` : ''}
+                    </div>
+                `;
+                container.innerHTML += requestHtml;
+            });
+        } else {
+            document.getElementById('task-requests-container').innerHTML = "<p>No requests for this task.</p>";
+        }
+
         document.getElementById('task-modal').style.display = 'block';
     }
 
@@ -158,46 +201,25 @@
             }
         });
     });
-</script>
-<script>
-function openTaskModalFromCard(element) {
-    const taskId = element.getAttribute('data-task-id');
-    if (!taskId) {
-        console.warn("No task ID found.");
-        return;
+
+    function handleRequestAction(requestId, action) {
+        fetch("/handle-request-action", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": "{{ request.session.get_csrf_token() }}"
+            },
+            body: JSON.stringify({ request_id: requestId, action: action })
+        })
+        .then(response => {
+            if (response.ok) {
+                alert(`Request ${action}ed successfully`);
+                location.reload();  // Recarga para ver los cambios
+            } else {
+                alert("Something went wrong.");
+            }
+        });
     }
-
-    document.getElementById('modal-task-id').value = taskId;
-
-    // Buscar la tarea desde la variable `tasks`
-    const task = {{ tasks | tojson }};
-    const selectedTask = task.find(t => t.id == taskId);
-
-    if (selectedTask) {
-        // Llenar el contenedor de requests
-        const container = document.getElementById('task-requests-container');
-        container.innerHTML = '';
-
-        if (selectedTask.requests && selectedTask.requests.length > 0) {
-            selectedTask.requests.forEach(req => {
-                const requestHtml = `
-                    <div class="border p-2 mb-2">
-                        <strong>Action:</strong> ${req.action_type}<br>
-                        <strong>Status:</strong> ${req.status}<br>
-                        <strong>Reason:</strong> ${req.reason}<br>
-                        <strong>Date:</strong> ${req.date}
-                    </div>
-                `;
-                container.innerHTML += requestHtml;
-            });
-        } else {
-            container.innerHTML = "<p>No requests for this task.</p>";
-        }
-    }
-
-    document.getElementById('task-modal').style.display = 'block';
-}
 </script>
-
 
 {% endblock tasks %}
