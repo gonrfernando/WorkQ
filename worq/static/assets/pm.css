@@ -185,7 +185,7 @@
     background-color: #28a745; 
 }
 
-.task-item {
+.task-items {
   display: flex;
   align-items: center;
   gap: 8px;

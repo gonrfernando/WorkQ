@@ -31,17 +31,19 @@
                 <span class="task-header">Add Task</span>
 
                 <!-- Select de Priority junto al título -->
-                <div class="priority-select">
-                    <label for="priority-select">Priority</label>
-                    <select id="priority-select" name="priority-select" class="controls">
-                    {% for p in priorities %}
-                        <option value="{{ p.id }}" class="priority-{{ p.id }}">
-                        {{ p.priority }}
-                        </option>
-                    {% endfor %}
-                    </select>
-                    <!-- Campo oculto para enviar prioridad -->
-                    <input type="hidden" name="priority" id="priority-hidden" value="{{ priorities[0].id }}">
+                <div class="position-absolute top-0 end-0 p-2 d-flex align-items-center gap-2">
+                  <div class="priority-select">
+                      <label for="priority-select">Priority</label>
+                      <select id="priority-select" name="priority-select" class="controls">
+                      {% for p in priorities %}
+                          <option value="{{ p.id }}" class="priority-{{ p.id }}">
+                          {{ p.priority }}
+                          </option>
+                      {% endfor %}
+                      </select>
+                      <!-- Campo oculto para enviar prioridad -->
+                      <input type="hidden" name="priority" id="priority-hidden" value="{{ priorities[0].id }}">
+                  </div>
                 </div>
             </h5>
 
@@ -52,7 +54,7 @@
 
             <!-- Requerimientos -->
             <div id="requirements-container">
-              <div class="task-item">
+              <div class="task-items">
                 <input class="controls requirement-input" type="text" name="requirements" placeholder="Requirement">
                 <span class="material-symbols-outlined btn delete-req" title="Delete requirement">delete</span>
               </div>
@@ -61,7 +63,7 @@
 
             <!-- Colaboradores -->
             <div id="collaborators-container">
-              <div class="task-item">
+              <div class="task-items">
                 <input class="controls collaborator-input" type="text" name="collaborators" placeholder="Collaborator">
                 <span class="material-symbols-outlined btn delete-collab" title="Delete collaborator">delete</span>
               </div>
