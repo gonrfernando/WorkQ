@@ -43,29 +43,30 @@
                     <!-- Campo oculto para enviar prioridad -->
                     <input type="hidden" name="priority" id="priority-hidden" value="{{ priorities[0].id }}">
                 </div>
-                </h5>
-
+            </h5>
 
             <input type="hidden" name="form_type" value="add_task">
 
             <input class="controls" type="text" id="title" name="title" placeholder="Title" required>
             <input class="controls" type="text" id="description" name="description" placeholder="Description" required>
 
+            <!-- Requerimientos -->
             <div id="requirements-container">
-              <div class="requirement-item">
-                <input class="controls requirement-input"
-                       type="text"
-                       name="requirements"
-                       placeholder="Requirement">
-                <span class="material-symbols-outlined btn"
-                      id="delete-req"
-                      title="Delete requirement">
-                  delete
-                </span>
+              <div class="task-item">
+                <input class="controls requirement-input" type="text" name="requirements" placeholder="Requirement">
+                <span class="material-symbols-outlined btn delete-req" title="Delete requirement">delete</span>
               </div>
             </div>
-
             <button id="add-req" class="buttons" type="button">+ Add Requirement</button>
+
+            <!-- Colaboradores -->
+            <div id="collaborators-container">
+              <div class="task-item">
+                <input class="controls collaborator-input" type="text" name="collaborators" placeholder="Collaborator">
+                <span class="material-symbols-outlined btn delete-collab" title="Delete collaborator">delete</span>
+              </div>
+            </div>
+            <button id="add-collab" class="buttons" type="button">+ Add Collaborator</button>
 
             <div class="add-group">
               <label for="finished_date">Due Date</label>
@@ -152,7 +153,7 @@ function addRequirementInput() {
     const container = document.getElementById('requirements-container');
 
     const item = document.createElement('div');
-    item.className = 'requirement-item';
+    item.className = 'task-item';
 
     const input = document.createElement('input');
     input.className = 'controls requirement-input';
@@ -170,23 +171,52 @@ function addRequirementInput() {
     container.appendChild(item);
 }
 
-// Eliminar requisito (delegado)
-document.getElementById('requirements-container').addEventListener('click', function(e) {
-    if (e.target.classList.contains('delete-req')) {
-        const item = e.target.closest('.requirement-item');
-        if (item) item.remove();
-    }
-});
+// Agregar nuevo input de colaborador
+function addCollaboratorInput() {
+    const container = document.getElementById('collaborators-container');
 
+    const item = document.createElement('div');
+    item.className = 'task-item';
+
+    const input = document.createElement('input');
+    input.className = 'controls collaborator-input';
+    input.type = 'text';
+    input.name = 'collaborators';
+    input.placeholder = 'Collaborator';
+
+    const del = document.createElement('span');
+    del.className = 'material-symbols-outlined btn delete-collab';
+    del.title = 'Delete collaborator';
+    del.textContent = 'delete';
+
+    item.appendChild(input);
+    item.appendChild(del);
+    container.appendChild(item);
+}
+
+// Eliminar requisito (delegado)
 document.getElementById('requirements-container')
   .addEventListener('click', function(e) {
-    if (e.target.id === 'delete-req') {
-      const item = e.target.closest('.requirement-item');
+    if (e.target.classList.contains('delete-req')) {
+      const item = e.target.closest('.task-item');
       if (item) item.remove();
     }
 });
+
+// Eliminar colaborador (delegado)
+document.getElementById('collaborators-container')
+  .addEventListener('click', function(e) {
+    if (e.target.classList.contains('delete-collab')) {
+      const item = e.target.closest('.task-item');
+      if (item) item.remove();
+    }
+});
+
+// Eventos de botones + Add
 document.getElementById('add-req')
   .addEventListener('click', addRequirementInput);
+document.getElementById('add-collab')
+  .addEventListener('click', addCollaboratorInput);
 
 // — NUEVO: sincronizar el select con el hidden
 const sel = document.getElementById('priority-select');

@@ -151,6 +151,7 @@
 
 .add-tasks {
   width: 600px;
+  /*raw content*/
   background: #fff;
   margin: auto;
   padding: 20px 30px;
@@ -184,22 +185,21 @@
     background-color: #28a745; 
 }
 
-/* Alinea input y delete en línea */
-.requirement-item {
+.task-item {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
 
-#delete-req {
+.delete-req,
+.delete-collab {
   background-color: #f9f9f9;
   border-radius: 6px;
   padding: 0.5rem 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 10%;
 }
-
 
 .outside-task {
   border-radius: 10px;
