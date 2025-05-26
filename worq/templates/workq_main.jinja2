@@ -34,6 +34,7 @@
       <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
       <script src="{{request.static_url('worq:static/assets/sidebar-scripts.js')}}"></script>
       <script src="{{request.static_url('worq:static/assets/task_view.js')}}"></script>
+      <script src="{{request.static_url('worq:static/assets/pm_main.js')}}"></script>
     {% endblock %}
       
 
@@ -76,10 +77,10 @@
       {% if user_role in ['superadmin', 'admin'] %}
       <span class="material-symbols-outlined show-popup toolbar-add-user">person_add</span>
       {% endif %}
-      <div class="notification">
+      <div class="notification-icon">
         <span class="toolbar-icon material-icons-round">notifications</span>
       </div>
-      <div class="calendar">
+      <div class="calendar-icon">
         <span class="toolbar-icon material-icons-round">calendar_today</span>
       </div>
       <span class="toolbar-separator"></span>
@@ -128,6 +129,18 @@
 
         {% endif %}
       {% endif %}
+      {% if request.matched_route.name == 'calendar' %}
+        <style>
+          #navigation {
+            display: none;
+          }
+        </style>
+        <div id="calendar-content">
+          {% block mainContent %}
+          
+          {% endblock mainContent %}
+        </div>
+      {% else %}
       <div class="container" id="navigation">
         <ul class="nav nav-tabs" id="myTabs" role="tablist">
 
@@ -152,31 +165,29 @@
             {% block content %}
             {% endblock content %}
             <!-- Tab 1 -->
-            {% if user_role in ['superadmin', 'admin', 'projectmanager'] %}
             <div class="tab-pane fade {% if user_role == 'superadmin' or user_role == 'admin' or user_role == 'projectmanager' %}show active{% endif %}" id="pm" role="tabpanel" aria-labelledby="pm-tab">
                 {% block add_task %}
                 {% endblock add_task %}
             </div>
-            {% endif %}
+
             <!-- Tab 2 -->
-            <div class="tab-pane fade {% if user_role == 'user' %}show active{% endif %}" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
+            <div class="tab-pane fade show active" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
                 {% block tasks %}
                 {% endblock tasks %}
             </div>
             <!-- Tab 3 -->
-            <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
-                <h3>Stats View</h3>
-                <p>Stats View</p>
+            <div class="tab-pane fade show active" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+                {% block stats %}
+                {% endblock stats %}
             </div>
             <!-- Tab 4 -->
-            {% if user_role in ['superadmin', 'admin'] %}
-            <div class="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="actions-tab">
-                <h3>Actions History</h3>
-                <p>Actions History View</p>
+            <div class="tab-pane fade show active" id="actions" role="tabpanel" aria-labelledby="actions-tab">
+                
             </div>
-            {% endif %}
+        
         </div>
       </div>
+      {% endif %}
     </div>
     <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -292,6 +303,51 @@
             });
           });
         });
+        // Mostrar el modal si hay un mensaje de error
+          document.addEventListener('DOMContentLoaded', function () {
+            const message = "{{ message|default('') }}";
+            if (message && message !== "None") {
+              const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+              errorModal.show();
+            }
+          });
       </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const calendarIcon = document.querySelector('.calendar-icon .toolbar-icon');
+        // Redirect to the calendar URL when the calendar icon is clicked
+        calendarIcon.addEventListener('click', function () {
+          window.location.href = "{{ request.route_url('calendar') }}";
+        });
+        const tabs = document.querySelectorAll('.nav-link[data-bs-toggle="tab"]');
+        // Recibe el tab activo desde el backend (por ejemplo, 'tasks', 'project', etc.)
+        const activeTabId = "{{ active_tab|default('') }}-tab";
+
+        // Marcar el tab activo según el valor recibido
+        tabs.forEach(tab => {
+          if (tab.id === activeTabId) {
+            tab.classList.add('active');
+          } else {
+            tab.classList.remove('active');
+          }
+          tab.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            // Define las rutas para cada tab
+            const tabRoutes = {
+              'pm-tab': '/pm_main',
+              'tasks-tab': '/task_view',
+              'stats-tab': '/stats_view',
+              'actions-tab': '/actions_view'
+            };
+
+            // Redirige si existe una ruta asignada
+            if (tabRoutes[this.id]) {
+              window.location.href = tabRoutes[this.id];
+            }
+          });
+        });
+      });
+    </script>
   </body>
 </html>

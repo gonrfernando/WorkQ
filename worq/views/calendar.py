@@ -38,7 +38,13 @@ def my_view(request):
         for task in tasks:
             if task.finished_date:
                 day = task.finished_date.day
-                tasks_by_day.setdefault(day, []).append(task)
+                tasks_by_day.setdefault(day, []).append({
+                    "title": task.title,
+                    "decription": task.description,
+                    "finished_date": task.finished_date.isoformat(),
+                    "priority": task.priority
+                })
+            
 
         return {
             "projects": json_projects,

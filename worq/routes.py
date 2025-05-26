@@ -17,3 +17,8 @@ def includeme(config):
     config.add_route('request_management', '/request_management')
     config.add_route('submit_request', '/submit-request')
     config.add_route('handle_request_action', '/handle-request-action')
+    config.add_route('stats_view', '/stats_view')
+    config.add_route('actions_view', '/actions_view')
+    config.add_route('save_active_tab', '/save_active_tab')
+    config.add_route('get_active_tab', '/get_active_tab')
+    config.add_route('upload_file', '/upload_file')

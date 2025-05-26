@@ -13,6 +13,8 @@ def my_view(request):
 
         # Datos del usuario desde la sesión
         user_id = session.get('user_id')
+        error = request.params.get('error')
+        active_project_id = session.get("project_id")
         user_name = session.get('user_name')
         user_email = session.get('user_email')
         user_role = session.get('user_role')
@@ -51,7 +53,8 @@ def my_view(request):
             'user_name': user_name,
             'user_email': user_email,
             'user_role': user_role,
-            'current_route': request.path
+            'current_route': request.path,
+            'message': error if error else None
         }
 
     except Exception as e:

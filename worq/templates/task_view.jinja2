@@ -15,7 +15,8 @@
         </div>
         <div class="col-5"></div>
         <div class="view_button col-1">
-            <span id="toggle-view" class="material-icons btn" title="Change task display">view_list</span>
+            <a href="{{ request.route_url('add_task') }}" title="Add task view" id="add-task" class="material-symbols-outlined btn">add</a>
+            <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
         </div>
     </div>
     {% if tasks|length == 0 %}
@@ -83,10 +84,13 @@
             <div class="task-details-modal">
                 <div class="task-requirements-modal">
                     <h4>Requirements</h4>
-                    <div id="requirements-list"></div>
+                    <div id="requirements-list">
+                        <!-- Requirements will be dynamically added here -->
+                    </div>
                     <div class="task-files-modal">
                         <input type="file" id="file-input" multiple>
                     </div>
+                    </form>
                 </div>
                 <div class="task-stats-modal"></div>
             </div>
