@@ -13,7 +13,8 @@
         {% endif %}
             <div class="task-spacer col-3">
                 <div class="task-item" data-task-id="{{ task.id }}" onclick="openTaskModalFromCard(this)">
-                    <h3 class="task-title">{{ task.title }}</h3>
+                    <h6 class="project-name">Project: {{ task.project_name }}</h6>
+                    <h4 class="task-title">{{ task.title }}</h4>
                     <div class="task-element task-subheader row">
                         <p class="priority col-4">
                             {{ task.priority }}
@@ -53,6 +54,7 @@
                 <span class="material-icons" id="close-modal" onclick="closeTaskModal()" style="cursor: pointer;">close</span>
             </div>
             <h1 class="task-title-modal">Task Title</h1>
+            <h6 class="project-name-modal">Project: </h6>
             <div class="task-subheader-modal row">
                 <p class="task-priority-modal col">Priority: <span class="task-priority high"></span></p>
                 <div class="due-date-wrapper col">
@@ -145,10 +147,33 @@
         const selectedTask = tasks.find(t => t.id == taskId);
 
         if (selectedTask) {
-            // Llenar el contenedor de requests
+            // Actualiza título, descripción, prioridad, fecha y nombre del proyecto en el modal
+            document.querySelector(".task-title-modal").innerText = selectedTask.title;
+            document.querySelector(".task-description-modal").innerText = selectedTask.description;
+            document.querySelector(".task-priority-modal span").className = "task-priority " + selectedTask.priority.toLowerCase();
+            document.querySelector(".task-priority-modal").innerHTML = `Priority: <span class="task-priority ${selectedTask.priority.toLowerCase()}"></span>`;
+            document.querySelector(".task-due-date-modal .due-date-text").innerText = selectedTask.due_date;
+            
+            // ✅ Aquí asignamos el nombre del proyecto al modal
+            document.querySelector(".project-name-modal").innerText = "Project: " + selectedTask.project_name;
+
+            const requirementsContainer = document.getElementById("requirements-list");
+            requirementsContainer.innerHTML = '';
+            selectedTask.requirements.forEach(req => {
+                const reqDiv = document.createElement("div");
+                reqDiv.style.display = "flex";
+                reqDiv.innerHTML = `
+                    <label class="checkbox-container">
+                        <input class="custom-checkbox" type="checkbox" ${req.is_completed ? "checked" : ""}>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="custom-checkbox-label">${req.requirement}</label>
+                `;
+                requirementsContainer.appendChild(reqDiv);
+            });
+
             const container = document.getElementById('task-requests-container');
             container.innerHTML = '';
-
             selectedTask.requests.forEach(req => {
                 let statusClass = '';
                 if (req.accepted_by) {

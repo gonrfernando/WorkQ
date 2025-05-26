@@ -131,6 +131,52 @@
             </form>
         </div>
     </div>
+    <style>
+    .modal-stack.show .modal-dialog {
+        z-index: 1060 !important;
+    }
+    .modal-stack.show ~ .modal-backdrop {
+        z-index: 1059 !important;
+    }
+
+    </style>
+
+
+    <!-- Modal de éxito -->
+    <div class="modal fade modal-stack" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+            <h5 class="modal-title" id="successModalLabel">Success</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            The request was submitted successfully!
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal de error -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="errorMessage">
+            An error occurred.
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+    </div>
 </div>
 
 <!-- Scripts -->
@@ -171,6 +217,60 @@
                 event.preventDefault();
             }
         });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsModal = document.getElementById('settingsModal');
+        const actionTypeInput = document.getElementById('action-type');
+        const requestReasonTextarea = document.getElementById('request-reason');
+
+        // Limpiar los campos al cerrar el modal
+        settingsModal.addEventListener('hidden.bs.modal', function () {
+            actionTypeInput.value = '';
+            requestReasonTextarea.value = '';
+        });
+
+        // (Opcional extra) Si también quieres limpiar al abrirlo:
+        settingsModal.addEventListener('show.bs.modal', function () {
+            actionTypeInput.value = '';
+            requestReasonTextarea.value = '';
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsForm = document.querySelector('#settingsModal form');
+        if (settingsForm) {
+            settingsForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(settingsForm);
+
+                fetch(settingsForm.action, {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+
+                    if (data.success) {
+                        // Cerrar modal de configuración
+                        bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+                        successModal.show();
+                    } else {
+                        document.getElementById('errorMessage').textContent = data.error || "An unexpected error occurred.";
+                        errorModal.show();
+                    }
+                })
+                .catch(error => {
+                    console.error("Request error:", error);
+                    document.getElementById('errorMessage').textContent = "Error during submission.";
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
+                });
+            });
+        }
     });
 </script>
 

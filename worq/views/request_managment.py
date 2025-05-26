@@ -20,7 +20,7 @@ def my_view(request):
     
     dbtasks = (
         request.dbsession.query(Tasks)
-        .options(joinedload(Tasks.requests))
+        .options(joinedload(Tasks.requests), joinedload(Tasks.project)) 
         .filter(exists().where(Requests.task_id == Tasks.id))
         .all()
     )
@@ -32,6 +32,8 @@ def my_view(request):
     
     json_tasks = [{
         "id": task.id, 
+        "project_id": task.project_id,
+        "project_name": task.project.name,  
         "title": task.title, 
         "description": task.description,
         "priority": priorities.get(task.priority, "None"), 
