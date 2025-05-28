@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const toggleButton = document.getElementById("toggle-view");
-    const taskContainers = document.querySelectorAll("#task-container");
+    const taskContainers = document.querySelectorAll(".task-container");
     const tasks = document.querySelectorAll(".task-spacer");
     const taskElements = document.querySelectorAll(".task-element");
     const taskSubheaders = document.querySelectorAll(".task-subheader");

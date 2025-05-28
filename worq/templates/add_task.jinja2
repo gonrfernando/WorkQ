@@ -115,6 +115,7 @@
 
 <script>
 const users = {{ users | tojson }};
+const projectUsers = {{ users_projects | tojson }};
 
 // Autocompletado de usuarios (sin cambios)
 function handleEmailSearchInput(event) {
@@ -149,6 +150,54 @@ function handleEmailSearchInput(event) {
         resultsContainer.style.display = "none";
     }
 }
+
+// Autocompletado de colaboradores (solo miembros del proyecto activo)
+function setupCollaboratorAutocomplete(inputElement) {
+    const wrapper = inputElement.parentElement;
+    let resultsContainer = document.createElement("div");
+    resultsContainer.className = "autocomplete-results";
+    wrapper.appendChild(resultsContainer);
+
+    inputElement.addEventListener("input", function() {
+        const query = inputElement.value.toLowerCase();
+        resultsContainer.innerHTML = "";
+
+        if (query.length < 1) {
+            resultsContainer.style.display = "none";
+            return;
+        }
+
+        const filtered = projectUsers.filter(user =>
+            user.email.toLowerCase().includes(query)
+        );
+
+        if (filtered.length > 0) {
+            resultsContainer.style.display = "block";
+            filtered.forEach(user => {
+                const item = document.createElement("div");
+                item.className = "autocomplete-item";
+                item.textContent = user.email;
+                item.onclick = () => {
+                    inputElement.value = user.email;
+                    resultsContainer.style.display = "none";
+                };
+                resultsContainer.appendChild(item);
+            });
+        } else {
+            resultsContainer.style.display = "none";
+        }
+    });
+}
+
+// Inicializar autocompletado para el input original
+setupCollaboratorAutocomplete(document.querySelector(".collaborator-input"));
+
+// Autocompletado para inputs nuevos
+document.getElementById("add-collab").addEventListener("click", () => {
+    const inputs = document.querySelectorAll(".collaborator-input");
+    const last = inputs[inputs.length - 1];
+    setupCollaboratorAutocomplete(last);
+});
 
 // Agregar nuevo input de requisito
 function addRequirementInput() {

@@ -28,7 +28,7 @@
     {% endblock %}
 
     {% block scripts %}
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></scrip>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
       <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
@@ -70,6 +70,11 @@
     
     <div class="toolbar">
       {% if user_role in ['superadmin', 'admin'] %}
+        <a href="{{ request.route_url('request_management') }}">
+          <span class="toolbar-icon material-icons-round">reply</span>
+        </a>
+      {% endif %}
+      {% if user_role in ['superadmin', 'admin'] %}
       <span class="material-symbols-outlined show-popup toolbar-add-user">person_add</span>
       {% endif %}
       <div class="notification-icon">
@@ -84,7 +89,7 @@
         <ul id="dropdown-menu">
           <li><p style="margin-bottom: 0;">Welcome {{ user_name }}</p></li>
           <li><p class="Role">{{user_role}}</p></li>
-          <li><a href="">Profile</a></li>
+          <li><a href="{{ request.route_url('info_user') }}">Profile</a></li>
           <li><a href="">Tutorial</a></li>
           <li><a href="{{ request.route_url('logout') }}">Logout</a></li>
         </ul>
@@ -92,6 +97,38 @@
     </div>
 
     <div class="main">
+      {% if current_route == '/' %}
+        {% if active_project_id  %}
+          <div class="members-sidebar" id="membersSidebar" onclick="toggleMembersSidebar()">
+              <i class="material-icons-round icon">groups</i>
+              <div class="members-content">
+                  <h3>Members</h3>
+                  <ul class="user-list">
+                      {% for user in users %}
+                        <li class="user-item show-popup"
+                            data-name="{{ user.name }}"
+                            data-email="{{ user.email }}"
+                            data-area="{{ user.area.area if user.area else '' }}"
+                            data-tel="{{ user.tel if user.tel else '' }}">
+                            <strong>{{ user.name }}</strong><br>
+                            {{ user.email }}<br>
+                        </li>
+                    {% endfor %}
+                  </ul>
+              </div>
+          </div>
+          <div class="popup-container" id="popupContainer" style="display: none;">
+            <div class="popup-box">
+              <h5>Member Details</h5>
+              <h5>Name: <span id="popupName"></span></h5>
+              <p>Email: <span id="popupEmail"></span></p>
+              <p>Tel: <span id="popupTel"></span></p>
+              <p>Area: <span id="popupArea"></span></p>
+            </div>
+          </div>
+
+        {% endif %}
+      {% endif %}
       {% if request.matched_route.name == 'calendar' %}
         <style>
           #navigation {
@@ -184,9 +221,8 @@
           const dropdownMenu = document.getElementById('dropdown-menu');
           const profileContainer = document.getElementById('profile-menu');
       
-          // Alternar visibilidad al hacer clic en el ícono
           profileIcon.addEventListener('click', function (event) {
-            event.stopPropagation(); // Evita que el clic se propague
+            event.stopPropagation();
             dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
           });
           document.addEventListener('DOMContentLoaded', function () {
@@ -194,13 +230,77 @@
               if (message) {
                 const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
                 errorModal.show();
-          }
-          });
-          // Cerrar el menú si clickeás fuera
+              }
+            });
+
           document.addEventListener('click', function (event) {
             if (!profileContainer.contains(event.target)) {
               dropdownMenu.style.display = 'none';
             }
+          });
+        });
+        function toggleMembersSidebar() {
+            const sidebar = document.getElementById('membersSidebar');
+            sidebar.classList.toggle('expanded');
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('membersSidebar');
+            const isClickInside = sidebar.contains(event.target);
+
+            if (!isClickInside && sidebar.classList.contains('expanded')) {
+                sidebar.classList.remove('expanded');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+          const showPopupButtons = document.querySelectorAll('.show-popup');
+          const form = document.getElementById('edit-user-form');
+
+          function resetFormFields() {
+            if (form) {
+              form.reset();
+              document.getElementById('user_id').value = '';
+              document.getElementById('form-search-input').value = '';
+              document.getElementById('form-autocomplete-results').innerHTML = '';
+            }
+          }
+
+          showPopupButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+              document.querySelector('.popup-container').classList.add('active');
+              resetFormFields();
+            });
+          });
+
+          document.querySelectorAll('.popup-container, .close-btn').forEach((element) => {
+            element.addEventListener('click', (e) => {
+              if (e.target.classList.contains('popup-container') || e.target.classList.contains('close-btn')) {
+                document.querySelector('.popup-container').classList.remove('active');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+              }
+            });
+          });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+          const userItems = document.querySelectorAll('.user-item');
+          const popupContainer = document.getElementById('popupContainer');
+          const popupName = document.getElementById('popupName');
+          const popupEmail = document.getElementById('popupEmail');
+          const popupTel = document.getElementById('popupTel');
+          const popupArea = document.getElementById('popupArea');
+
+          userItems.forEach(item => {
+            item.addEventListener('click', function (e) {
+
+              popupName.textContent = this.dataset.name;
+              popupEmail.textContent = this.dataset.email;
+              popupTel.textContent = this.dataset.tel;
+              popupArea.textContent = this.dataset.area;
+              popupContainer.style.display = 'block';
+            });
           });
         });
         // Mostrar el modal si hay un mensaje de error
