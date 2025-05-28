@@ -1,5 +1,5 @@
 import datetime
-from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities
+from worq.models.models import UsersProjects, Roles, Users, Tasks,TaskRequirements, TaskPriorities, UsersTasks  # Asegúrate de importar este modelo
 from sqlalchemy.exc import SQLAlchemyError
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -52,6 +52,7 @@ def task_creation_view(request):
             finished_date = request.POST.get('finished_date')
             priority      = request.POST.get('priority')
             requirements  = request.POST.getall('requirements')
+            collaborators = request.POST.getall('collaborators')  # <-- nuevo
 
             try:
                 new_task = Tasks(
@@ -63,12 +64,12 @@ def task_creation_view(request):
                         datetime.datetime.strptime(finished_date, '%Y-%m-%dT%H:%M')
                         if finished_date else None
                     ),
-                    # Ahora guardamos en priority_id
                     priority_id=int(priority) if priority else None
                 )
                 dbsession.add(new_task)
-                dbsession.flush()  # Para obtener new_task.id
+                dbsession.flush()
 
+                # Guardar requisitos
                 for req in requirements:
                     req_text = req.strip()
                     if req_text:
@@ -77,6 +78,34 @@ def task_creation_view(request):
                             requirement=req_text,
                             is_completed=False
                         ))
+
+                for collab in collaborators:
+                    collab_text = collab.strip().lower()
+                    if not collab_text:
+                        continue
+
+                    user = dbsession.query(Users).filter(
+                        Users.email.ilike(collab_text)
+                    ).first()
+
+                    if not user:
+                        # Crear nuevo usuario con valores por defecto
+                        user = Users(
+                            name=collab_text.split('@')[0].capitalize(),
+                            email=collab_text,
+                            tel='',
+                            country_id=None,
+                            area_id=None,
+                            role_id=None
+                        )
+                        dbsession.add(user)
+                        dbsession.flush()  # para obtener user.id
+
+                    dbsession.add(UsersTasks(
+                        task_id=new_task.id,
+                        user_id=user.id
+                    ))
+                    
                 dbsession.flush()
                 print(f"[INFO] Tarea '{title}' creada con ID {new_task.id}")
 
@@ -119,6 +148,20 @@ def task_creation_view(request):
 
     started_date_value = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M')
 
+    proj_users = (
+        dbsession.query(UsersProjects)
+        .filter_by(project_id=active_project_id)
+        .all()
+    )
+    json_proj_users = [
+        {
+            "id": up.user.id,
+            "email": up.user.email,
+            "name": up.user.name
+        }
+        for up in proj_users
+    ]
+
     return {
         "users": json_users,
         "roles": json_roles,
@@ -126,7 +169,8 @@ def task_creation_view(request):
         "active_project_id": active_project_id,
         "active_project": active_project,
         "started_date_value": started_date_value,
-        "priorities": json_priorities,      # <--- aquí
+        "priorities": json_priorities,
+        "users_projects": json_proj_users,        # ← aquí
         "user_name": session.get('user_name'),
         "user_email": session.get('user_email'),
         "user_role": session.get('user_role')
