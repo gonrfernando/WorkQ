@@ -131,7 +131,7 @@
 }
 
 .TCreation3 {
-  max-width: 3050px;
+  max-width: 3090px;
   background: #FEFEFE;
   margin: auto;
   margin-top: 30px;
@@ -281,19 +281,20 @@
   background-color: #f0f0f0;
 }
 
-.scrollable-task-form {
-  max-height: 500px; /* Puedes ajustar según lo que necesites */
-  overflow: auto;
+.scrollable-section {
+  max-height: 190px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: #ffffff;
-  margin-bottom: 16px;
 }
 
 /* Asegura que los campos dentro del formulario scrolleable no se deformen */
-.scrollable-task-form .controls,
-.scrollable-task-form input,
-.scrollable-task-form button {
+.scrollable-section .controls,
+.scrollable-section input,
+.scrollable-section button {
   width: 100%;
   box-sizing: border-box;
 }

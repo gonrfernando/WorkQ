@@ -25,63 +25,64 @@
       <div class="outside-task">
 
         <!-- FORMULARIO DE TAREA -->
-        <div class="scrollable-task-form">
-          <form method="POST" class="add-tasks">
-            <h5 class="task-header-container">
-                <span class="task-header">Add Task</span>
+        <form method="POST" class="add-tasks">
+          <h5 class="task-header-container">
+            <span class="task-header">Add Task</span>
+            <div class="priority-select">
+              <label for="priority-select">Priority</label>
+              <select id="priority-select" name="priority-select" class="controls">
+                {% for p in priorities %}
+                  <option value="{{ p.id }}" class="priority-{{ p.id }}">
+                    {{ p.priority }}
+                  </option>
+                {% endfor %}
+              </select>
+              <input type="hidden" name="priority" id="priority-hidden" value="{{ priorities[0].id }}">
+            </div>
+          </h5>
 
-                <!-- Select de Priority junto al título -->
-                <div class="position-absolute top-0 end-0 p-2 d-flex align-items-center gap-2">
-                  <div class="priority-select">
-                      <label for="priority-select">Priority</label>
-                      <select id="priority-select" name="priority-select" class="controls">
-                      {% for p in priorities %}
-                          <option value="{{ p.id }}" class="priority-{{ p.id }}">
-                          {{ p.priority }}
-                          </option>
-                      {% endfor %}
-                      </select>
-                      <!-- Campo oculto para enviar prioridad -->
-                      <input type="hidden" name="priority" id="priority-hidden" value="{{ priorities[0].id }}">
-                  </div>
-                </div>
-            </h5>
+          <input type="hidden" name="form_type" value="add_task">
+          <input class="controls" type="text" id="title" name="title" placeholder="Title" required>
+          <input class="controls" type="text" id="description" name="description" placeholder="Description" required>
 
-            <input type="hidden" name="form_type" value="add_task">
-
-            <input class="controls" type="text" id="title" name="title" placeholder="Title" required>
-            <input class="controls" type="text" id="description" name="description" placeholder="Description" required>
-
-            <!-- Requerimientos -->
+          <!-- REQUERIMIENTOS -->
+          <label><strong>Requirements</strong></label>
+          <div class="scrollable-section" id="req-section">
             <div id="requirements-container">
-              <div class="task-items">
+              <div class="task-items" id="req-template-item">
                 <input class="controls requirement-input" type="text" name="requirements" placeholder="Requirement">
+                <span class="duplicate-warning" style="display:none; color: #d00; font-size: 0.9em;">
+                  Ya agregaste este requisito
+                </span>
                 <span class="material-symbols-outlined btn delete-req" title="Delete requirement">delete</span>
               </div>
             </div>
             <button id="add-req" class="buttons" type="button">+ Add Requirement</button>
+          </div>
 
-            <!-- Colaboradores -->
+          <!-- COLABORADORES -->
+          <label><strong>Collaborators</strong></label>
+          <div class="scrollable-section" id="collab-section">
             <div id="collaborators-container">
-              <div class="task-items">
+              <div class="task-items" id="collab-template-item">
                 <input class="controls collaborator-input" type="text" name="collaborators" placeholder="Collaborator">
+                <span class="duplicate-warning" style="display:none; color: #d00; font-size: 0.9em;">
+                  Ya agregaste este colaborador
+                </span>
                 <span class="material-symbols-outlined btn delete-collab" title="Delete collaborator">delete</span>
               </div>
             </div>
             <button id="add-collab" class="buttons" type="button">+ Add Collaborator</button>
+          </div>
 
-            <div class="add-group">
-              <label for="finished_date">Due Date</label>
-              <input class="date-button"
-                     type="datetime-local"
-                     id="finished_date"
-                     name="finished_date">
-              <input class="buttons" type="submit" value="Submit Task">
-            </div>
-          </form>
-        </div>
+          <div class="add-group">
+            <label for="finished_date">Due Date</label>
+            <input class="date-button" type="datetime-local" id="finished_date" name="finished_date">
+            <input class="buttons" type="submit" value="Submit Task">
+          </div>
+        </form>
 
-        <!-- FORMULARIO DE USUARIO (sin cambios) -->
+        <!-- FORMULARIO DE USUARIO -->
         <form method="POST" class="add-users">
           <h5>Add User</h5>
           <input type="hidden" name="form_type" value="add_user">
@@ -91,8 +92,7 @@
                    id="email-search-input"
                    placeholder="Search User Email"
                    oninput="handleEmailSearchInput(event)">
-            <div id="email-autocomplete-results"
-                 class="add-user-autocomplete-results"></div>
+            <div id="email-autocomplete-results" class="add-user-autocomplete-results"></div>
           </div>
           <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
           <select class="controls" id="role" name="role_id" required>
@@ -117,161 +117,123 @@
 const users = {{ users | tojson }};
 const projectUsers = {{ users_projects | tojson }};
 
-// Autocompletado de usuarios (sin cambios)
+// 1) Guardamos las plantillas originales (HTML puro)
+const reqTemplate = document.getElementById("req-template-item").outerHTML;
+const collabTemplate = document.getElementById("collab-template-item").outerHTML;
+
+// 2) Función genérica para prevenir duplicados
+function checkDuplicate(inputEl, containerSelector) {
+  const val = inputEl.value.trim().toLowerCase();
+  if (!val) return;
+  const others = Array.from(document.querySelectorAll(containerSelector + " input"))
+    .filter(i => i !== inputEl)
+    .map(i => i.value.trim().toLowerCase());
+  const warning = inputEl.parentElement.querySelector(".duplicate-warning");
+  if (others.includes(val)) {
+    warning.style.display = "inline";
+    inputEl.value = "";
+  } else {
+    warning.style.display = "none";
+  }
+}
+
+// 3) Autocomplete para usuarios existentes
 function handleEmailSearchInput(event) {
-    const query = event.target.value.toLowerCase();
-    const resultsContainer = document.getElementById("email-autocomplete-results");
+  const query = event.target.value.toLowerCase();
+  const resultsContainer = document.getElementById("email-autocomplete-results");
+  resultsContainer.innerHTML = "";
+  if (query.length < 1) { resultsContainer.style.display = "none"; return; }
+
+  const filtered = users.filter(u => u.email.toLowerCase().includes(query));
+  if (!filtered.length) { resultsContainer.style.display = "none"; return; }
+  resultsContainer.style.display = "block";
+
+  filtered.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "autocomplete-item";
+    div.textContent = u.email;
+    div.onclick = () => {
+      document.getElementById("email-search-input").value = u.email;
+      document.getElementById("user_id").value = u.id;
+      document.getElementById("email").value = u.email;
+      resultsContainer.style.display = "none";
+    };
+    resultsContainer.appendChild(div);
+  });
+}
+
+// 4) Autocomplete para colaboradores (igual que usuarios, pero filtrado por proyecto)
+function setupCollaboratorAutocomplete(inputEl) {
+  const wrapper = inputEl.parentElement;
+  const resultsContainer = document.createElement("div");
+  resultsContainer.className = "add-user-autocomplete-results";
+  wrapper.appendChild(resultsContainer);
+
+  inputEl.addEventListener("input", () => {
+    const q = inputEl.value.toLowerCase();
     resultsContainer.innerHTML = "";
+    if (q.length < 1) { resultsContainer.style.display = "none"; return; }
 
-    if (query.length < 1) {
+    const filtered = projectUsers.filter(u => u.email.toLowerCase().includes(q));
+    if (!filtered.length) { resultsContainer.style.display = "none"; return; }
+    resultsContainer.style.display = "block";
+
+    filtered.forEach(u => {
+      const div = document.createElement("div");
+      div.className = "autocomplete-item";
+      div.textContent = u.email;
+      div.onclick = () => {
+        inputEl.value = u.email;
         resultsContainer.style.display = "none";
-        return;
-    }
-
-    const filteredUsers = users.filter(user =>
-        user.email.toLowerCase().includes(query)
-    );
-
-    if (filteredUsers.length > 0) {
-        resultsContainer.style.display = "block";
-        filteredUsers.forEach(user => {
-            const item = document.createElement("div");
-            item.className = "autocomplete-item";
-            item.textContent = user.email;
-            item.onclick = () => {
-                document.getElementById("email-search-input").value = user.email;
-                document.getElementById("user_id").value = user.id;
-                document.getElementById("email").value = user.email;
-                resultsContainer.style.display = "none";
-            };
-            resultsContainer.appendChild(item);
-        });
-    } else {
-        resultsContainer.style.display = "none";
-    }
-}
-
-// Autocompletado de colaboradores (solo miembros del proyecto activo)
-function setupCollaboratorAutocomplete(inputElement) {
-    const wrapper = inputElement.parentElement;
-    let resultsContainer = document.createElement("div");
-    resultsContainer.className = "autocomplete-results";
-    wrapper.appendChild(resultsContainer);
-
-    inputElement.addEventListener("input", function() {
-        const query = inputElement.value.toLowerCase();
-        resultsContainer.innerHTML = "";
-
-        if (query.length < 1) {
-            resultsContainer.style.display = "none";
-            return;
-        }
-
-        const filtered = projectUsers.filter(user =>
-            user.email.toLowerCase().includes(query)
-        );
-
-        if (filtered.length > 0) {
-            resultsContainer.style.display = "block";
-            filtered.forEach(user => {
-                const item = document.createElement("div");
-                item.className = "autocomplete-item";
-                item.textContent = user.email;
-                item.onclick = () => {
-                    inputElement.value = user.email;
-                    resultsContainer.style.display = "none";
-                };
-                resultsContainer.appendChild(item);
-            });
-        } else {
-            resultsContainer.style.display = "none";
-        }
+      };
+      resultsContainer.appendChild(div);
     });
+  });
+
+  inputEl.addEventListener("blur", () => {
+    setTimeout(() => { resultsContainer.style.display = "none"; }, 150);
+    checkDuplicate(inputEl, "#collaborators-container");
+  });
 }
 
-// Inicializar autocompletado para el input original
+// 5) Inicializa autocomplete en el primer collaborator
 setupCollaboratorAutocomplete(document.querySelector(".collaborator-input"));
 
-// Autocompletado para inputs nuevos
+// 6) Añadir nuevo requirement
+document.getElementById("add-req").addEventListener("click", () => {
+  const cont = document.getElementById("requirements-container");
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = reqTemplate;
+  cont.appendChild(wrapper.firstElementChild);
+  const inp = cont.querySelector(".task-items:last-child input");
+  inp.addEventListener("blur", () => checkDuplicate(inp, "#requirements-container"));
+});
+
+// 7) Añadir nuevo collaborator
 document.getElementById("add-collab").addEventListener("click", () => {
-    const inputs = document.querySelectorAll(".collaborator-input");
-    const last = inputs[inputs.length - 1];
-    setupCollaboratorAutocomplete(last);
+  const cont = document.getElementById("collaborators-container");
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = collabTemplate;
+  cont.appendChild(wrapper.firstElementChild);
+  const inp = cont.querySelector(".task-items:last-child input");
+  setupCollaboratorAutocomplete(inp);
 });
 
-// Agregar nuevo input de requisito
-function addRequirementInput() {
-    const container = document.getElementById('requirements-container');
-
-    const item = document.createElement('div');
-    item.className = 'task-item';
-
-    const input = document.createElement('input');
-    input.className = 'controls requirement-input';
-    input.type = 'text';
-    input.name = 'requirements';
-    input.placeholder = 'Requirement';
-
-    const del = document.createElement('span');
-    del.className = 'material-symbols-outlined btn delete-req';
-    del.title = 'Delete requirement';
-    del.textContent = 'delete';
-
-    item.appendChild(input);
-    item.appendChild(del);
-    container.appendChild(item);
-}
-
-// Agregar nuevo input de colaborador
-function addCollaboratorInput() {
-    const container = document.getElementById('collaborators-container');
-
-    const item = document.createElement('div');
-    item.className = 'task-item';
-
-    const input = document.createElement('input');
-    input.className = 'controls collaborator-input';
-    input.type = 'text';
-    input.name = 'collaborators';
-    input.placeholder = 'Collaborator';
-
-    const del = document.createElement('span');
-    del.className = 'material-symbols-outlined btn delete-collab';
-    del.title = 'Delete collaborator';
-    del.textContent = 'delete';
-
-    item.appendChild(input);
-    item.appendChild(del);
-    container.appendChild(item);
-}
-
-// Eliminar requisito (delegado)
-document.getElementById('requirements-container')
-  .addEventListener('click', function(e) {
-    if (e.target.classList.contains('delete-req')) {
-      const item = e.target.closest('.task-item');
-      if (item) item.remove();
-    }
+// 8) Delegación de delete
+document.getElementById("requirements-container").addEventListener("click", e => {
+  if (e.target.classList.contains("delete-req")) {
+    e.target.closest(".task-items").remove();
+  }
+});
+document.getElementById("collaborators-container").addEventListener("click", e => {
+  if (e.target.classList.contains("delete-collab")) {
+    e.target.closest(".task-items").remove();
+  }
 });
 
-// Eliminar colaborador (delegado)
-document.getElementById('collaborators-container')
-  .addEventListener('click', function(e) {
-    if (e.target.classList.contains('delete-collab')) {
-      const item = e.target.closest('.task-item');
-      if (item) item.remove();
-    }
-});
-
-// Eventos de botones + Add
-document.getElementById('add-req')
-  .addEventListener('click', addRequirementInput);
-document.getElementById('add-collab')
-  .addEventListener('click', addCollaboratorInput);
-
-// — NUEVO: sincronizar el select con el hidden
-const sel = document.getElementById('priority-select');
-const hid = document.getElementById('priority-hidden');
-sel.addEventListener('change', () => hid.value = sel.value);
+// 9) Sincronizar select/hidden priority
+const sel = document.getElementById("priority-select");
+const hid = document.getElementById("priority-hidden");
+sel.addEventListener("change", () => hid.value = sel.value);
 </script>
 {% endblock %}

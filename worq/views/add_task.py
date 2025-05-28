@@ -170,7 +170,7 @@ def task_creation_view(request):
         "active_project": active_project,
         "started_date_value": started_date_value,
         "priorities": json_priorities,
-        "users_projects": json_proj_users,        # ← aquí
+        "users_projects": json_proj_users,        
         "user_name": session.get('user_name'),
         "user_email": session.get('user_email'),
         "user_role": session.get('user_role')
