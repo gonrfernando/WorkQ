@@ -1,10 +1,9 @@
 from pyramid.view import view_config
-from worq.models.models import Projects, Tasks, TaskRequirements, UsersProjects, Status
 from pyramid.httpexceptions import HTTPFound
-
+from worq.models.models import Projects, Tasks, TaskRequirements, UsersProjects
 
 @view_config(route_name='task_view', renderer='worq:templates/task_view.jinja2')
-def my_view(request):
+def task_view(request):
     session = request.session
 
     # Validación de sesión
@@ -16,7 +15,7 @@ def my_view(request):
     user_email = session.get('user_email')
     user_role = session.get('user_role')
 
-    # 🔍 Obtener los proyectos del usuario a través de UsersProjects
+    # Obtener proyectos del usuario
     user_projects = (
         request.dbsession.query(Projects)
         .join(UsersProjects)
@@ -24,19 +23,15 @@ def my_view(request):
         .all()
     )
 
-    # Convertir a JSON para pasar a la plantilla
     json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
 
-    # Obtener proyecto activo
     active_project_id = session.get("project_id")
     active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
 
-    # Si no hay proyecto activo, asignar el primero (opcional)
     if not active_project and json_projects:
         active_project = json_projects[0]
         active_project_id = active_project["id"]
 
-    # 📌 Obtener tareas del proyecto activo
     dbtasks = request.dbsession.query(Tasks).filter_by(project_id=active_project_id).all()
     priorities = {1: "Low", 2: "Avg", 3: "High"}
 

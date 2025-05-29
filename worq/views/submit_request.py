@@ -1,38 +1,23 @@
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound, HTTPBadRequest
 from datetime import datetime
-from worq.models.models import Requests, Status
+from worq.models.models import Requests
 
-@view_config(route_name='submit_request', request_method='POST')
+@view_config(route_name='submit_request', request_method='POST', renderer='json')
 def submit_request(request):
     try:
         task_id_str = request.POST.get('task_id')
-        status_id_str = request.POST.get('status_id')
         action_type = request.POST.get('action_type')
         reason = request.POST.get('reason')
 
-        print(f"User session data: {request.session}")
         user_id = request.session.get('user_id')
         project_id = request.session.get('project_id')
 
-        status_id = 1
-        missing_fields = []
-
-        if not task_id_str:
-            missing_fields.append("task_id")
-        if not action_type:
-            missing_fields.append("action_type")
-        if not reason:
-            missing_fields.append("reason")
-        if not user_id:
-            missing_fields.append("user_id")
-        if not project_id:
-            missing_fields.append("project_id")
-
-        if missing_fields:
-            raise ValueError(f"Faltan los siguientes datos requeridos: {', '.join(missing_fields)}.")
+        # Requisitos mínimos
+        if not all([task_id_str, action_type, reason, user_id, project_id]):
+            return {"success": False, "error": "Please complete all required fields."}
 
         task_id = int(task_id_str)
+        status_id = 1  # Pending by default
 
         new_request = Requests(
             user_id=user_id,
@@ -45,9 +30,11 @@ def submit_request(request):
         )
 
         request.dbsession.add(new_request)
+        request.dbsession.flush()
 
-        return HTTPFound(location=request.route_url('task_view'))
+        return {"success": True}
 
     except Exception as e:
-        print(f"Error en submit_request: {e}")
-        raise HTTPBadRequest(f"Error al procesar la solicitud: {str(e)}")
+        print(f"[submit_request error] {e}")
+        return {"success": False, "error": "An error occurred while submitting your request. Please try again later."}
+

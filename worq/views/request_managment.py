@@ -2,9 +2,10 @@ from pyramid.view import view_config
 from worq.models.models import Projects, Tasks, TaskRequirements, Requests
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm import joinedload
-from sqlalchemy import exists
+from sqlalchemy import exists, and_
 from pyramid.response import Response
 from datetime import datetime
+
 
 @view_config(route_name='request_management', renderer='worq:templates/request_management.jinja2')
 def my_view(request):
@@ -18,10 +19,18 @@ def my_view(request):
 
     json_projects = [{"id": project.id, "name": project.name} for project in projects]
     
+    # Filtramos Tasks que tengan alguna Request con id=1
     dbtasks = (
         request.dbsession.query(Tasks)
         .options(joinedload(Tasks.requests), joinedload(Tasks.project)) 
-        .filter(exists().where(Requests.task_id == Tasks.id))
+        .filter(
+            exists().where(
+                and_(
+                    Requests.task_id == Tasks.id,
+                    Requests.status_id == 1
+                )
+            )
+        )
         .all()
     )
     priorities = {
@@ -87,8 +96,10 @@ def handle_request_action(request):
 
         if action == "accept":
             req_obj.accepted_by = user_id
+            req_obj.status_id = 2  # status aceptada
         elif action == "reject":
             req_obj.rejected_by = user_id
+            req_obj.status_id = 3  # status rechazada
         else:
             return Response(json_body={'error': 'Invalid action'}, status=400)
 

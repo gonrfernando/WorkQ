@@ -181,6 +181,10 @@
 
 <!-- Scripts -->
 <script>
+    const csrfToken = "{{ request.session.get_csrf_token() }}";
+</script>
+
+<script>
     function openTaskModalFromCard(element) {
         const taskId = element.getAttribute('data-task-id');
         if (!taskId) {
@@ -247,6 +251,9 @@
 
                 fetch(settingsForm.action, {
                     method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': csrfToken
+                    },
                     body: formData,
                 })
                 .then(response => response.json())
