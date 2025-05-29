@@ -75,7 +75,9 @@
         </a>
       {% endif %}
       {% if user_role in ['superadmin', 'admin'] %}
-      <span class="material-symbols-outlined show-popup toolbar-add-user">person_add</span>
+      <a href="{{ request.route_url('edit_user') }}">
+        <span class="material-symbols-outlined show-popup toolbar-add-user">person_add</span>
+      </a>
       {% endif %}
       <div class="notification-icon">
         <span class="toolbar-icon material-icons-round">notifications</span>
