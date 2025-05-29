@@ -250,48 +250,62 @@ function resetFormFields(form) {
 // --- AJAX para ambos formularios con mensajes personalizados ---
 document.addEventListener('DOMContentLoaded', function() {
   // FORMULARIO DE TAREA
-  const taskForm = document.querySelector('.add-tasks');
-  if (taskForm) {
-    taskForm.addEventListener('submit', function(event) {
-      event.preventDefault();
+const taskForm = document.querySelector('.add-tasks');
+if (taskForm) {
+  taskForm.addEventListener('submit', function(event) {
+    event.preventDefault();
 
-      const formData = new FormData(taskForm);
-      const requirements = Array.from(document.querySelectorAll('.requirement-input')).map(input => input.value).filter(Boolean);
-      const collaborators = Array.from(document.querySelectorAll('.collaborator-input')).map(input => input.value).filter(Boolean);
-      formData.delete('requirements');
-      formData.delete('collaborators');
-      requirements.forEach(req => formData.append('requirements', req));
-      collaborators.forEach(col => formData.append('collaborators', col));
-      const jsonData = Object.fromEntries(formData.entries());
+    const formData = new FormData(taskForm);
+    const requirements = Array.from(document.querySelectorAll('.requirement-input')).map(input => input.value).filter(Boolean);
+    const collaborators = Array.from(document.querySelectorAll('.collaborator-input')).map(input => input.value).filter(Boolean);
+    formData.delete('requirements');
+    formData.delete('collaborators');
 
-      fetch(window.location.pathname, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jsonData)
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          document.getElementById('successModalLabel').innerText = 'Task Added';
-          document.querySelector('#successModal .modal-body').innerText = 'The task has been added successfully!';
-          const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-          successModal.show();
-          resetFormFields(taskForm);
-        } else {
-          document.getElementById('errorModalLabel').innerText = 'Error';
-          document.getElementById('errorMessage').innerText = data.error || 'Unknown error';
-          const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-          errorModal.show();
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      if (jsonData.hasOwnProperty(key)) {
+        if (!Array.isArray(jsonData[key])) {
+          jsonData[key] = [jsonData[key]];
         }
-      })
-      .catch(error => {
+        jsonData[key].push(value);
+      } else {
+        jsonData[key] = value;
+      }
+    });
+
+    // Reemplaza por los valores reales de inputs
+    jsonData.requirements = requirements;
+    jsonData.collaborators = collaborators;
+
+    fetch(window.location.pathname, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(jsonData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('successModalLabel').innerText = 'Task Added';
+        document.querySelector('#successModal .modal-body').innerText = 'The task has been added successfully!';
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+        resetFormFields(taskForm);
+      } else {
         document.getElementById('errorModalLabel').innerText = 'Error';
-        document.getElementById('errorMessage').innerText = 'Request failed!';
+        document.getElementById('errorMessage').innerText = data.error || 'Unknown error';
         const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
         errorModal.show();
-      });
+      }
+    })
+    .catch(error => {
+      document.getElementById('errorModalLabel').innerText = 'Error';
+      document.getElementById('errorMessage').innerText = 'Request failed!';
+      const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+      errorModal.show();
     });
-  }
+  });
+}
+
 
   // FORMULARIO DE USUARIO
   const userForm = document.querySelector('.add-users');
