@@ -1,9 +1,36 @@
 {% extends "workq_main.jinja2" %}
-
 {% block stats %}
-<div>
-    <h3>Stats Content</h3>
-    <p>This is the content for the Stats tab.</p>
+<div class="container mt-4">
+  <h3>Estadísticas de {{ user_name }}</h3>
+  
+  <div class="row mb-3">
+    {% for project in userprojects %}
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header">
+            {{ project.name }}
+          </div>
+          <div class="card-body">
+            {% set total = usertasks | selectattr("project_id", "equalto", project.id) | list %}
+            {% set finished = total | selectattr("state_id", "equalto", 3) | list %}
+            <p>Total tareas: {{ total|length }}</p>
+            <p>Completadas: {{ finished|length }}</p>
+            {% if total|length > 0 %}
+              <div class="progress">
+                <div class="progress-bar bg-success" role="progressbar" 
+                     style="width: {{ (finished|length / total|length * 100)|round(0) }}%" 
+                     aria-valuenow="{{ (finished|length / total|length * 100)|round(0) }}" 
+                     aria-valuemin="0" aria-valuemax="100">
+                  {{ (finished|length / total|length * 100)|round(0) }}%
+                </div>
+              </div>
+            {% else %}
+              <div class="text-muted">Sin tareas asignadas</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 </div>
-
 {% endblock stats %}

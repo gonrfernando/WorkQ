@@ -249,5 +249,33 @@
         });
       });
     </script>
+    <script>
+      document.getElementById('uploadForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        try {
+          const response = await fetch('/upload_file', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+
+          const messageDiv = document.getElementById('uploadMessage');
+          messageDiv.innerText = data.message;
+          messageDiv.className = data.status === 'success'
+            ? 'alert alert-success'
+            : 'alert alert-danger';
+
+        } catch (error) {
+          console.error('Error al subir archivo:', error);
+          const messageDiv = document.getElementById('uploadMessage');
+          messageDiv.innerText = 'Error al conectar con el servidor.';
+          messageDiv.className = 'alert alert-danger';
+        }
+      });
+</script>
   </body>
 </html>
