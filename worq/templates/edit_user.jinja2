@@ -15,7 +15,7 @@
 
 <body>
 
-<div class="popup-container">
+<div id="edit-user-popup" class="popup-container2">
   <div class="popup-box">
     <div class="iconperson">
       <span class="material-symbols-outlined">person</span>
@@ -157,22 +157,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Cuando se hace clic en el botón para abrir el popup
   showPopupBtn.addEventListener('click', () => {
-    document.querySelector('.popup-container').classList.add('active');
+    document.querySelector('#edit-user-popup').classList.add('active');
     resetFormFields(); // Limpia el formulario cada vez que se abre
   });
 
   // Cierre del popup al hacer clic fuera del popup o en el botón de cerrar
-  document.querySelectorAll('.popup-container, .close-btn').forEach((element) => {
+  document.querySelectorAll('#edit-user-popup, .close-btn').forEach((element) => {
     element.addEventListener('click', (e) => {
-      if (e.target.classList.contains('popup-container') || e.target.classList.contains('close-btn')) {
-        document.querySelector('.popup-container').classList.remove('active');
+      if (e.target.id === 'edit-user-popup' || e.target.classList.contains('close-btn')) {
+        document.querySelector('#edit-user-popup').classList.remove('active');
         document.querySelector('.modal-backdrop').remove();
       }
     });
   });
-  setTimeout(() => {
-    document.querySelector('.popup-container').classList.add('active');
-  }, 400); // Puedes ajustar el tiempo (400ms) a lo que te parezca más suave
+  document.querySelector('#edit-user-popup').classList.add('active');
 });
 </script>
 
