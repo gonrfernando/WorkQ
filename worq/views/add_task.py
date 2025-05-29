@@ -1,9 +1,10 @@
 import datetime
-from worq.models.models import UsersProjects, Roles, Users, Tasks,TaskRequirements, TaskPriorities, UsersTasks  # Asegúrate de importar este modelo
+from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks
 from sqlalchemy.exc import SQLAlchemyError
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
+import json
 
 @view_config(
     route_name='add_task',
@@ -23,11 +24,21 @@ def task_creation_view(request):
 
     # --- POST handling ---
     if request.method == 'POST':
-        form_type = request.POST.get('form_type')
+        # Soporta tanto JSON como form-data
+        if request.content_type and 'application/json' in request.content_type:
+            data = request.json_body
+            get = data.get
+            getall = lambda k: data[k] if isinstance(data.get(k), list) else [data[k]] if data.get(k) else []
+        else:
+            data = request.POST
+            get = data.get
+            getall = data.getall
+
+        form_type = get('form_type')
 
         if form_type == 'add_user':
-            user_id_selected = request.POST.get('user_id')
-            role_id_selected = request.POST.get('role_id')
+            user_id_selected = get('user_id')
+            role_id_selected = get('role_id')
             if user_id_selected and active_project_id:
                 try:
                     exists = dbsession.query(UsersProjects).filter_by(
@@ -42,17 +53,22 @@ def task_creation_view(request):
                         )
                         dbsession.add(new_up)
                         dbsession.flush()
+                    # Responde JSON si es petición AJAX
+                    if 'application/json' in request.accept:
+                        return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
                 except SQLAlchemyError as e:
                     print(f"[ERROR] Error al asignar usuario: {e}")
+                    if 'application/json' in request.accept:
+                        return Response(json.dumps({'success': False, 'error': 'Error al editar el usuario'}), content_type='application/json; charset=utf-8')
                     return Response("Error al asignar usuario al proyecto", status=500)
 
         elif form_type == 'add_task':
-            title         = request.POST.get('title')
-            description   = request.POST.get('description')
-            finished_date = request.POST.get('finished_date')
-            priority      = request.POST.get('priority')
-            requirements  = request.POST.getall('requirements')
-            collaborators = request.POST.getall('collaborators')  # <-- nuevo
+            title         = get('title')
+            description   = get('description')
+            finished_date = get('finished_date')
+            priority      = get('priority')
+            requirements  = getall('requirements')
+            collaborators = getall('collaborators')
 
             try:
                 new_task = Tasks(
@@ -105,16 +121,24 @@ def task_creation_view(request):
                         task_id=new_task.id,
                         user_id=user.id
                     ))
-                    
+
                 dbsession.flush()
                 print(f"[INFO] Tarea '{title}' creada con ID {new_task.id}")
 
+                if 'application/json' in request.accept:
+                    return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
+
             except SQLAlchemyError as e:
                 print(f"[ERROR] Error al crear la tarea: {e}")
+                if 'application/json' in request.accept:
+                    return Response(json.dumps({'success': False, 'error': 'Error al crear la tarea'}), content_type='application/json; charset=utf-8')
                 return Response("Error al crear la tarea", status=500)
 
+        # Si es AJAX y no hubo error, responde éxito genérico
+        if 'application/json' in request.accept:
+            return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
+
     # --- Datos para renderizado en GET y tras POST ---
-    # 1) Proyectos del usuario
     ups = dbsession.query(UsersProjects).filter_by(user_id=user_id).all()
     json_projects = [
         {"id": up.project_id, "name": up.project.name}
@@ -125,7 +149,6 @@ def task_creation_view(request):
         None
     )
 
-    # 2) Usuarios y roles para el form de asignación
     users = dbsession.query(Users).all()
     json_users = [
         {
@@ -142,7 +165,6 @@ def task_creation_view(request):
     roles = dbsession.query(Roles).all()
     json_roles = [{"id": r.id, "name": r.name} for r in roles]
 
-    # 3) Prioridades para el select
     priorities = dbsession.query(TaskPriorities).all()
     json_priorities = [{"id": p.id, "priority": p.priority} for p in priorities]
 

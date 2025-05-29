@@ -235,5 +235,136 @@ document.getElementById("collaborators-container").addEventListener("click", e =
 const sel = document.getElementById("priority-select");
 const hid = document.getElementById("priority-hidden");
 sel.addEventListener("change", () => hid.value = sel.value);
+
+// --- Función para resetear campos de ambos formularios ---
+function resetFormFields(form) {
+  form.reset();
+  if (form.classList.contains('add-users')) {
+    document.getElementById('user_id').value = '';
+    document.getElementById('email-search-input').value = '';
+    document.getElementById('email-autocomplete-results').innerHTML = '';
+  }
+  // Si quieres limpiar requirements/collaborators extra, puedes hacerlo aquí
+}
+
+// --- AJAX para ambos formularios con mensajes personalizados ---
+document.addEventListener('DOMContentLoaded', function() {
+  // FORMULARIO DE TAREA
+  const taskForm = document.querySelector('.add-tasks');
+  if (taskForm) {
+    taskForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const formData = new FormData(taskForm);
+      const requirements = Array.from(document.querySelectorAll('.requirement-input')).map(input => input.value).filter(Boolean);
+      const collaborators = Array.from(document.querySelectorAll('.collaborator-input')).map(input => input.value).filter(Boolean);
+      formData.delete('requirements');
+      formData.delete('collaborators');
+      requirements.forEach(req => formData.append('requirements', req));
+      collaborators.forEach(col => formData.append('collaborators', col));
+      const jsonData = Object.fromEntries(formData.entries());
+
+      fetch(window.location.pathname, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jsonData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('successModalLabel').innerText = 'Task Added';
+          document.querySelector('#successModal .modal-body').innerText = 'The task has been added successfully!';
+          const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+          successModal.show();
+          resetFormFields(taskForm);
+        } else {
+          document.getElementById('errorModalLabel').innerText = 'Error';
+          document.getElementById('errorMessage').innerText = data.error || 'Unknown error';
+          const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+          errorModal.show();
+        }
+      })
+      .catch(error => {
+        document.getElementById('errorModalLabel').innerText = 'Error';
+        document.getElementById('errorMessage').innerText = 'Request failed!';
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+      });
+    });
+  }
+
+  // FORMULARIO DE USUARIO
+  const userForm = document.querySelector('.add-users');
+  if (userForm) {
+    userForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const formData = new FormData(userForm);
+      const jsonData = Object.fromEntries(formData.entries());
+
+      fetch(window.location.pathname, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jsonData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('successModalLabel').innerText = 'User Assigned';
+          document.querySelector('#successModal .modal-body').innerText = 'The user has been assigned to the project!';
+          const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+          successModal.show();
+          resetFormFields(userForm);
+        } else {
+          document.getElementById('errorModalLabel').innerText = 'Error';
+          document.getElementById('errorMessage').innerText = data.error || 'Unknown error';
+          const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+          errorModal.show();
+        }
+      })
+      .catch(error => {
+        document.getElementById('errorModalLabel').innerText = 'Error';
+        document.getElementById('errorMessage').innerText = 'Request failed!';
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+      });
+    });
+  }
+});
 </script>
+<!-- Modal de éxito -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="successModalLabel">Task Added</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        The task has been added successfully!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de error -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="errorMessage">
+        An error occurred while adding the task.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
