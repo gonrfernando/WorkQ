@@ -16,7 +16,7 @@ def sign_up_view(request):
         # Si se solicita reenvío
         if 'resend' in request.params:
             last_sent_str = session.get('email_last_sent')
-            now = datetime.utcnow()
+            now = datetime.now()
             if last_sent_str:
                 last_sent = datetime.fromisoformat(last_sent_str)
                 if (now - last_sent).total_seconds() < 45:
@@ -38,8 +38,12 @@ def sign_up_view(request):
 
             if not email_sent:
                 return {'message': 'Failed to resend email.', 'status': 'error'}
-
-            session['email_last_sent'] = now
+            user = request.dbsession.query(Users).filter(Users.email == email).first()
+            if user:
+                hashed_password = bcrypt.hashpw(temp_password.encode('utf-8'), bcrypt.gensalt())
+                user.passw = hashed_password.decode('utf-8')
+                request.dbsession.flush()  # guardar los cambios
+            session['email_last_sent'] = now.isoformat()
 
             return {
                 'message': 'Email resent successfully.',
@@ -74,8 +78,12 @@ def sign_up_view(request):
 
             # Guardar en sesión
             session['email'] = email
-            session['email_last_sent'] = datetime.utcnow().isoformat()
+            session['email_last_sent'] = datetime.now().isoformat()
 
+            print("=== Sesión actual ===")
+            for key, value in session.items():
+                print(f"session['{key}'] = {value} (tipo: {type(value)})")
+            print("=====================")
 
             return {
                 'message': 'Temporary password sent to your email.',
