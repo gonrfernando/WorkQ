@@ -7,13 +7,20 @@
             <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
         </div>
     </div>
+    {% if not has_requests %}
+        <div class="alert alert-info mt-4" role="alert">
+            No tasks with requests found.
+        </div>
+    {% endif %}
+
     {% for task in tasks %}
         {% if loop.index0 % 4 == 0 %}
         <div class="task-container card-view row gx-5">
         {% endif %}
             <div class="task-spacer col-3">
                 <div class="task-item" data-task-id="{{ task.id }}" onclick="openTaskModalFromCard(this)">
-                    <h3 class="task-title">{{ task.title }}</h3>
+                    <h6 class="project-name">Project: {{ task.project_name }}</h6>
+                    <h4 class="task-title">{{ task.title }}</h4>
                     <div class="task-element task-subheader row">
                         <p class="priority col-4">
                             {{ task.priority }}
@@ -53,6 +60,7 @@
                 <span class="material-icons" id="close-modal" onclick="closeTaskModal()" style="cursor: pointer;">close</span>
             </div>
             <h1 class="task-title-modal">Task Title</h1>
+            <h6 class="project-name-modal">Project: </h6>
             <div class="task-subheader-modal row">
                 <p class="task-priority-modal col">Priority: <span class="task-priority high"></span></p>
                 <div class="due-date-wrapper col">
@@ -99,6 +107,35 @@
         background-color: #f8d7da; /* Rosa claro */
         border-left: 5px solid #dc3545;
     }
+
+    .modal-body-scrollable {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .request-accepted {
+        background-color: #d4edda;
+        border-left: 5px solid #28a745;
+    }
+
+    .request-rejected {
+        background-color: #f8d7da;
+        border-left: 5px solid #dc3545;
+    }
+
+    /* Elevamos los modales solo cuando están activos */
+    .modal.show#confirmModal .modal-dialog,
+    .modal.show#successModal .modal-dialog,
+    .modal.show#errorModal .modal-dialog {
+        z-index: 1070;
+    }
+
+    .modal.show#confirmModal ~ .modal-backdrop,
+    .modal.show#successModal ~ .modal-backdrop,
+    .modal.show#errorModal ~ .modal-backdrop {
+        z-index: 1069;
+    }
+
     </style>
 
     <!-- Modal de configuración -->
@@ -126,6 +163,60 @@
 
         </div>
     </div>
+    <!-- Modal de éxito -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="successMessage">
+                Request processed successfully.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="location.reload()">OK</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de error -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="errorMessage">
+                Something went wrong.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="confirmModalLabel">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="confirmMessage">
+                Are you sure?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="confirmActionBtn" type="button" class="btn btn-primary">Confirm</button>
+            </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Scripts -->
@@ -145,10 +236,31 @@
         const selectedTask = tasks.find(t => t.id == taskId);
 
         if (selectedTask) {
-            // Llenar el contenedor de requests
+            // Actualiza título, descripción, prioridad, fecha y nombre del proyecto en el modal
+            document.querySelector(".task-title-modal").innerText = selectedTask.title;
+            document.querySelector(".task-description-modal").innerText = selectedTask.description;
+            document.querySelector(".task-priority-modal").innerHTML = `Priority: <span class="task-priority ${selectedTask.priority.toLowerCase()}"></span>`;
+            document.querySelector(".task-due-date-modal .due-date-text").innerText = selectedTask.due_date;
+            
+            document.querySelector(".project-name-modal").innerText = "Project: " + selectedTask.project_name;
+
+            const requirementsContainer = document.getElementById("requirements-list");
+            requirementsContainer.innerHTML = '';
+            selectedTask.requirements.forEach(req => {
+                const reqDiv = document.createElement("div");
+                reqDiv.style.display = "flex";
+                reqDiv.innerHTML = `
+                    <label class="checkbox-container">
+                        <input class="custom-checkbox" type="checkbox" ${req.is_completed ? "checked" : ""}>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="custom-checkbox-label">${req.requirement}</label>
+                `;
+                requirementsContainer.appendChild(reqDiv);
+            });
+
             const container = document.getElementById('task-requests-container');
             container.innerHTML = '';
-
             selectedTask.requests.forEach(req => {
                 let statusClass = '';
                 if (req.accepted_by) {
@@ -185,41 +297,69 @@
     function openSettingsModal() {
         const taskId = document.getElementById('modal-task-id').value;
         if (!taskId) {
-            console.warn("No task selected.");
+            alert('No task selected.');
             return;
         }
-        const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
-        modal.show();
+        const bsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        bsModal.show();
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const settingsModal = document.getElementById('settingsModal');
-        settingsModal.addEventListener('show.bs.modal', function (event) {
-            const taskId = document.getElementById('modal-task-id').value;
-            if (!taskId) {
-                event.preventDefault();
-            }
-        });
-    });
+    let pendingAction = null;
+    let pendingRequestId = null;
+    let confirmModalInstance = null;
 
     function handleRequestAction(requestId, action) {
-        fetch("/handle-request-action", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-Token": "{{ request.session.get_csrf_token() }}"
-            },
-            body: JSON.stringify({ request_id: requestId, action: action })
-        })
-        .then(response => {
-            if (response.ok) {
-                alert(`Request ${action}ed successfully`);
-                location.reload();  // Recarga para ver los cambios
-            } else {
-                alert("Something went wrong.");
-            }
-        });
-    }
-</script>
+        pendingRequestId = requestId;
+        pendingAction = action;
 
-{% endblock tasks %}
+        document.getElementById("confirmMessage").textContent =
+            `Are you sure you want to ${action} this request?`;
+
+        const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal"));
+        confirmModalInstance = confirmModal;
+        confirmModal.show();
+
+        const confirmBtn = document.getElementById("confirmActionBtn");
+
+        // Evita múltiples asignaciones duplicadas
+        confirmBtn.onclick = () => {
+            confirmModalInstance.hide();
+
+            // Esperamos a que el modal de confirmación se cierre
+            const confirmEl = document.getElementById("confirmModal");
+            confirmEl.addEventListener("hidden.bs.modal", function onHidden() {
+                // Removemos el listener para que no se dispare múltiples veces
+                confirmEl.removeEventListener("hidden.bs.modal", onHidden);
+
+                // Ahora hacemos la petición
+                fetch("{{ request.route_url('handle_request_action') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": "{{ request.session.get_csrf_token() }}"
+                    },
+                    body: JSON.stringify({ request_id: pendingRequestId, action: pendingAction }),
+                })
+                .then(response => response.json().then(data => {
+                    if (response.ok) {
+                        document.getElementById("successMessage").textContent = `Request ${pendingAction}ed successfully.`;
+                        const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+                        successModal.show();
+                    } else {
+                        document.getElementById("errorMessage").textContent = data.error || "Something went wrong.";
+                        const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                        errorModal.show();
+                    }
+                }))
+                .catch(error => {
+                    console.error("Error:", error);
+                    document.getElementById("errorMessage").textContent = "Error sending request.";
+                    const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                    errorModal.show();
+                });
+            });
+        };
+    }
+
+</script>
+{% endblock %}
