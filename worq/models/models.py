@@ -157,6 +157,7 @@ class Tasks(Base):
     description = Column(Text, nullable=False)
     creation_date = Column(DateTime, nullable=False)
     finished_date = Column(DateTime)
+    due_date = Column(DateTime)
     priority_id = Column(ForeignKey('task_priorities.id'), nullable=False)
     status_id = Column(ForeignKey('status.id'), nullable=False)
 
