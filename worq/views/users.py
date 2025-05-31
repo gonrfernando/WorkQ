@@ -59,11 +59,6 @@ def my_view(request):
 def update_user(request):
     try:
         user_id = request.json_body.get("user_id")
-        print("User ID:", user_id)
-        print("Country ID:", request.json_body.get("country_id"))
-        print("Area ID:", request.json_body.get("area_id"))
-        print("Role ID:", request.json_body.get("role_id"))
-
         if not user_id:
             return {"error": "User ID is required"}
 
@@ -77,6 +72,10 @@ def update_user(request):
         user.country_id = int(request.json_body.get("country_id", user.country_id))
         user.area_id = int(request.json_body.get("area_id", user.area_id))
         user.role_id = int(request.json_body.get("role_id", user.role_id))
+
+        new_passw = request.json_body.get("passw")
+        if new_passw:
+            user.passw = new_passw
 
         request.dbsession.flush()
 
