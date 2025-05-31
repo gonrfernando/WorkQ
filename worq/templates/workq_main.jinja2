@@ -32,6 +32,7 @@
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
       <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <script src="{{request.static_url('worq:static/assets/sidebar-scripts.js')}}"></script>
       <script src="{{request.static_url('worq:static/assets/task_view.js')}}"></script>
       <script src="{{request.static_url('worq:static/assets/pm_main.js')}}"></script>
@@ -40,6 +41,8 @@
 
   </head>
   <body>
+
+
     <div id="mySidebar" class="sidebar" onmouseleave="closeNav()" onmouseover="openNav()">
       <!-- Top Branding -->
       <div class="sidebar-header">
@@ -277,5 +280,7 @@
         }
       });
 </script>
+{% block footer_scripts %}
+{% endblock %}
   </body>
 </html>

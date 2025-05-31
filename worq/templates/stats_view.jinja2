@@ -1,36 +1,65 @@
 {% extends "workq_main.jinja2" %}
 {% block stats %}
-<div class="container mt-4">
-  <h3>Estadísticas de {{ user_name }}</h3>
-  
-  <div class="row mb-3">
-    {% for project in userprojects %}
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-header">
-            {{ project.name }}
-          </div>
-          <div class="card-body">
-            {% set total = usertasks | selectattr("project_id", "equalto", project.id) | list %}
-            {% set finished = total | selectattr("state_id", "equalto", 3) | list %}
-            <p>Total tareas: {{ total|length }}</p>
-            <p>Completadas: {{ finished|length }}</p>
-            {% if total|length > 0 %}
-              <div class="progress">
-                <div class="progress-bar bg-success" role="progressbar" 
-                     style="width: {{ (finished|length / total|length * 100)|round(0) }}%" 
-                     aria-valuenow="{{ (finished|length / total|length * 100)|round(0) }}" 
-                     aria-valuemin="0" aria-valuemax="100">
-                  {{ (finished|length / total|length * 100)|round(0) }}%
+<div class="container-fluid">
+    <div class="project-bar row">
+        <div class="col-6 bar-wrapper">
+            <div class="project-selector-bar dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">
+                    {{ active_project.name }}
+                </button>
+                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                    {% for project in projects %}
+                        <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
+                    {% endfor %}
                 </div>
-              </div>
-            {% else %}
-              <div class="text-muted">Sin tareas asignadas</div>
-            {% endif %}
-          </div>
+            </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
+    </div>
+    <!-- Gráfico de estadísticas -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div id="taskStatsChart" class="ct-chart ct-perfect-fourth"></div>
+        </div>
+    </div>
 </div>
+
 {% endblock stats %}
+{% block footer_scripts %}
+  <script>
+    window.taskStatsData = {{ stats | tojson }};
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chartist@0.11.4/dist/chartist.min.js"></script>
+  <style>
+  /* Asegúrate de que el contenedor tenga un tamaño fijo */
+  #taskStatsChart {
+    width: 100%;
+    max-width: 400px;
+    height: 400px;
+    margin: 0 auto;
+  }
+
+  /* Etiquetas (números o texto en los bordes) */
+  .ct-label {
+    fill: #444;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  /* Colores personalizados para cada parte de la gráfica */
+  .ct-series-a .ct-slice-donut {
+    stroke: #4CAF50; /* Verde */
+  }
+
+  .ct-series-b .ct-slice-donut {
+    stroke: #F44336; /* Rojo */
+  }
+
+  .ct-series-c .ct-slice-donut {
+    stroke: #2196F3; /* Azul */
+  }
+</style>
+
+  <script src="{{ request.static_url('worq:static/assets/stats_view.js') }}"></script>
+{% endblock %}

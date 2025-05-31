@@ -396,6 +396,11 @@ padding: 18px, 40px;
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
   font-family: 'Segoe UI', sans-serif;
 }
+#taskStatsChart {
+  width: 100%;
+  max-width: 400px;
+  height: 400px;
+}
 
 /* Éxito */
 .modal-header.bg-success {
