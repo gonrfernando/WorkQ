@@ -511,11 +511,11 @@ a, a .toolbar-icon {
 
 .members-sidebar {
     width: 60px; /* Pequeño inicialmente */
-    height: 100px;
+    height: 60px;
     background-color: #465158;
     transition: 0.3s;
     position: fixed;
-    top: 220px; /* Ajusta donde quieres */
+    top: 240px; /* Ajusta donde quieres */
     right: 20px;
     border-radius: 10px;
     overflow: visible;

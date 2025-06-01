@@ -1,5 +1,5 @@
 from pyramid.view import view_config
-from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities, UsersProjects
+from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities, UsersProjects, Users
 from sqlalchemy.orm import joinedload
 from pyramid.httpexceptions import HTTPFound
 
@@ -77,6 +77,14 @@ def task_view(request):
             ]
         })
 
+    # 6) Cargar usuarios del proyecto activo
+    users = (
+        request.dbsession.query(Users)
+        .join(UsersProjects)
+        .filter(UsersProjects.project_id == active_project_id)
+        .all()
+    )
+
     return {
         "projects": json_projects,
         "active_project": active_project,
@@ -85,5 +93,7 @@ def task_view(request):
         "user_email": user_email,
         "user_role": user_role,
         "active_tab": "tasks",
-        "message": error
+        "message": error,
+        "users": users,
+        "active_project_id": active_project_id,
     }
