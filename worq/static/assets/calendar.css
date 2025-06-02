@@ -86,7 +86,7 @@
     border-left-color: #4caf50 !important;
     background: #e8f5e9 !important;
 }
-.priority-avg {
+.priority-average {
     border-left-color: #ffb300 !important;
     background: #fff8e1 !important;
 }
@@ -218,7 +218,7 @@
 .priority-dot.low {
     background-color: #4caf50; 
 }
-.priority-dot.avg {
+.priority-dot.average {
     background-color: #ffb300; 
 }
 .priority-dot.high {

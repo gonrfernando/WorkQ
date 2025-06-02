@@ -2,7 +2,7 @@ from datetime import datetime, date, timedelta
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPInternalServerError
 from worq.models.models import Projects, Tasks, UsersProjects, TaskPriorities
-
+from sqlalchemy.orm import joinedload
 
 @view_config(route_name='calendar', renderer='worq:templates/calendar.jinja2')
 def my_view(request):
@@ -30,16 +30,23 @@ def my_view(request):
         json_projects = [{"id": up.project_id, "name": up.project.name} for up in user_projects]
 
         # Mapeo de prioridades
+        all_priorities = request.dbsession.query(TaskPriorities).all()
         priority_map = {
             p.id: p.priority for p in request.dbsession.query(TaskPriorities).all()
         }
 
         # Obtener tareas del mes actual
-        tasks = request.dbsession.query(Tasks).filter(
-            Tasks.project_id == active_project_id,
-            Tasks.finished_date >= first_day,
-            Tasks.finished_date < next_month
-        ).all()
+        tasks = (
+            request.dbsession.query(Tasks)
+            .options(joinedload(Tasks.priority))
+            .filter(
+                Tasks.project_id == active_project_id,
+                Tasks.finished_date >= first_day,
+                Tasks.finished_date < next_month
+            )
+            .all()
+        )
+
 
         # Agrupar tareas por día
         tasks_by_day = {}
@@ -47,10 +54,13 @@ def my_view(request):
             if task.finished_date:
                 day = task.finished_date.day
                 tasks_by_day.setdefault(day, []).append({
-                    "title": task.title,
-                    "description": task.description,
-                    "finished_date": task.finished_date.isoformat(),
-                    "priority": priority_map.get(task.priority_id, "None")
+                    "id":            task.id,
+                    "title":         task.title,
+                    "description":   task.description or "",
+                    "finished_date":      task.finished_date.isoformat(),
+                    "priority_id":   task.priority_id,                      # entero
+                    "priority_name": priority_map.get(task.priority_id, "None"), # texto, p.ej. "Low" / "Medium" / "High"
+                    "project_id":    task.project_id
                 })
 
         return {
