@@ -34,7 +34,6 @@
     <section class="out">
       <section class="form-login">
         <h5>Sign-in</h5>
-        <h6>Koch email address</h6>
         <form method="POST" action="{{ request.route_url('sign_in') }}">
           <div>
             <input class="controls" type="text" id="email" name="email" placeholder="Email" required>
@@ -52,6 +51,20 @@
         <p>Don’t have an account? 
           <a href="{{ request.route_url('sign_up') }}">Sign-up</a>
         </p>
+        <p>Forgot your password?
+          <a href="#" onclick="toggleForgotSection(event)">Click here</a>
+        </p>
+
+        <div id="forgot-section" class="collapse mt-3">
+          <div class="p-3 rounded bg-light border shadow-sm" id = "form_div"> <!-- Fondo y estilo -->
+            <form method="POST" action="{{ request.route_url('forgot_password') }}">
+              <input class="form-control mb-2" type="email" name="emailfp" id="emailfp"
+                    placeholder="Enter your email" required value="{{ email_value or '' }}">
+              <button class="btn-forgot w-100" type="submit">Send</button>
+            </form>
+          </div>
+        </div>
+
          <!-- Modal -->
     <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -113,6 +126,15 @@
             passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
             visibilityIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
           }
+          function toggleForgotSection(event) {
+            event.preventDefault();
+            const forgotSection = document.getElementById('forgot-section');
+            new bootstrap.Collapse(forgotSection, {
+              toggle: true
+            });
+          }
+          
+
         </script>
       </section>
     </section>

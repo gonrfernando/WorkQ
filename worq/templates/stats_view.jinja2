@@ -1,9 +1,65 @@
 {% extends "workq_main.jinja2" %}
-
 {% block stats %}
-<div>
-    <h3>Stats Content</h3>
-    <p>This is the content for the Stats tab.</p>
+<div class="container-fluid">
+    <div class="project-bar row">
+        <div class="col-6 bar-wrapper">
+            <div class="project-selector-bar dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">
+                    {{ active_project.name }}
+                </button>
+                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                    {% for project in projects %}
+                        <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Gráfico de estadísticas -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div id="taskStatsChart" class="ct-chart ct-perfect-fourth"></div>
+        </div>
+    </div>
 </div>
 
 {% endblock stats %}
+{% block footer_scripts %}
+  <script>
+    window.taskStatsData = {{ stats | tojson }};
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chartist@0.11.4/dist/chartist.min.js"></script>
+  <style>
+  /* Asegúrate de que el contenedor tenga un tamaño fijo */
+  #taskStatsChart {
+    width: 100%;
+    max-width: 400px;
+    height: 400px;
+    margin: 0 auto;
+  }
+
+  /* Etiquetas (números o texto en los bordes) */
+  .ct-label {
+    fill: #444;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  /* Colores personalizados para cada parte de la gráfica */
+  .ct-series-a .ct-slice-donut {
+    stroke: #4CAF50; /* Verde */
+  }
+
+  .ct-series-b .ct-slice-donut {
+    stroke: #F44336; /* Rojo */
+  }
+
+  .ct-series-c .ct-slice-donut {
+    stroke: #2196F3; /* Azul */
+  }
+</style>
+
+  <script src="{{ request.static_url('worq:static/assets/stats_view.js') }}"></script>
+{% endblock %}
