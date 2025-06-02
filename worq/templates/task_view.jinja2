@@ -46,7 +46,7 @@
                                     {% if requirement.is_completed %} 
                                         checked 
                                     {% endif %} 
-                                    type="checkbox">
+                                    type="checkbox" textContent="{{requirement.requirement}}">
                                     <span class="checkmark"></span>
                                 </label>
                                 <label class="custom-checkbox-label" for="requirement-{{ requirement.id }}">{{ requirement.requirement }}</label>

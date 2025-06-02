@@ -19,3 +19,4 @@ def includeme(config):
     config.add_route('save_active_tab', '/save_active_tab')
     config.add_route('get_active_tab', '/get_active_tab')
     config.add_route('upload_file', '/upload_file')
+    config.add_route('update_requirement', '/update_requirement')

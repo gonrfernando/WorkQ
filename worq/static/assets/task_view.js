@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const priority = task.querySelector(".task-priority").classList[1];
             const dueDate = task.querySelector(".due-date-text").textContent;
             const description = task.querySelector(".task-description").textContent;
-            const requirements = task.querySelectorAll(".custom-checkbox-label");
+            const requirements = task.querySelectorAll(".custom-checkbox");
 
             taskTitleModal.textContent = title;
             taskPriorityModal.className = `task-priority ${priority}`;
@@ -101,12 +101,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 const div = document.createElement("div");
                 div.style.display = "flex";
                 div.style.marginBottom = "2px";
+                let labelText = "";
+                const labelElem = req.closest('div').querySelector('label.custom-checkbox-label');
+                if (labelElem) {
+                    labelText = labelElem.textContent;
+                } else {
+                    labelText = req.getAttribute('textContent') || req.value || '';
+                }
                 div.innerHTML = `
                     <label class="checkbox-container">
-                        <input class="custom-checkbox" id="requirement-${req.id}" type="checkbox" ${req.checked ? "checked" : ""}>
+                        <input class="custom-checkbox" id="${req.id}" type="checkbox" ${req.checked ? "checked" : ""} data-reqid="${req.id}">
                         <span class="checkmark"></span>
                         </label>
-                    <label for="${req.id}">${req.textContent}</label>
+                    <label for="${req.id}">${labelText}</label>
                 `;
                 requirementsList.appendChild(div);
             });
@@ -126,10 +133,41 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     saveTaskButton.addEventListener("click", function () {
-        modal.style.display = "none";
+        const checkboxes = requirementsList.querySelectorAll('.custom-checkbox');
+        const updates = [];
+        checkboxes.forEach(checkbox => {
+            const reqIdAttr = checkbox.getAttribute('id');
+            const requirementId = reqIdAttr ? reqIdAttr.replace('requirement-', '') : '';
+            updates.push({
+                requirement_id: requirementId,
+                is_completed: checkbox.checked
+            });
+        });
+        if (updates.length > 0) {
+            Promise.all(
+                updates.map(update =>
+                    fetch('/update_requirement', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(update)
+                    }).then(res => res.json())
+                )
+            ).then(results => {
+                const failed = results.find(r => !r.success);
+                if (failed) {
+                    alert("Failed to update requirement: " + (failed.error || "Unknown error"));
+                }
+                location.reload(); 
+            });
+        } else {
+            modal.style.display = "none";
+        }
     });
 
     deliverTaskButton.addEventListener("click", function () {
         modal.style.display = "none";
     });
 });
+
