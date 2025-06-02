@@ -136,6 +136,14 @@
         z-index: 1069;
     }
 
+    .modal.show#editTaskModal .modal-dialog {
+        z-index: 1080 !important;
+    }
+
+    .modal.show#editTaskModal ~ .modal-backdrop {
+        z-index: 1079 !important;
+    }
+
     </style>
 
     <!-- Modal de configuración -->
@@ -161,6 +169,45 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+    <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+            <form id="editTaskForm">
+                <div class="modal-header">
+                <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                <input type="hidden" name="task_id" id="edit-task-id">
+                <div class="mb-3">
+                    <label for="edit-task-title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="edit-task-title" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="edit-task-desc" class="form-label">Description</label>
+                    <textarea class="form-control" id="edit-task-desc" name="description" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="edit-task-due" class="form-label">Due Date</label>
+                    <input type="date" class="form-control" id="edit-task-due" name="due_date" required>
+                </div>
+                <div class="mb-3">
+                    <label for="edit-task-priority" class="form-label">Priority</label>
+                    <select class="form-select" id="edit-task-priority" name="priority">
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                    </select>
+                </div>
+                </div>
+                <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+            </div>
         </div>
     </div>
     <!-- Modal de éxito -->
@@ -342,9 +389,16 @@
                 })
                 .then(response => response.json().then(data => {
                     if (response.ok) {
-                        document.getElementById("successMessage").textContent = `Request ${pendingAction}ed successfully.`;
-                        const successModal = new bootstrap.Modal(document.getElementById("successModal"));
-                        successModal.show();
+                        const acceptedTaskId = pendingRequestId; // o ajusta si el ID de la tarea viene en `data.task_id`
+                        const task = {{ tasks | tojson }}.find(t => t.requests.some(r => r.id == acceptedTaskId));
+
+                        if (task) {
+                            openEditTaskModal(task);
+                        } else {
+                            document.getElementById("successMessage").textContent = `Request ${pendingAction}ed. But task not found.`;
+                            const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+                            successModal.show();
+                        }
                     } else {
                         document.getElementById("errorMessage").textContent = data.error || "Something went wrong.";
                         const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
@@ -362,4 +416,27 @@
     }
 
 </script>
+<script>
+function openEditTaskModal(task) {
+    // Cierra el successModal si está visible
+    const successModalEl = document.getElementById("successModal");
+    const successModal = bootstrap.Modal.getInstance(successModalEl);
+    if (successModal) {
+        successModal.hide();
+    }
+
+    // Carga datos del task en el modal
+    document.getElementById("edit-task-id").value = task.id;
+    document.getElementById("edit-task-title").value = task.title;
+    document.getElementById("edit-task-desc").value = task.description;
+    document.getElementById("edit-task-due").value = task.due_date;
+    document.getElementById("edit-task-priority").value = task.priority;
+
+    // Abre el modal de edición
+    const editModal = new bootstrap.Modal(document.getElementById("editTaskModal"));
+    editModal.show();
+}
+
+</script>
+
 {% endblock %}
