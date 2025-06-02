@@ -42,11 +42,48 @@
         <p>Already have a password?
           <a href="{{ request.route_url('sign_in') }}">Sign-in</a>
         </p>
+         {% if email_sent %}
+          <p class="mt-3">Email sent to: <strong>{{ email_value }}</strong></p>
+          <form id="resendform" method="GET" action="{{ request.route_url('sign_up') }}">
+            <input type="hidden" name="resend" value="1">
+            <button type="submit" class="btn btn-info" id="resendBtn" disabled>Resend email (<span id="cooldown">45</span>s)</button>
+          </form>
+
+          <script>
+            let countdown = 45;
+            const resendBtn = document.getElementById('resendBtn');
+            const cooldownSpan = document.getElementById('cooldown');
+
+            const interval = setInterval(() => {
+              countdown -= 1;
+              cooldownSpan.textContent = countdown;
+              if (countdown <= 0) {
+                clearInterval(interval);
+                resendBtn.disabled = false;
+                resendBtn.textContent = "Resend email";
+              }
+            }, 1000);
+          </script>
+        {% endif %}
         <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+              <div class="modal-header
+              {% if status == 'success' %}
+                bg-success text-white
+              {% elif status == 'error' %}
+                bg-danger text-white
+              {% else %}
+                bg-secondary text-white
+              {% endif %}
+              ">
+                 <h5 class="modal-title" id="errorModalLabel">
+                  {% if status == 'success' %}
+                    Success
+                  {% else %}
+                    Error
+                  {% endif %}
+                  </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
@@ -58,6 +95,8 @@
             </div>
           </div>
         </div>
+       
+
         {% if redirect %}
             <script>
               setTimeout(function() {

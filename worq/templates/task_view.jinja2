@@ -47,9 +47,11 @@
                         {% for requirement in task.requirements %}
                             <div style="display:flex">
                                 <label class="checkbox-container">
-                                    <input class="custom-checkbox" id="requirement-{{ requirement.id }}"
-                                           {% if requirement.is_completed %}checked{% endif %}
-                                           type="checkbox">
+                                    <input class="custom-checkbox" id="requirement-{{ requirement.id }}"  
+                                    {% if requirement.is_completed %} 
+                                        checked 
+                                    {% endif %} 
+                                    type="checkbox" textContent="{{requirement.requirement}}">
                                     <span class="checkmark"></span>
                                 </label>
                                 <label class="custom-checkbox-label" for="requirement-{{ requirement.id }}">{{ requirement.requirement }}</label>
@@ -88,9 +90,22 @@
                         <!-- Requirements will be dynamically added here -->
                     </div>
                     <div class="task-files-modal">
-                        <input type="file" id="file-input" multiple>
+                        <input type="file" id="file" name="file" multiple>
+                        <button type="submit" id="btnsubir" class="btn btn-primary" disabled>Upload</button>
                     </div>
                     </form>
+                   <script>
+                        const file = document.getElementById('file');
+                        const btnsubir = document.getElementById('btnsubir');
+
+                        file.addEventListener('change', () => {
+                        if (file.files.length > 0) {
+                            btnsubir.disabled = false;
+                        } else {
+                            btnsubir.disabled = true;
+                        }
+                        });
+                    </script>   
                 </div>
                 <div class="task-stats-modal"></div>
             </div>
