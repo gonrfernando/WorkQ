@@ -1,31 +1,48 @@
 import os
+import uuid
+import mimetypes
 from pyramid.view import view_config
-from pyramid.response import Response
-from worq.scripts.sanitize import sanitize_file
+from worq.scripts.s3_utils import upload_file_to_s3
+from worq.models.models import Files
 
-UPLOAD_FOLDER = 'uploads'  # Directorio donde se guardarán los archivos
+# Extensiones permitidas (puedes ajustarlas)
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'pdf', 'docx', 'xlsx', 'txt'}
 
-@view_config(route_name='upload_file', request_method='POST', renderer='json')
-def upload_file_view(request):
-    try:
-        # Verifica si el formulario contiene un archivo
-        if 'file' not in request.POST:
-            return {"success": False, "error": "No file part in the request"}
+def secure_filename(filename):
+    """
+    Sanitiza el nombre del archivo para evitar inyecciones o caracteres maliciosos.
+    """
+    filename = os.path.basename(filename)  # Evita path traversal
+    filename = filename.replace(" ", "_")  # Opcional: reemplaza espacios
+    # Solo caracteres alfanuméricos, guiones y puntos
+    return ''.join(c for c in filename if c.isalnum() or c in ('_', '-', '.'))
 
-        # Obtén el archivo y su nombre
-        file = request.POST['file'].file
-        filename = request.POST['file'].filename
+def allowed_file(filename):
+    """
+    Verifica que el archivo tenga una extensión permitida.
+    """
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-        # Sanitiza y valida el archivo
-        sanitized_name = sanitize_file(file, filename)
+@view_config(route_name='upload_file', renderer='json', request_method='POST')
+def upload_view(request):
+    archivo = request.POST['file']
+    input_file = archivo.file
+    original_filename = archivo.filename
+    content_type = archivo.type
 
-        # Guarda el archivo en el directorio de subida
-        upload_path = os.path.join(UPLOAD_FOLDER, sanitized_name)
-        with open(upload_path, 'wb') as output_file:
-            output_file.write(file.read())
+    # Validación y sanitización
+    if not allowed_file(original_filename):
+        return {'status': 'error', 'message': 'Extensión de archivo no permitida'}
 
-        return {"success": True, "message": "File uploaded successfully", "filename": sanitized_name}
-    except ValueError as e:
-        return {"success": False, "error": str(e)}
-    except Exception as e:
-        return {"success": False, "error": "An unexpected error occurred"}
+    sanitized_filename = secure_filename(original_filename)
+    unique_filename = f"{uuid.uuid4().hex}_{sanitized_filename}"
+
+    # Subir a S3
+    url = upload_file_to_s3(input_file, unique_filename, content_type)
+
+    # Guardar en base de datos
+    nuevo_archivo = Files(filename=sanitized_filename, filepath=url)
+    request.dbsession.add(nuevo_archivo)
+    request.dbsession.flush()
+
+    return {'status': 'ok', 'url': url}

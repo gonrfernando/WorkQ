@@ -24,7 +24,7 @@ body {
 
 .out {
   width: 500px;
-  height: 440px;
+  height: 460px;
   background: #EFF0F2;
   margin: auto;
   margin-top: calc(calc(calc(100vh - 450px) / 2) - 20px);
@@ -37,7 +37,7 @@ body {
 
 .form-login {
   width: 400px;
-  height: 340px;
+  height: 360px;
   background: #FFFFFF;
   margin: auto;
   margin-top: 50px;
@@ -70,6 +70,23 @@ body {
   background: #EEEEEE;
   font-size: 14px;
   font-weight: bold;
+}
+.custom-bg {
+  background-color: #f9f9fc;
+  border: 1px solid #ced4da;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+}
+.btn-forgot {
+  background-color: #465158;
+  border-color: #465158;
+  color: white;
+}
+.btn-forgot:hover {
+  background-color: #3a454d; /* un tono más oscuro para hover */
+  border-color: #3a454d;
+}
+#form_div{
+  background-color: #eff0f2;
 }
 
 .buttons {
@@ -379,6 +396,11 @@ padding: 18px, 40px;
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
   font-family: 'Segoe UI', sans-serif;
 }
+#taskStatsChart {
+  width: 100%;
+  max-width: 400px;
+  height: 400px;
+}
 
 /* Éxito */
 .modal-header.bg-success {
@@ -427,4 +449,9 @@ padding: 18px, 40px;
 }
 .modal {
   display: none;
+}
+#resendform{
+  position: relative;
+  left: 30%;
+  bottom: 9%;
 }
