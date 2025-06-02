@@ -1,8 +1,7 @@
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPInternalServerError
-from pyramid.httpexceptions import HTTPFound
-from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import HTTPInternalServerError, HTTPFound
 from worq.models.models import Users
+import bcrypt
 
 @view_config(route_name='sign_in', renderer='templates/sign_in.jinja2')
 def sign_in_view(request):
@@ -15,7 +14,8 @@ def sign_in_view(request):
             }
         error = request.params.get('error')
         if error:
-            return {'message' : error }
+            return {'message': error}
+        
         if request.method == 'POST':
             email = request.POST.get('email', '').strip()
             password = request.POST.get('password', '').strip()
@@ -23,12 +23,11 @@ def sign_in_view(request):
             print(f"Received data: email={email}, password={password}")
 
             if '@' and '.' not in email:
-                print("Error3")
+                print("Error: Invalid email format")
                 return {'message': 'Invalid email address'}
 
             dbsession = request.dbsession
-            
-            user = dbsession.query(Users).filter(Users.email==email).first()
+            user = dbsession.query(Users).filter(Users.email == email).first()
 
             if email == '' or password == '':
                 return {'message': 'Email and password are required.'}
@@ -42,6 +41,7 @@ def sign_in_view(request):
                 session['user_id'] = user.id
                 return HTTPFound(location=request.route_url('home'))
             else:
+                # Usuario no encontrado
                 return {'message': 'Invalid email or password.'}
 
         return {}

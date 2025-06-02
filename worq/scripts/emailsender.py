@@ -1,28 +1,30 @@
 import smtplib
-from email.message import EmailMessage
+from email.mime.text import MIMEText
 
-def send_email(request, to_email, content):
-    msg = EmailMessage()
-    msg["Subject"] = "Tu contraseña temporal"
-    msg["From"] = "Ce360worq@gmail.com"
-    msg["To"] = to_email
-    msg.set_content(f"""
-    Hola 👋
-
-    Esta es tu contraseña temporal para ingresar al sistema:
-
-    {content}
-
-    ¡No la compartas con nadie!
-    """)
-
+def send_email_async(request, to_email, temp_password):
     try:
-        with smtplib.SMTP("sandbox.smtp.mailtrap.io", 2525) as server:
-            server.ehlo()
+        settings = request.registry.settings
+
+        smtp_server = settings.get('smtp.host')
+        smtp_port = int(settings.get('smtp.port', 587))
+        smtp_user = settings.get('smtp.user')
+        smtp_pass = settings.get('smtp.pass')
+        from_email = smtp_user  # usamos el mismo correo como remitente
+
+        subject = "Tu contraseña temporal"
+        body = f"Tu contraseña temporal es: {temp_password}"
+
+        msg = MIMEText(body)
+        msg["Subject"] = subject
+        msg["From"] = from_email
+        msg["To"] = to_email
+
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
-            server.ehlo()
-            server.login("9abc83595b2a88", "75f90074523f91")  # asegúrate de poner tu password real aquí
-            server.send_message(msg)
-        print(f"Correo enviado a {to_email}")
+            server.login(smtp_user, smtp_pass)
+            server.sendmail(from_email, [to_email], msg.as_string())
+
+        return True
     except Exception as e:
-        print(f"Error al enviar correo: {e}")
+        print(f"Error sending email: {e}")
+        return False
