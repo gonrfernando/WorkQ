@@ -43,7 +43,7 @@
 
           <input type="hidden" name="form_type" value="add_task">
           <input class="controls" type="text" id="title" name="title" placeholder="Title" required>
-          <input class="controls" type="text" id="description" name="description" placeholder="Description" required>
+          <textarea class="controls" type="text" id="description" name="description" placeholder="Description" oninput="autoResize(this)" required></textarea>
 
           <!-- REQUERIMIENTOS -->
           <label><strong>Requirements</strong></label>
@@ -117,6 +117,11 @@
 const users = {{ users | tojson }};
 const projectUsers = {{ users_projects | tojson }};
 
+
+function autoResize(textarea) {
+  textarea.style.height = 'auto'; // Reset altura
+  textarea.style.height = textarea.scrollHeight + 'px'; // Ajusta a contenido
+}
 // 1) Guardamos las plantillas originales (HTML puro)
 const reqTemplate = document.getElementById("req-template-item").outerHTML;
 const collabTemplate = document.getElementById("collab-template-item").outerHTML;

@@ -381,3 +381,15 @@
 .btn-success:hover {
     background-color: #007bb5;
 }
+
+.task-users {
+    margin-top: 0.5rem;
+}
+.assigned-user {
+    font-size: 0.9rem;
+    color: #333;
+}
+.assigned-user .material-symbols-outlined {
+    font-size: 18px;
+    vertical-align: middle;
+}

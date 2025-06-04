@@ -80,7 +80,8 @@ def task_creation_view(request):
                         datetime.datetime.strptime(finished_date, '%Y-%m-%dT%H:%M')
                         if finished_date else None
                     ),
-                    priority_id=int(priority) if priority else None
+                    priority_id=int(priority) if priority else None,
+                    status_id = 4
                 )
                 dbsession.add(new_task)
                 dbsession.flush()
