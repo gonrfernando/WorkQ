@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, String, Text
+from sqlalchemy import Boolean, Date, DateTime, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, String, Text, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 
@@ -10,6 +10,9 @@ class Base(DeclarativeBase):
 
 class Areas(Base):
     __tablename__ = 'areas'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='areas_pkey'),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     area: Mapped[str] = mapped_column(String)
@@ -19,6 +22,9 @@ class Areas(Base):
 
 class Countries(Base):
     __tablename__ = 'countries'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='countries_pkey'),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String)
@@ -38,12 +44,12 @@ class Permissions(Base):
 
     roles_permissions: Mapped[List['RolesPermissions']] = relationship('RolesPermissions', back_populates='permission')
 
-    id = Column(Integer, primary_key=True, server_default=text("nextval('permissions_id_seq'::regclass)"))
-    name = Column(String(100), nullable=False)
-    description = Column(String(200), nullable=False)
 
 class Roles(Base):
     __tablename__ = 'roles'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='roles_pkey'),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String)
@@ -55,6 +61,9 @@ class Roles(Base):
 
 class States(Base):
     __tablename__ = 'states'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='states_pkey'),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     state: Mapped[str] = mapped_column(String(100))
@@ -64,11 +73,15 @@ class States(Base):
 
 class Status(Base):
     __tablename__ = 'status'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='status_pkey'),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     status_name: Mapped[str] = mapped_column(String(100))
     description: Mapped[str] = mapped_column(Text)
 
+    tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='status')
     requests: Mapped[List['Requests']] = relationship('Requests', back_populates='status')
 
 
@@ -83,11 +96,12 @@ class TaskPriorities(Base):
 
     tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='priority')
 
-    id = Column(Integer, primary_key=True, server_default=text("nextval('task_priorities_id_seq'::regclass)"))
-    priority = Column(String(100), nullable=False)
 
 class Types(Base):
     __tablename__ = 'types'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', name='types_pkey'),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     type: Mapped[str] = mapped_column(String(100))
@@ -99,6 +113,10 @@ class Types(Base):
 
 class Notifications(Base):
     __tablename__ = 'notifications'
+    __table_args__ = (
+        ForeignKeyConstraint(['type_id'], ['types.id'], name='type'),
+        PrimaryKeyConstraint('id', name='notifications_pkey')
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     type_id: Mapped[int] = mapped_column(Integer)
@@ -112,6 +130,10 @@ class Notifications(Base):
 
 class Projects(Base):
     __tablename__ = 'projects'
+    __table_args__ = (
+        ForeignKeyConstraint(['state_id'], ['states.id'], name='state_fk'),
+        PrimaryKeyConstraint('id', name='projects_pkey')
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     state_id: Mapped[int] = mapped_column(Integer)
@@ -200,6 +222,10 @@ class Actions(Base):
 
 class Chats(Base):
     __tablename__ = 'chats'
+    __table_args__ = (
+        ForeignKeyConstraint(['project_id'], ['projects.id'], name='project_fk'),
+        PrimaryKeyConstraint('id', name='chats_pkey')
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     project_id: Mapped[int] = mapped_column(Integer)
@@ -211,6 +237,10 @@ class Chats(Base):
 
 class Files(Base):
     __tablename__ = 'files'
+    __table_args__ = (
+        ForeignKeyConstraint(['uploaded_by'], ['users.id'], name='users_fk'),
+        PrimaryKeyConstraint('id', name='files_pkey')
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     filepath: Mapped[str] = mapped_column(Text)
@@ -244,6 +274,7 @@ class Tasks(Base):
     __table_args__ = (
         ForeignKeyConstraint(['priority_id'], ['task_priorities.id'], name='priority_fk'),
         ForeignKeyConstraint(['project_id'], ['projects.id'], name='project'),
+        ForeignKeyConstraint(['status_id'], ['status.id'], name='tasks_status_id_fkey'),
         PrimaryKeyConstraint('id', name='tasks_pkey')
     )
 
@@ -253,10 +284,13 @@ class Tasks(Base):
     description: Mapped[str] = mapped_column(Text)
     creation_date: Mapped[datetime.datetime] = mapped_column(DateTime)
     priority_id: Mapped[int] = mapped_column(Integer)
+    status_id: Mapped[int] = mapped_column(Integer, server_default=text('1'))
     finished_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    due_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
 
     priority: Mapped['TaskPriorities'] = relationship('TaskPriorities', back_populates='tasks')
     project: Mapped['Projects'] = relationship('Projects', back_populates='tasks')
+    status: Mapped['Status'] = relationship('Status', back_populates='tasks')
     requests: Mapped[List['Requests']] = relationship('Requests', back_populates='task')
     task_files: Mapped[List['TaskFiles']] = relationship('TaskFiles', back_populates='task')
     task_requirements: Mapped[List['TaskRequirements']] = relationship('TaskRequirements', back_populates='task')
@@ -369,6 +403,10 @@ class TaskFiles(Base):
 
 class TaskRequirements(Base):
     __tablename__ = 'task_requirements'
+    __table_args__ = (
+        ForeignKeyConstraint(['task_id'], ['tasks.id'], name='task_fk'),
+        PrimaryKeyConstraint('id', name='task_requirements_pkey')
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     task_id: Mapped[int] = mapped_column(Integer)
