@@ -1,5 +1,5 @@
 from pyramid.view import view_config
-from worq.models.models import Projects, Tasks, TaskRequirements, Requests
+from worq.models.models import Projects, Tasks, TaskRequirements, Requests, TaskPriorities
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm import joinedload
 from sqlalchemy import exists, and_
@@ -33,10 +33,9 @@ def my_view(request):
         )
         .all()
     )
-    priorities = {
-        1: "Low",
-        2: "Avg",
-        3: "High"
+    priority_map = {
+        p.id: p.priority
+        for p in request.dbsession.query(TaskPriorities).all()
     }
     
     json_tasks = [{
@@ -45,7 +44,7 @@ def my_view(request):
         "project_name": task.project.name,  
         "title": task.title, 
         "description": task.description,
-        "priority": priorities.get(task.priority, "None"), 
+        "priority": priority_map.get(task.priority_id, "None"),
         "due_date": task.finished_date.strftime('%Y-%m-%d %H:%M:%S') if task.finished_date else "N/A",
         "requirements": [{
             "id": req.id,
