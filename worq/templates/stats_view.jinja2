@@ -17,6 +17,11 @@
     </div>
     <!-- Gráfico de estadísticas -->
 <div class="container mt-4">
+    <div class="task-stats">
+    <h3> Tareas Completadas    <span id ="count_comple" class="badge text-bg-success">{{ stats.completed }}</span></h3>
+    <h3> Tareas Pendientes   <span id ="count_assign"class="badge text-bg-info">{{ stats.assigned }}</span></h3>
+    <h3> Tareas Atrasadas   <span id ="count_late"class="badge text-bg-danger">{{ stats.late }}</span></h3>
+    </div>
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div id="taskStatsChart" class="ct-chart ct-perfect-fourth"></div>
@@ -34,9 +39,9 @@
   <style>
   /* Asegúrate de que el contenedor tenga un tamaño fijo */
   #taskStatsChart {
-    width: 100%;
+    width: 600px;
     max-width: 400px;
-    height: 400px;
+    height: 300px;
     margin: 0 auto;
   }
 
@@ -49,16 +54,28 @@
 
   /* Colores personalizados para cada parte de la gráfica */
   .ct-series-a .ct-slice-donut {
-    stroke: #4CAF50; /* Verde */
+    stroke: #198754; /* Verde */
   }
 
   .ct-series-b .ct-slice-donut {
-    stroke: #F44336; /* Rojo */
+    stroke: #dc3545; /* Rojo */
   }
 
   .ct-series-c .ct-slice-donut {
-    stroke: #2196F3; /* Azul */
+    stroke: #0dcaf0; /* Azul */
   }
+  #count_comple{
+  position: relative;
+  left :5%;
+   }
+   #count_assign{
+  position: relative;
+  left :14%;
+   }
+   #count_late{
+  position: relative;
+  left :19%;
+   }
 </style>
 
   <script src="{{ request.static_url('worq:static/assets/stats_view.js') }}"></script>

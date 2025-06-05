@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const series = [
         taskStats.completed,
         taskStats.late,
-        taskStats.assigned - taskStats.completed - taskStats.late
+        taskStats.assigned
     ];
     const labels = ['Completadas', 'Atrasadas', 'Pendientes'];
 
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         series: series
     }, {
         donut: true,
-        donutWidth: 50,
+        donutWidth: 130,
         showLabel: true,
         chartPadding: 20
     });
