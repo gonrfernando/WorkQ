@@ -14,6 +14,7 @@ import json
 )
 def project_creation_view(request):
     session = request.session
+    user_id = session.get("user_id")
     if 'user_name' not in session:
         return HTTPFound(
             location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'})
@@ -54,7 +55,8 @@ def project_creation_view(request):
                 enddate=(datetime.datetime.strptime(enddate, '%Y-%m-%d').date()
                         if enddate else None),
                 creationdate=datetime.date.today(),
-                state_id=1
+                state_id=1,
+                created_by=user_id
             )
             dbsession.add(new_proj)
             dbsession.flush()
