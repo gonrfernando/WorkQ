@@ -77,7 +77,7 @@
 
           <div class="add-group">
             <label for="finished_date">Due Date</label>
-            <input class="date-button" type="datetime-local" id="finished_date" name="finished_date">
+            <input type="datetime-local" name="finished_date" min="{{ started_date_value }}">
             <input class="buttons" type="submit" value="Submit Task">
           </div>
         </form>

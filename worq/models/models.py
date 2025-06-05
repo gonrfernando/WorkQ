@@ -124,31 +124,8 @@ class Notifications(Base):
     state: Mapped[str] = mapped_column(String)
 
     type: Mapped['Types'] = relationship('Types', back_populates='notifications')
-    project_notifications: Mapped[List['ProjectNotifications']] = relationship('ProjectNotifications', back_populates='noti')
     users_notifications: Mapped[List['UsersNotifications']] = relationship('UsersNotifications', back_populates='noti')
-
-
-class Projects(Base):
-    __tablename__ = 'projects'
-    __table_args__ = (
-        ForeignKeyConstraint(['state_id'], ['states.id'], name='state_fk'),
-        PrimaryKeyConstraint('id', name='projects_pkey')
-    )
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    state_id: Mapped[int] = mapped_column(Integer)
-    name: Mapped[str] = mapped_column(String(200))
-    startdate: Mapped[datetime.date] = mapped_column(Date)
-    enddate: Mapped[datetime.date] = mapped_column(Date)
-    creationdate: Mapped[datetime.date] = mapped_column(Date)
-
-    state: Mapped['States'] = relationship('States', back_populates='projects')
-    actions: Mapped[List['Actions']] = relationship('Actions', back_populates='project')
-    chats: Mapped[List['Chats']] = relationship('Chats', back_populates='project')
-    project_notifications: Mapped[List['ProjectNotifications']] = relationship('ProjectNotifications', back_populates='project')
-    tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='project')
-    users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', back_populates='project')
-    requests: Mapped[List['Requests']] = relationship('Requests', back_populates='project')
+    project_notifications: Mapped[List['ProjectNotifications']] = relationship('ProjectNotifications', back_populates='noti')
 
 
 class RolesPermissions(Base):
@@ -188,16 +165,79 @@ class Users(Base):
     area: Mapped[Optional['Areas']] = relationship('Areas', back_populates='users')
     country: Mapped[Optional['Countries']] = relationship('Countries', back_populates='users')
     role: Mapped['Roles'] = relationship('Roles', back_populates='users')
-    actions: Mapped[List['Actions']] = relationship('Actions', back_populates='user')
     files: Mapped[List['Files']] = relationship('Files', back_populates='users')
+    projects: Mapped[List['Projects']] = relationship('Projects', back_populates='user')
     users_notifications: Mapped[List['UsersNotifications']] = relationship('UsersNotifications', back_populates='user')
-    users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', back_populates='user')
+    actions: Mapped[List['Actions']] = relationship('Actions', back_populates='user')
+    tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='users')
+    users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.invited_by]', back_populates='users')
+    users_projects_: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.user_id]', back_populates='user')
     chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='sender')
     requests: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.accepted_by]', back_populates='users')
     requests_: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.ex_user]', back_populates='users_')
     requests1: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.rejected_by]', back_populates='users1')
     requests2: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.user_id]', back_populates='user')
     users_tasks: Mapped[List['UsersTasks']] = relationship('UsersTasks', back_populates='user')
+
+
+class Files(Base):
+    __tablename__ = 'files'
+    __table_args__ = (
+        ForeignKeyConstraint(['uploaded_by'], ['users.id'], name='users_fk'),
+        PrimaryKeyConstraint('id', name='files_pkey')
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    filepath: Mapped[str] = mapped_column(Text)
+    uploaded_by: Mapped[Optional[int]] = mapped_column(Integer)
+    filename: Mapped[Optional[str]] = mapped_column(String(200))
+    uploaded_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True))
+
+    users: Mapped[Optional['Users']] = relationship('Users', back_populates='files')
+    task_files: Mapped[List['TaskFiles']] = relationship('TaskFiles', back_populates='file')
+    chat_files: Mapped[List['ChatFiles']] = relationship('ChatFiles', back_populates='file')
+
+
+class Projects(Base):
+    __tablename__ = 'projects'
+    __table_args__ = (
+        ForeignKeyConstraint(['state_id'], ['states.id'], name='state_fk'),
+        ForeignKeyConstraint(['user_id'], ['users.id'], name='user_fk'),
+        PrimaryKeyConstraint('id', name='projects_pkey')
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    state_id: Mapped[int] = mapped_column(Integer)
+    name: Mapped[str] = mapped_column(String(200))
+    startdate: Mapped[datetime.date] = mapped_column(Date)
+    enddate: Mapped[datetime.date] = mapped_column(Date)
+    creationdate: Mapped[datetime.date] = mapped_column(Date)
+    user_id: Mapped[Optional[int]] = mapped_column(Integer)
+
+    state: Mapped['States'] = relationship('States', back_populates='projects')
+    user: Mapped[Optional['Users']] = relationship('Users', back_populates='projects')
+    actions: Mapped[List['Actions']] = relationship('Actions', back_populates='project')
+    chats: Mapped[List['Chats']] = relationship('Chats', back_populates='project')
+    project_notifications: Mapped[List['ProjectNotifications']] = relationship('ProjectNotifications', back_populates='project')
+    tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='project')
+    users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', back_populates='project')
+    requests: Mapped[List['Requests']] = relationship('Requests', back_populates='project')
+
+
+class UsersNotifications(Base):
+    __tablename__ = 'users_notifications'
+    __table_args__ = (
+        ForeignKeyConstraint(['noti_id'], ['notifications.id'], name='notis'),
+        ForeignKeyConstraint(['user_id'], ['users.id'], name='user'),
+        PrimaryKeyConstraint('id', name='users_notifications_pkey')
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    noti_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[int] = mapped_column(Integer)
+
+    noti: Mapped['Notifications'] = relationship('Notifications', back_populates='users_notifications')
+    user: Mapped['Users'] = relationship('Users', back_populates='users_notifications')
 
 
 class Actions(Base):
@@ -235,24 +275,6 @@ class Chats(Base):
     chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='chat')
 
 
-class Files(Base):
-    __tablename__ = 'files'
-    __table_args__ = (
-        ForeignKeyConstraint(['uploaded_by'], ['users.id'], name='users_fk'),
-        PrimaryKeyConstraint('id', name='files_pkey')
-    )
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    filepath: Mapped[str] = mapped_column(Text)
-    uploaded_by: Mapped[Optional[int]] = mapped_column(Integer)
-    filename: Mapped[Optional[str]] = mapped_column(String(200))
-    uploaded_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True))
-
-    users: Mapped[Optional['Users']] = relationship('Users', back_populates='files')
-    task_files: Mapped[List['TaskFiles']] = relationship('TaskFiles', back_populates='file')
-    chat_files: Mapped[List['ChatFiles']] = relationship('ChatFiles', back_populates='file')
-
-
 class ProjectNotifications(Base):
     __tablename__ = 'project_notifications'
     __table_args__ = (
@@ -272,6 +294,7 @@ class ProjectNotifications(Base):
 class Tasks(Base):
     __tablename__ = 'tasks'
     __table_args__ = (
+        ForeignKeyConstraint(['created_by'], ['users.id'], name='user_fk'),
         ForeignKeyConstraint(['priority_id'], ['task_priorities.id'], name='priority_fk'),
         ForeignKeyConstraint(['project_id'], ['projects.id'], name='project'),
         ForeignKeyConstraint(['status_id'], ['status.id'], name='tasks_status_id_fkey'),
@@ -286,8 +309,10 @@ class Tasks(Base):
     priority_id: Mapped[int] = mapped_column(Integer)
     status_id: Mapped[int] = mapped_column(Integer, server_default=text('1'))
     finished_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
-    due_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    deliver_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    created_by: Mapped[Optional[int]] = mapped_column(Integer)
 
+    users: Mapped[Optional['Users']] = relationship('Users', back_populates='tasks')
     priority: Mapped['TaskPriorities'] = relationship('TaskPriorities', back_populates='tasks')
     project: Mapped['Projects'] = relationship('Projects', back_populates='tasks')
     status: Mapped['Status'] = relationship('Status', back_populates='tasks')
@@ -297,25 +322,10 @@ class Tasks(Base):
     users_tasks: Mapped[List['UsersTasks']] = relationship('UsersTasks', back_populates='task')
 
 
-class UsersNotifications(Base):
-    __tablename__ = 'users_notifications'
-    __table_args__ = (
-        ForeignKeyConstraint(['noti_id'], ['notifications.id'], name='notis'),
-        ForeignKeyConstraint(['user_id'], ['users.id'], name='user'),
-        PrimaryKeyConstraint('id', name='users_notifications_pkey')
-    )
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    noti_id: Mapped[int] = mapped_column(Integer)
-    user_id: Mapped[int] = mapped_column(Integer)
-
-    noti: Mapped['Notifications'] = relationship('Notifications', back_populates='users_notifications')
-    user: Mapped['Users'] = relationship('Users', back_populates='users_notifications')
-
-
 class UsersProjects(Base):
     __tablename__ = 'users_projects'
     __table_args__ = (
+        ForeignKeyConstraint(['invited_by'], ['users.id'], name='invited_fk'),
         ForeignKeyConstraint(['project_id'], ['projects.id'], name='project_fk'),
         ForeignKeyConstraint(['role_id'], ['roles.id'], name='role_fk'),
         ForeignKeyConstraint(['user_id'], ['users.id'], name='user_fk'),
@@ -326,10 +336,12 @@ class UsersProjects(Base):
     user_id: Mapped[int] = mapped_column(Integer)
     project_id: Mapped[int] = mapped_column(Integer)
     role_id: Mapped[int] = mapped_column(Integer)
+    invited_by: Mapped[Optional[int]] = mapped_column(Integer)
 
+    users: Mapped[Optional['Users']] = relationship('Users', foreign_keys=[invited_by], back_populates='users_projects')
     project: Mapped['Projects'] = relationship('Projects', back_populates='users_projects')
     role: Mapped['Roles'] = relationship('Roles', back_populates='users_projects')
-    user: Mapped['Users'] = relationship('Users', back_populates='users_projects')
+    user: Mapped['Users'] = relationship('Users', foreign_keys=[user_id], back_populates='users_projects_')
 
 
 class ChatsMessages(Base):
