@@ -49,7 +49,8 @@ def task_creation_view(request):
                         new_up = UsersProjects(
                             user_id=user_id_selected,
                             project_id=active_project_id,
-                            role_id=role_id_selected
+                            role_id=role_id_selected,
+                            invited_by=user_id
                         )
                         dbsession.add(new_up)
                         dbsession.flush()
@@ -80,7 +81,9 @@ def task_creation_view(request):
                         datetime.datetime.strptime(finished_date, '%Y-%m-%dT%H:%M')
                         if finished_date else None
                     ),
-                    priority_id=int(priority) if priority else None
+                    priority_id=int(priority) if priority else None,
+                    status_id=4,
+                    created_by=user_id
                 )
                 dbsession.add(new_task)
                 dbsession.flush()
