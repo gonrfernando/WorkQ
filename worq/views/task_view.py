@@ -57,6 +57,7 @@ def task_view(request):
             joinedload(Tasks.priority)
         )
         .filter_by(project_id=active_project_id)
+        .order_by(Tasks.priority_id.desc())
         .all()
     )
 
