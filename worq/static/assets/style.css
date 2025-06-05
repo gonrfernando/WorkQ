@@ -98,6 +98,10 @@ body {
   margin-bottom: 16px;
   border-radius: 6px;
 }
+.task-stats{
+  position: fixed;
+  left: 20%;
+}
 
 .form-login p {
   height: 40px;

@@ -1,85 +1,51 @@
 from pyramid.view import view_config
-from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities, UsersProjects
-from sqlalchemy.orm import joinedload
+from worq.models.models import Projects, Tasks, TaskRequirements
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPInternalServerError
 from pyramid.response import Response
 from sqlalchemy.orm.exc import NoResultFound
 
 @view_config(route_name='task_view', renderer='worq:templates/task_view.jinja2')
-def task_view(request):
+def my_view(request):
     session = request.session
-
-    # Redirigir si el usuario no está autenticado
-    if 'user_name' not in session:
-        return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
-
-    # Parámetros de sesión
-    user_name  = session['user_name']
+    projects = request.dbsession.query(Projects).all()
+    if not 'user_name' in session:
+            return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+    error = request.params.get('error')
+    user_name = session.get('user_name')
     user_email = session.get('user_email')
-    user_role  = session.get('user_role')
-    user_id    = session.get('user_id')  # Esto se necesita para filtrar proyectos
-    error      = request.params.get('error')
-
-    # 1) Obtener solo los proyectos del usuario
-    user_projects = (
-        request.dbsession.query(Projects)
-        .join(UsersProjects)
-        .filter(UsersProjects.user_id == user_id)
-        .all()
-    )
-
-    json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
-
-    # 2) Determinar proyecto activo
+    user_role = session.get('user_role')
     active_project_id = session.get("project_id")
-    active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
-
-    if not active_project and json_projects:
-        active_project = json_projects[0]
-        active_project_id = active_project["id"]
+    if not active_project_id and projects:
+        # Fallback to first project if not set
+        active_project_id = projects[0].id
         session["project_id"] = active_project_id
-
-    active_project_id = int(active_project_id) if active_project_id is not None else None
-
-    # 3) Cargar prioridades desde la base de datos
-    priority_map = {
-        p.id: p.priority
-        for p in request.dbsession.query(TaskPriorities).all()
+    if active_project_id is not None:
+        active_project_id = int(active_project_id)
+    
+    json_projects = [{"id": project.id, "name": project.name} for project in projects]
+    active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
+    
+    dbtasks = request.dbsession.query(Tasks).filter_by(project_id = active_project_id).all()
+    priorities = {
+        1: "Low",
+        2: "Avg",
+        3: "High"
     }
-
-    # 4) Consultar tareas con relaciones precargadas
-    dbtasks = (
-        request.dbsession
-        .query(Tasks)
-        .options(
-            joinedload(Tasks.task_requirements),
-            joinedload(Tasks.priority)
-        )
-        .filter_by(project_id=active_project_id)
-        .all()
-    )
-
-    # 5) Serializar tareas
-    json_tasks = []
-    for task in dbtasks:
-        json_tasks.append({
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-            "priority": priority_map.get(task.priority_id, "None"),
-            "due_date": task.finished_date.strftime('%Y-%m-%d %H:%M:%S') if task.finished_date else "N/A",
-            "project_id": task.project_id,
-            "requirements": [
-                {
-                    "id": req.id,
-                    "requirement": req.requirement,
-                    "is_completed": req.is_completed
-                }
-                for req in task.task_requirements
-            ]
-        })
-
+    
+    json_tasks = [{
+        "id": task.id, 
+        "title":task.title, 
+        "description":task.description,
+        "priority": priorities.get(task.priority, "None"), 
+        "due_date":task.finished_date,
+        "requirements":[{
+            "id":requirement.id,
+            "requirement":requirement.requirement,
+            "is_completed":requirement.is_completed
+        } for requirement in request.dbsession.query(TaskRequirements).filter_by(task_id = task.id).all()]
+        } for task in dbtasks]
+    
     return {
         "projects": json_projects,
         "active_project": active_project,

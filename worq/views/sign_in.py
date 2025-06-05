@@ -25,24 +25,27 @@ def sign_in_view(request):
             if '@' and '.' not in email:
                 print("Error: Invalid email format")
                 return {'message': 'Invalid email address'}
-
             dbsession = request.dbsession
             user = dbsession.query(Users).filter(Users.email == email).first()
 
             if email == '' or password == '':
                 return {'message': 'Email and password are required.'}
             
-            if user and user.passw == password:
-                session = request.session
-                session['user_id'] = user.id
-                session['user_name'] = user.name
-                session['user_email'] = user.email
-                session['user_role'] = user.role.name
-                session['user_id'] = user.id
-                return HTTPFound(location=request.route_url('home'))
+            if user:
+                # Verificar la contraseña usando bcrypt
+                if bcrypt.checkpw(password.encode('utf-8'), user.passw.encode('utf-8')):
+                    # Contraseña válida, iniciar sesión
+                    session['user_name'] = user.name
+                    session['user_email'] = user.email
+                    session['user_role'] = user.role.name
+                    session['user_id'] = user.id
+                    return HTTPFound(location=request.route_url('task_view'))
+                else:
+                    # Contraseña inválida
+                    return {'message': 'Invalid email or password. 1'}
             else:
                 # Usuario no encontrado
-                return {'message': 'Invalid email or password.'}
+                return {'message': 'Invalid email or password. 2'}
 
         return {}
     except Exception as e:
