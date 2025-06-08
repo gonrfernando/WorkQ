@@ -54,7 +54,8 @@ def task_view(request):
         .query(Tasks)
         .options(
             joinedload(Tasks.task_requirements),
-            joinedload(Tasks.priority)
+            joinedload(Tasks.priority),
+            joinedload(Tasks.users)
         )
         .filter_by(project_id=active_project_id)
         .order_by(Tasks.priority_id.desc())
@@ -78,6 +79,14 @@ def task_view(request):
                     "is_completed": req.is_completed
                 }
                 for req in task.task_requirements
+            ],
+            "assigned_users": [
+            {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email
+            }
+            for user in (task.users or [])
             ]
         })
 

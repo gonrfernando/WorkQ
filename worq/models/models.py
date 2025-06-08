@@ -169,7 +169,7 @@ class Users(Base):
     projects: Mapped[List['Projects']] = relationship('Projects', back_populates='user')
     users_notifications: Mapped[List['UsersNotifications']] = relationship('UsersNotifications', back_populates='user')
     actions: Mapped[List['Actions']] = relationship('Actions', back_populates='user')
-    tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='users')
+    tasks: Mapped[List['Tasks']] = relationship('Tasks', secondary='users_tasks', back_populates='users', overlaps="users_tasks")
     users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.invited_by]', back_populates='users')
     users_projects_: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.user_id]', back_populates='user')
     chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='sender')
@@ -312,7 +312,8 @@ class Tasks(Base):
     deliver_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
     created_by: Mapped[Optional[int]] = mapped_column(Integer)
 
-    users: Mapped[Optional['Users']] = relationship('Users', back_populates='tasks')
+    users: Mapped[List['Users']] = relationship(
+    'Users',secondary='users_tasks', back_populates='tasks', overlaps="users_tasks")
     priority: Mapped['TaskPriorities'] = relationship('TaskPriorities', back_populates='tasks')
     project: Mapped['Projects'] = relationship('Projects', back_populates='tasks')
     status: Mapped['Status'] = relationship('Status', back_populates='tasks')
@@ -440,8 +441,9 @@ class UsersTasks(Base):
     user_id: Mapped[int] = mapped_column(Integer)
     task_id: Mapped[int] = mapped_column(Integer)
 
-    task: Mapped['Tasks'] = relationship('Tasks', back_populates='users_tasks')
-    user: Mapped['Users'] = relationship('Users', back_populates='users_tasks')
+    task = relationship('Tasks', back_populates='users_tasks', overlaps="users,tasks")
+    user = relationship('Users', back_populates='users_tasks', overlaps="users,tasks")
+
 
 
 class ChatFiles(Base):

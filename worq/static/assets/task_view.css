@@ -393,3 +393,10 @@
     font-size: 18px;
     vertical-align: middle;
 }
+
+.task-users {
+    margin-top: 0.5rem;
+}
+.task-users .material-symbols-outlined {
+    vertical-align: middle;
+}
