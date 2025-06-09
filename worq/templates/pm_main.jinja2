@@ -12,13 +12,13 @@
 
             <div class="add-group">
                     <label for="startdate">Start Date</label>
-                    <input type="date" id="startdate" name="startdate">
+                    <input type="date" id="startdate" name="startdate" min="{{ now }}">
               </div>
 
 
               <div class="add-group">
                     <label for="finished_date">End Date</label>
-                    <input type="date" id="enddate" name="enddate">
+                    <input type="date" id="enddate" name="enddate" min="{{ now }}">
                 </div>
 
             <textarea class="controls full-width" id="description" name="description" placeholder="Description"></textarea>

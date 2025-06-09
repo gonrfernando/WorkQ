@@ -41,7 +41,18 @@ def project_creation_view(request):
             name = data.get('name')
             startdate = data.get('startdate')
             enddate = data.get('enddate')
+            today = datetime.date.today()
 
+# Validación: startdate no en el pasado
+            start_date_obj = datetime.datetime.strptime(startdate, '%Y-%m-%d').date()
+            if start_date_obj < today:
+                return Response("La fecha de inicio no puede ser en el pasado.", status=400)
+
+            # Validación: enddate no antes de startdate (si se proporciona)
+            if enddate:
+                end_date_obj = datetime.datetime.strptime(enddate, '%Y-%m-%d').date()
+                if end_date_obj < start_date_obj:
+                    return Response("La fecha de fin no puede ser anterior a la de inicio.", status=400)
             if not name or not startdate:
                 return Response(
                     "Missing required fields: 'name' and 'startdate' are mandatory",
@@ -78,4 +89,5 @@ def project_creation_view(request):
         "user_name":         session.get('user_name'),
         "user_email":        session.get('user_email'),
         "user_role":         session.get('user_role'),
+        "now": datetime.datetime.utcnow().strftime('%Y-%m-%d')
     }

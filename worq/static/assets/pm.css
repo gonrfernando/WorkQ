@@ -260,7 +260,17 @@
 }
 
 .add-group input[type="date"] {
-  width: 30%;
+  width: 40%;
+  border: 1px solid #017bab;
+  margin-bottom: 15px;
+  padding: 11px 11px;
+  background: #EEEEEE;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.add-group input[type="datetime-local"] {
+  width: 40%;
   border: 1px solid #017bab;
   margin-bottom: 15px;
   padding: 11px 11px;

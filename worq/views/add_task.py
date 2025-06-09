@@ -67,6 +67,10 @@ def task_creation_view(request):
             title         = get('title')
             description   = get('description')
             finished_date = get('finished_date')
+            if finished_date:
+                dt = datetime.datetime.strptime(finished_date, '%Y-%m-%dT%H:%M')
+                if dt < datetime.datetime.utcnow():
+                    return Response("The due date cant be in the past.", status=400)
             priority      = get('priority')
             requirements  = getall('requirements')
             collaborators = getall('collaborators')
@@ -171,7 +175,7 @@ def task_creation_view(request):
     priorities = dbsession.query(TaskPriorities).all()
     json_priorities = [{"id": p.id, "priority": p.priority} for p in priorities]
 
-    started_date_value = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M')
+    now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M')
 
     proj_users = (
         dbsession.query(UsersProjects)
@@ -193,7 +197,7 @@ def task_creation_view(request):
         "projects": json_projects,
         "active_project_id": active_project_id,
         "active_project": active_project,
-        "started_date_value": started_date_value,
+        "now": now,
         "priorities": json_priorities,
         "users_projects": json_proj_users,        
         "user_name": session.get('user_name'),
