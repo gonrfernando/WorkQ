@@ -1,5 +1,6 @@
 from pyramid.view import view_config
-from worq.models.models import Projects, Tasks, TaskRequirements
+from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities, UsersProjects, Users
+from sqlalchemy.orm import joinedload
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPInternalServerError
 from pyramid.response import Response
@@ -27,25 +28,51 @@ def my_view(request):
     active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
     
     dbtasks = request.dbsession.query(Tasks).filter_by(project_id = active_project_id).all()
-    priorities = {
-        1: "Low",
-        2: "Avg",
-        3: "High"
+    priority_map = {
+        p.id: p.priority
+        for p in request.dbsession.query(TaskPriorities).all()
     }
-    
-    json_tasks = [{
-        "id": task.id, 
-        "title":task.title, 
-        "description":task.description,
-        "priority": priorities.get(task.priority, "None"), 
-        "due_date":task.finished_date,
-        "requirements":[{
-            "id":requirement.id,
-            "requirement":requirement.requirement,
-            "is_completed":requirement.is_completed
-        } for requirement in request.dbsession.query(TaskRequirements).filter_by(task_id = task.id).all()]
-        } for task in dbtasks]
-    
+
+    # 4) Consultar tareas con relaciones precargadas
+    dbtasks = (
+        request.dbsession
+        .query(Tasks)
+        .options(
+            joinedload(Tasks.task_requirements),
+            joinedload(Tasks.priority)
+        )
+        .filter_by(project_id=active_project_id)
+        .all()
+    )
+
+    # 5) Serializar tareas
+    json_tasks = []
+    for task in dbtasks:
+        json_tasks.append({
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "priority": priority_map.get(task.priority_id, "None"),
+            "due_date": task.finished_date.strftime('%Y-%m-%d %H:%M:%S') if task.finished_date else "N/A",
+            "project_id": task.project_id,
+            "requirements": [
+                {
+                    "id": req.id,
+                    "requirement": req.requirement,
+                    "is_completed": req.is_completed
+                }
+                for req in task.task_requirements
+            ]
+        })
+
+    # 6) Cargar usuarios del proyecto activo
+    users = (
+        request.dbsession.query(Users)
+        .join(UsersProjects)
+        .filter(UsersProjects.project_id == active_project_id)
+        .all()
+    )
+
     return {
         "projects": json_projects,
         "active_project": active_project,
@@ -54,7 +81,9 @@ def my_view(request):
         "user_email": user_email,
         "user_role": user_role,
         "active_tab": "tasks",
-        "message": error if error else None  # Agrega 'message' solo si 'error' tiene un valor
+        "message": error,
+        "users": users,
+        "active_project_id": active_project_id,
     }
 
 
