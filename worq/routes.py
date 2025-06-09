@@ -22,3 +22,6 @@ def includeme(config):
     config.add_route('save_active_tab', '/save_active_tab')
     config.add_route('get_active_tab', '/get_active_tab')
     config.add_route('upload_file', '/upload_file')
+    config.add_route('edit_task', '/edit_task')
+    config.add_route('delete_task_status', '/delete_task_status')
+    config.add_route('prepare_edit_task', '/prepare_edit_task')

@@ -1,0 +1,357 @@
+{% extends "workq_main.jinja2" %}
+
+{% block tasks %}  {# Asegúrate de que este bloque existe en workq_main.jinja2 #}
+
+<div id="edit-user-popup" class="popup-container active">
+    <form method="POST" class="add-tasks">  {# Asegúrate de incluir esta clase #}
+      <h5 class="task-header-container">
+        <span class="task-header">Edit Task</span>
+        <div class="priority-select">
+          <label for="priority-select">Priority</label>
+          <select id="priority-select" name="priority-select" class="controls">
+            {% for p in priorities %}
+              <option value="{{ p.id }}" class="priority-{{ p.id }}">
+                {{ p.priority }}
+              </option>
+            {% endfor %}
+          </select>
+          <input type="hidden" name="priority" id="priority-hidden" value="{{ priorities[0].id }}">
+        </div>
+      </h5>
+
+      <input type="hidden" name="form_type" value="edit_task">
+      <input type="hidden" name="task_id" value="{{ task_to_edit.id }}">
+      <label><strong>Title</strong></label>
+      <input class="controls" type="text" id="title" name="title" placeholder="Title" required>
+      <label><strong>Description</strong></label>
+      <input class="controls" type="text" id="description" name="description" placeholder="Description" required>
+
+      <!-- Requirements -->
+      <label><strong>Requirements</strong></label>
+      <div class="scrollable-section" id="req-section">
+        <div id="requirements-container">
+          <div class="task-items" id="req-template-item">
+            <input class="controls requirement-input" type="text" name="requirements" placeholder="Requirement">
+            <span class="duplicate-warning" style="display:none; color: #d00; font-size: 0.9em;">
+              You already added this requirement
+            </span>
+            <span class="material-symbols-outlined btn delete-req" title="Delete requirement">delete</span>
+          </div>
+        </div>
+        <button id="add-req" class="buttons" type="button">+ Add Requirement</button>
+      </div>
+
+      <!-- Collaborators -->
+      <label><strong>Collaborators</strong></label>
+      <div class="scrollable-section" id="collab-section">
+        <div id="collaborators-container">
+          <div class="task-items" id="collab-template-item">
+            <input class="controls collaborator-input" type="text" name="collaborators" placeholder="Collaborator">
+            <span class="duplicate-warning" style="display:none; color: #d00; font-size: 0.9em;">
+              You already added this collaborator
+            </span>
+            <span class="material-symbols-outlined btn delete-collab" title="Delete collaborator">delete</span>
+          </div>
+        </div>
+        <button id="add-collab" class="buttons" type="button">+ Add Collaborator</button>
+      </div>
+
+      <div class="add-group">
+        <label for="finished_date">Due Date</label>
+        <input class="date-button" type="datetime-local" id="finished_date" name="finished_date">
+        
+
+      </div>
+      <input class="buttons" type="submit" value="Submit Edit"><input class="buttons" type="button" value="Delete Task" id="delete-task-button">
+    </form>
+
+</div>
+
+
+<script>
+const users = {{ users | tojson }};
+const projectUsers = {{ users_projects | tojson }};
+
+const reqTemplate = document.getElementById("req-template-item").outerHTML;
+const collabTemplate = document.getElementById("collab-template-item").outerHTML;
+
+function checkDuplicate(inputEl, containerSelector) {
+  const val = inputEl.value.trim().toLowerCase();
+  if (!val) return;
+  const others = Array.from(document.querySelectorAll(containerSelector + " input"))
+    .filter(i => i !== inputEl)
+    .map(i => i.value.trim().toLowerCase());
+  const warning = inputEl.parentElement.querySelector(".duplicate-warning");
+  if (others.includes(val)) {
+    warning.style.display = "inline";
+    inputEl.value = "";
+  } else {
+    warning.style.display = "none";
+  }
+}
+
+function setupCollaboratorAutocomplete(inputEl) {
+  const wrapper = inputEl.parentElement;
+  const resultsContainer = document.createElement("div");
+  resultsContainer.className = "add-user-autocomplete-results";
+  wrapper.appendChild(resultsContainer);
+
+  inputEl.addEventListener("input", () => {
+    const q = inputEl.value.toLowerCase();
+    resultsContainer.innerHTML = "";
+    if (q.length < 1) { resultsContainer.style.display = "none"; return; }
+
+    const filtered = projectUsers.filter(u => u.email.toLowerCase().includes(q));
+    if (!filtered.length) { resultsContainer.style.display = "none"; return; }
+    resultsContainer.style.display = "block";
+
+    filtered.forEach(u => {
+      const div = document.createElement("div");
+      div.className = "autocomplete-item";
+      div.textContent = u.email;
+      div.onclick = () => {
+        inputEl.value = u.email;
+        resultsContainer.style.display = "none";
+      };
+      resultsContainer.appendChild(div);
+    });
+  });
+
+  inputEl.addEventListener("blur", () => {
+    setTimeout(() => { resultsContainer.style.display = "none"; }, 150);
+    checkDuplicate(inputEl, "#collaborators-container");
+  });
+}
+
+setupCollaboratorAutocomplete(document.querySelector(".collaborator-input"));
+
+document.getElementById("add-req").addEventListener("click", () => {
+  const cont = document.getElementById("requirements-container");
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = reqTemplate;
+  cont.appendChild(wrapper.firstElementChild);
+  const inp = cont.querySelector(".task-items:last-child input");
+  inp.addEventListener("blur", () => checkDuplicate(inp, "#requirements-container"));
+});
+
+document.getElementById("add-collab").addEventListener("click", () => {
+  const cont = document.getElementById("collaborators-container");
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = collabTemplate;
+  cont.appendChild(wrapper.firstElementChild);
+  const inp = cont.querySelector(".task-items:last-child input");
+  setupCollaboratorAutocomplete(inp);
+});
+
+document.getElementById("requirements-container").addEventListener("click", e => {
+  if (e.target.classList.contains("delete-req")) {
+    e.target.closest(".task-items").remove();
+  }
+});
+document.getElementById("collaborators-container").addEventListener("click", e => {
+  if (e.target.classList.contains("delete-collab")) {
+    e.target.closest(".task-items").remove();
+  }
+});
+
+const sel = document.getElementById("priority-select");
+const hid = document.getElementById("priority-hidden");
+sel.addEventListener("change", () => hid.value = sel.value);
+
+function resetFormFields(form) {
+  form.reset();
+  if (form.classList.contains('add-users')) {
+    document.getElementById('user_id').value = '';
+    document.getElementById('email-search-input').value = '';
+    document.getElementById('email-autocomplete-results').innerHTML = '';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // FORMULARIO DE TAREA
+const taskForm = document.querySelector('.add-tasks');
+if (taskForm) {
+  taskForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const formData = new FormData(taskForm);
+    const requirements = Array.from(document.querySelectorAll('.requirement-input')).map(input => input.value).filter(Boolean);
+    const collaborators = Array.from(document.querySelectorAll('.collaborator-input')).map(input => input.value).filter(Boolean);
+    formData.delete('requirements');
+    formData.delete('collaborators');
+
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      if (jsonData.hasOwnProperty(key)) {
+        if (!Array.isArray(jsonData[key])) {
+          jsonData[key] = [jsonData[key]];
+        }
+        jsonData[key].push(value);
+      } else {
+        jsonData[key] = value;
+      }
+    });
+
+    // Reemplaza por los valores reales de inputs
+    jsonData.requirements = requirements;
+    jsonData.collaborators = collaborators;
+
+    fetch(window.location.pathname, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(jsonData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Mostrar modal de éxito
+        document.getElementById('successModalLabel').innerText = 'Task Edited';
+        document.querySelector('#successModal .modal-body').innerText = 'The task has been edited successfully!';
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+
+        // Escuchar evento cuando el modal se cierre
+        const successModalEl = document.getElementById('successModal');
+        successModalEl.addEventListener('hidden.bs.modal', () => {
+          // Redirigir solo cuando se cierre el modal
+          window.location.href = data.redirect || '/';
+        }, { once: true });  // 'once' para que solo se dispare una vez
+
+        successModal.show();
+        resetFormFields(taskForm);
+
+      } else {
+        // Mostrar modal de error
+        document.getElementById('errorModalLabel').innerText = 'Error';
+        document.getElementById('errorMessage').innerText = data.error || 'Unknown error';
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+      }
+    })
+
+
+    .catch(error => {
+      document.getElementById('errorModalLabel').innerText = 'Error';
+      document.getElementById('errorMessage').innerText = 'Request failed!';
+      const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+      errorModal.show();
+    });
+  });
+}
+
+});
+</script>
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="successModalLabel">Task Added</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        The task has been added successfully!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="errorMessage">
+        An error occurred while adding the task.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const taskData = {{ task_to_edit | tojson }};
+
+  document.getElementById('title').value = taskData.title;
+  document.getElementById('description').value = taskData.description;
+  document.getElementById('finished_date').value = taskData.finished_date || '';
+
+  const prioritySelect = document.getElementById('priority-select');
+  const priorityHidden = document.getElementById('priority-hidden');
+  if (taskData.priority_id) {
+    prioritySelect.value = taskData.priority_id;
+    priorityHidden.value = taskData.priority_id;
+  }
+
+  const reqContainer = document.getElementById('requirements-container');
+  reqContainer.innerHTML = ''; // Limpia los existentes
+  taskData.requirements.forEach(req => {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = reqTemplate;
+    const el = wrapper.firstElementChild;
+    el.querySelector('input').value = req;
+    reqContainer.appendChild(el);
+  });
+
+  const collabContainer = document.getElementById('collaborators-container');
+  collabContainer.innerHTML = '';
+  taskData.collaborators.forEach(email => {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = collabTemplate;
+    const el = wrapper.firstElementChild;
+    el.querySelector('input').value = email;
+    setupCollaboratorAutocomplete(el.querySelector('input'));
+    collabContainer.appendChild(el);
+  });
+
+  const deleteButton = document.getElementById("delete-task-button");
+
+  deleteButton.addEventListener("click", function () {
+    const taskId = document.querySelector('input[name="task_id"]').value;
+
+    if (!taskId) {
+      alert("No task ID found.");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to delete this task? This action cannot be undone.")) {
+      return;
+    }
+
+    fetch("/delete_task_status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task_id: taskId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("Respuesta de delete:", data);
+      if (data.success) {
+        // Mostrar modal de éxito o redirigir
+        window.location.href = data.redirect || "/";
+      } else {
+        alert("Error: " + (data.error || "Could not delete task."));
+      }
+    })
+    .catch(err => {
+      alert("Request failed.");
+      console.error(err);
+    });
+  });
+
+});
+</script>
+
+<script>
+const taskId = sessionStorage.getItem('edit_task_id');
+if (taskId) {
+    console.log("Task ID:", taskId);
+    sessionStorage.removeItem('edit_task_id');
+}
+</script>
+{% endblock %}

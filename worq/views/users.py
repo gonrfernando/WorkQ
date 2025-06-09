@@ -28,7 +28,6 @@ def my_view(request):
                    "name": user.name, 
                    "email": user.email,
                    "tel": user.tel, 
-                   "passw": user.passw, 
                    "country_id": user.country_id,
                    "area_id": user.area_id,
                    "role_id": user.role_id} for user in users]

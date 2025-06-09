@@ -13,6 +13,9 @@ def my_view(request):
     projects = request.dbsession.query(Projects).all()
     if 'user_name' not in session:
         return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+    if session.get('user_role') not in ('admin', 'superadmin'):
+        print(f"[WARNING] Acceso denegado. Rol actual: {session.get('user_role')}")
+        return HTTPFound(location=request.route_url('task_view'))
     user_name = session.get('user_name')
     user_email = session.get('user_email')
     user_role = session.get('user_role')
@@ -106,8 +109,28 @@ def handle_request_action(request):
             return Response(json_body={'error': 'Invalid action'}, status=400)
 
         request.dbsession.flush()
-        return {"message": "Request updated"}
+        
+        return {
+            "message": "Request updated",
+            "task_id": req_obj.task_id
+        }
 
     except Exception as e:
         print(f"Error: {e}")
         return Response(json_body={'error': str(e)}, status=500)
+
+@view_config(route_name='prepare_edit_task', request_method='POST', renderer='json')
+def prepare_edit_task_view(request):
+    try:
+        data = request.json_body
+        task_id = data.get("task_id")
+        if not task_id:
+            return {"success": False, "error": "Task ID is required."}
+
+        request.session['edit_task_id'] = task_id
+        print(f"[INFO] task_id {task_id} guardado en sesión.")
+        return {"success": True}
+    except Exception as e:
+        print(f"[ERROR] Error al preparar tarea para edición: {e}")
+        return {"success": False, "error": str(e)}
+

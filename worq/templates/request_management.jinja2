@@ -353,19 +353,37 @@
                         const acceptedTaskId = pendingRequestId; // o ajusta si el ID de la tarea viene en `data.task_id`
                         const task = {{ tasks | tojson }}.find(t => t.requests.some(r => r.id == acceptedTaskId));
 
-                        if (task) {
-                            openEditTaskModal(task);
+                        if (pendingAction === 'accept' && data.task_id) {
+                            fetch("{{ request.route_url('prepare_edit_task') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-Token": "{{ request.session.get_csrf_token() }}"
+                                },
+                                body: JSON.stringify({ task_id: data.task_id })
+                            })
+                            .then(res => res.json())
+                            .then(prep => {
+                                if (prep.success) {
+                                    window.location.href = "{{ request.route_url('edit_task') }}";
+                                } else {
+                                    document.getElementById("errorMessage").textContent = prep.error || "Could not prepare task for editing.";
+                                    const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                                    errorModal.show();
+                                }
+                            });
                         } else {
-                            document.getElementById("successMessage").textContent = `Request ${pendingAction}ed. But task not found.`;
+                            document.getElementById("successMessage").textContent = `Request ${pendingAction}ed.`;
                             const successModal = new bootstrap.Modal(document.getElementById("successModal"));
                             successModal.show();
                         }
-                    } else {
-                        document.getElementById("errorMessage").textContent = data.error || "Something went wrong.";
-                        const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
-                        errorModal.show();
-                    }
-                }))
+
+                        } else {
+                            document.getElementById("errorMessage").textContent = data.error || "Something went wrong.";
+                            const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                            errorModal.show();
+                        }
+                                        }))
                 .catch(error => {
                     console.error("Error:", error);
                     document.getElementById("errorMessage").textContent = "Error sending request.";
