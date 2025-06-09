@@ -67,6 +67,24 @@
 
 </div>
 
+<!-- Modal de Confirmación para Eliminar -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this task? This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="confirm-delete-btn" type="button" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 const users = {{ users | tojson }};
@@ -310,18 +328,15 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   const deleteButton = document.getElementById("delete-task-button");
+  const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
 
   deleteButton.addEventListener("click", function () {
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    confirmModal.show();
+  });
+
+  confirmDeleteBtn.addEventListener("click", function () {
     const taskId = document.querySelector('input[name="task_id"]').value;
-
-    if (!taskId) {
-      alert("No task ID found.");
-      return;
-    }
-
-    if (!confirm("Are you sure you want to delete this task? This action cannot be undone.")) {
-      return;
-    }
 
     fetch("/delete_task_status", {
       method: "POST",
@@ -330,16 +345,20 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .then(res => res.json())
     .then(data => {
-      console.log("Respuesta de delete:", data);
       if (data.success) {
-        // Mostrar modal de éxito o redirigir
         window.location.href = data.redirect || "/";
       } else {
-        alert("Error: " + (data.error || "Could not delete task."));
+        document.getElementById('errorModalLabel').innerText = 'Delete Error';
+        document.getElementById('errorMessage').innerText = data.error || 'Could not delete task.';
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
       }
     })
     .catch(err => {
-      alert("Request failed.");
+      document.getElementById('errorModalLabel').innerText = 'Request Failed';
+      document.getElementById('errorMessage').innerText = 'Network or server error.';
+      const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+      errorModal.show();
       console.error(err);
     });
   });

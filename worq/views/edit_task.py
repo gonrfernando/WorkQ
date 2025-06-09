@@ -198,6 +198,7 @@ def delete_task_status(request):
     try:
         data = request.json_body
         task_id = data.get('task_id')
+        user_id = request.session.get('user_id')
 
         if not task_id:
             return {'success': False, 'error': 'No task ID provided'}
@@ -213,6 +214,7 @@ def delete_task_status(request):
         print(f"Nuevo status_id: {task.status_id}") 
 
         return {
+            'user_id': user_id,
             'success': True,
             'redirect': request.route_url('request_management')
         }
