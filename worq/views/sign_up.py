@@ -12,7 +12,8 @@ from datetime import datetime, timedelta
 def sign_up_view(request):
     try:
         session = request.session
-
+        if 'user_email' in session:
+            return {'message': 'Already logged in. Redirecting...', 'redirect': True, 'status': 'error'}
         # Si se solicita reenvío
         if 'resend' in request.params:
             last_sent_str = session.get('email_last_sent')
@@ -48,11 +49,13 @@ def sign_up_view(request):
                 'email_value': email
             }
 
-        if 'user_name' in session:
+        if 'user_email' in session:
             return {'message': 'Already logged in. Redirecting...', 'redirect': True, 'status': 'error'}
 
         if request.method == 'POST':
             email = request.POST.get('email', '').strip()
+            if email == '':
+                return {'message': 'Please fill the email input', 'status': 'error'}
             if not email or '@' not in email or '.' not in email:
                 return {'message': 'Invalid email', 'status': 'error'}
 

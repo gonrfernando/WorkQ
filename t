@@ -50,7 +50,7 @@ def test_user(db_session):
     db_session.commit()
 
     hashed_pw = bcrypt.hashpw('admin123'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
+    
     user = Users(
         name='Admin',
         email='admin@example.com',
@@ -83,3 +83,4 @@ def testapp(db_session):
 
     test_app.app = add_dbsession
     return test_app
+
