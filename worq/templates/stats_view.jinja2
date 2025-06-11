@@ -16,7 +16,7 @@
         </div>
     </div>
     <!-- Gráfico de estadísticas -->
-<div class="container mt-4">
+  <div class="container mt-4">
     <div class="task-stats">
       <div class="row">
         <h3> Tasks completed</h3><span id ="count_comple" class="badge text-bg-success">{{ stats.completed }}</span>
@@ -49,6 +49,7 @@
             <div id="taskStatsChart" class="ct-chart ct-perfect-fourth"></div>
         </div>
     </div>
+  </div>
 </div>
 
 {% endblock stats %}
@@ -74,16 +75,15 @@
     font-weight: bold;
   }
 
-  /* Colores personalizados para cada parte de la gráfica */
-  .ct-series-a .ct-slice-pie {
+  .ct-completed > .ct-slice-pie {
     fill: #198754; /* Verde */
   }
 
-  .ct-series-b .ct-slice-pie {
+  .ct-late > .ct-slice-pie {
     fill: #dc3545; /* Rojo */
   }
 
-  .ct-series-c .ct-slice-pie {
+  .ct-assigned > .ct-slice-pie {
     fill: #0dcaf0; /* Azul */
   }
   #count_comple{

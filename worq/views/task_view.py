@@ -2,6 +2,7 @@ from pyramid.view import view_config
 from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities, UsersProjects, Users
 from sqlalchemy.orm import joinedload
 from pyramid.httpexceptions import HTTPFound
+from sqlalchemy import and_
 
 @view_config(route_name='task_view', renderer='worq:templates/task_view.jinja2')
 def task_view(request):
@@ -15,18 +16,25 @@ def task_view(request):
     user_name  = session['user_name']
     user_email = session.get('user_email')
     user_role  = session.get('user_role')
-    user_id    = session.get('user_id')  # Esto se necesita para filtrar proyectos
+    user_id    = session.get('user_id')  # Para filtrar proyectos
     error      = request.params.get('error')
 
-    # 1) Obtener solo los proyectos del usuario
-    user_projects = (
-        request.dbsession.query(Projects)
-        .join(UsersProjects)
-        .filter(UsersProjects.user_id == user_id)
-        .all()
-    )
+    # 1) Obtener proyectos según rol del usuario
+    if user_role in ['superadmin', 'admin']:
+        # Si es admin o superadmin, traemos todos los proyectos
+        user_projects = request.dbsession.query(Projects).all()
+    else:
+        # Si no, solo los proyectos asociados al usuario
+        user_projects = (
+            request.dbsession.query(Projects)
+            .join(UsersProjects)
+            .filter(UsersProjects.user_id == user_id)
+            .all()
+        )
 
     json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
+
+    # ... el resto de tu código sigue igual
 
     # 2) Determinar proyecto activo
     active_project_id = session.get("project_id")
@@ -53,7 +61,12 @@ def task_view(request):
             joinedload(Tasks.task_requirements),
             joinedload(Tasks.priority)
         )
-        .filter_by(project_id=active_project_id)
+        .filter(
+            and_(
+                Tasks.project_id == active_project_id,
+                Tasks.status_id != 7  
+            )
+        )
         .all()
     )
 
@@ -97,22 +110,3 @@ def task_view(request):
         "users": users,
         "active_project_id": active_project_id,
     }
-
-
-@view_config(route_name='update_requirement', renderer='json', request_method='POST')
-def update_requirement(request):
-    try:
-        data = request.json_body
-        req_id = data.get("requirement_id")
-        is_completed = data.get("is_completed")
-        if req_id is None or is_completed is None:
-            return {"success": False, "error": "Missing data"}
-        req = request.dbsession.query(TaskRequirements).filter_by(id=req_id).one_or_none()
-        if not req:
-            return {"success": False, "error": "Requirement not found"}
-        req.is_completed = bool(is_completed)
-        request.dbsession.flush()
-        return {"success": True}
-    except Exception as e:
-        print(f"Error updating requirement: {e}")
-        return {"success": False, "error": str(e)}
