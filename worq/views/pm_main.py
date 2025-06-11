@@ -7,11 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from worq.models.models import Projects
 import json
 
-@view_config(
-    route_name='pm_main',
-    renderer='worq:templates/pm_main.jinja2',
-    request_method=('GET', 'POST')
-)
+@view_config(route_name='pm_main', renderer='worq:templates/pm_main.jinja2', request_method=('GET', 'POST'))
 def project_creation_view(request):
     session = request.session
     user_id = session.get("user_id")
@@ -67,10 +63,12 @@ def project_creation_view(request):
                         if enddate else None),
                 creationdate=datetime.date.today(),
                 state_id=1,
-                created_by=user_id
+                user_id=user_id
             )
             dbsession.add(new_proj)
             dbsession.flush()
+            print("Nuevo proyecto ID:", new_proj.id)
+
             transaction.commit()
 
             session["project_id"] = new_proj.id

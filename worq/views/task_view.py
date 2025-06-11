@@ -9,18 +9,15 @@ from sqlalchemy.orm.exc import NoResultFound
 def task_view(request):
     session = request.session
 
-    # Redirigir si el usuario no está autenticado
     if 'user_name' not in session:
         return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
 
-    # Parámetros de sesión
     user_name  = session['user_name']
     user_email = session.get('user_email')
     user_role  = session.get('user_role')
-    user_id    = session.get('user_id')  # Esto se necesita para filtrar proyectos
+    user_id    = session.get('user_id')
     error      = request.params.get('error')
 
-    # 1) Obtener solo los proyectos del usuario
     user_projects = (
         request.dbsession.query(Projects)
         .join(UsersProjects)
@@ -30,7 +27,6 @@ def task_view(request):
 
     json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
 
-    # 2) Determinar proyecto activo
     active_project_id = session.get("project_id")
     active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
 
@@ -41,13 +37,11 @@ def task_view(request):
 
     active_project_id = int(active_project_id) if active_project_id is not None else None
 
-    # 3) Cargar prioridades desde la base de datos
     priority_map = {
         p.id: p.priority
         for p in request.dbsession.query(TaskPriorities).all()
     }
 
-    # 4) Consultar tareas con relaciones precargadas
     query = (
         request.dbsession
         .query(Tasks)
@@ -59,13 +53,11 @@ def task_view(request):
         .filter(Tasks.project_id == active_project_id)
     )
 
-    # ✅ Solo mostrar tareas asignadas al usuario si es rol 4 (user)
     if user_role == "user":
         query = query.join(UsersTasks).filter(UsersTasks.user_id == user_id)
 
     dbtasks = query.order_by(Tasks.priority_id.desc()).all()
 
-    # 5) Serializar tareas
     json_tasks = []
     for task in dbtasks:
         json_tasks.append({
@@ -101,7 +93,7 @@ def task_view(request):
         "user_email": user_email,
         "user_role": user_role,
         "active_tab": "tasks",
-        "message": error if error else None  # Agrega 'message' solo si 'error' tiene un valor
+        "message": error if error else None  
     }
 
 
