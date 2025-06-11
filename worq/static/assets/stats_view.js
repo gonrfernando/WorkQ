@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Validar que haya datos
     if (total === 0) {
-        document.getElementById('taskStatsChart').innerHTML = "<p>No hay tareas asignadas para este proyecto.</p>";
+        document.getElementById('taskStatsChart').innerHTML = "<p>There are no tasks assigned to this project.</p>";
         return;
     }
 
@@ -16,15 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
         taskStats.late,
         taskStats.assigned
     ];
-    const labels = ['Completadas', 'Atrasadas', 'Pendientes'];
+    const labels = ['Completed', 'Late', 'Pending'];
 
 
     new Chartist.Pie('#taskStatsChart', {
         labels: labels,
         series: series
     }, {
-        donut: true,
-        donutWidth: 130,
         showLabel: true,
         chartPadding: 20
     });
