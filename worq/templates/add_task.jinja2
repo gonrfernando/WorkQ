@@ -1,6 +1,9 @@
 {% extends "workq_main.jinja2" %}
 
 {% block add_task %}
+<head>
+  <link rel="stylesheet" href="{{ request.static_url('worq:static/assets/pm.css') }}">
+</head>
 <section class="creation1">
   <section class="TCreation2">
     <div class="project-selector-bar dropdown">
@@ -88,11 +91,10 @@
           <input type="hidden" name="form_type" value="add_user">
           <input type="hidden" id="user_id" name="user_id">
           <div class="search-bar2">
-            <input type="text"
-                   id="email-search-input"
-                   placeholder="Search User Email"
-                   oninput="handleEmailSearchInput(event)">
-            <div id="email-autocomplete-results" class="add-user-autocomplete-results"></div>
+          <input type="text"
+                placeholder="Search User Email"
+                oninput="handleEmailSearchInput(event)">
+            <div id="email-autocomplete-results" class="autocomplete-results"></div>
           </div>
           <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
           <select class="controls" id="role" name="role_id" required>
@@ -142,11 +144,17 @@ function checkDuplicate(inputEl, containerSelector) {
   }
 }
 
-// 3) Autocomplete para usuarios existentes
 function handleEmailSearchInput(event) {
-  const query = event.target.value.toLowerCase();
-  const resultsContainer = document.getElementById("email-autocomplete-results");
+  const input = event.target;
+  const wrapper = input.parentElement;
+  let resultsContainer = wrapper.querySelector('.autocomplete-results');
+  if (!resultsContainer) {
+    resultsContainer = document.createElement('div');
+    resultsContainer.className = 'autocomplete-results';
+    wrapper.appendChild(resultsContainer);
+  }
   resultsContainer.innerHTML = "";
+  const query = input.value.toLowerCase();
   if (query.length < 1) { resultsContainer.style.display = "none"; return; }
 
   const filtered = users.filter(u => u.email.toLowerCase().includes(query));
@@ -158,18 +166,24 @@ function handleEmailSearchInput(event) {
     div.className = "autocomplete-item";
     div.textContent = u.email;
     div.onclick = () => {
-      document.getElementById("email-search-input").value = u.email;
+      input.value = u.email;
       document.getElementById("user_id").value = u.id;
       document.getElementById("email").value = u.email;
-      resultsContainer.style.display = "none";
+      resultsContainer.style.display = "block";
     };
     resultsContainer.appendChild(div);
   });
+  // Oculta el autocompletado si el input pierde el foco
+  input.onblur = () => setTimeout(() => { resultsContainer.style.display = "none"; }, 150);
 }
 
 // 4) Autocomplete para colaboradores (igual que usuarios, pero filtrado por proyecto)
 function setupCollaboratorAutocomplete(inputEl) {
   const wrapper = inputEl.parentElement;
+  // Elimina cualquier contenedor anterior
+  const oldResults = wrapper.querySelectorAll('.add-user-autocomplete-results');
+  oldResults.forEach(el => el.remove());
+
   const resultsContainer = document.createElement("div");
   resultsContainer.className = "add-user-autocomplete-results";
   wrapper.appendChild(resultsContainer);
