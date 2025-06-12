@@ -79,7 +79,7 @@
       {% endif %}
       {% if user_role in ['superadmin', 'admin'] %}
       <a href="{{ request.route_url('edit_user') }}">
-        <span class="material-symbols-outlined show-popup toolbar-add-user">person_add</span>
+        <span class="toolbar-icon material-icons-round">person_add</span>
       </a>
       {% endif %}
       <div class="notification-icon">
@@ -102,7 +102,7 @@
     </div>
 
     <div class="main">
-      {% if current_route == '/' %}
+      {% if current_route == '/' or request.matched_route.name == 'task_view' %}
         {% if active_project_id  %}
           <div class="members-sidebar" id="membersSidebar" onclick="toggleMembersSidebar()">
               <i class="material-icons-round icon">groups</i>

@@ -17,6 +17,10 @@ def task_creation_view(request):
         return HTTPFound(
             location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'})
         )
+    if 'user_role' not in ['superadmin', 'admin', 'projectmanager']:
+        return HTTPFound(
+            location=request.route_url('task_view')
+        )
 
     dbsession = request.dbsession
     active_project_id = session.get("project_id")

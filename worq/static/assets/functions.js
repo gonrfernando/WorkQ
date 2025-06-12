@@ -38,7 +38,6 @@ function handleFormSearchInput(event) {
               document.getElementById("user_id").value = user.id;
               document.getElementById("name").value = user.name;
               document.getElementById("email").value = user.email;
-              document.getElementById("passw").value = user.passw;
               document.getElementById("country").value = user.country_id || "";
               document.getElementById("area").value = user.area_id || "";
               document.getElementById("role").value = user.role_id || "";

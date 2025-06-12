@@ -16,17 +16,40 @@
         </div>
     </div>
     <!-- Gráfico de estadísticas -->
-<div class="container mt-4">
+  <div class="container mt-4">
     <div class="task-stats">
-    <h3> Tareas Completadas    <span id ="count_comple" class="badge text-bg-success">{{ stats.completed }}</span></h3>
-    <h3> Tareas Pendientes   <span id ="count_assign"class="badge text-bg-info">{{ stats.assigned }}</span></h3>
-    <h3> Tareas Atrasadas   <span id ="count_late"class="badge text-bg-danger">{{ stats.late }}</span></h3>
+      <div class="row">
+        <h3> Tasks completed</h3><span id ="count_comple" class="badge text-bg-success">{{ stats.completed }}</span>
+      </div>
+      <div class="row">
+        <h3> Tasks assigned</h3><span id ="count_assign" class="badge text-bg-info">{{ stats.assigned }}</span>
+      </div>
+      <div class="row">
+        <h3> Tasks pending</h3><span id ="count_late" class="badge text-bg-danger">{{ stats.late }}</span>
+      </div>
     </div>
+    <style>
+    .task-stats .row {
+        display: grid;
+        grid-template-columns: 250px auto;
+        align-items: center;
+    }
+
+    .task-stats .row h3 {
+      width: 250px; /* Ajusta según tu diseño */
+      margin: 0;
+    }
+
+    .task-stats .row span {
+      margin-left: 20px; /* Espacio entre el h3 y el span */
+    }
+    </style>
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div id="taskStatsChart" class="ct-chart ct-perfect-fourth"></div>
         </div>
     </div>
+  </div>
 </div>
 
 {% endblock stats %}
@@ -52,17 +75,16 @@
     font-weight: bold;
   }
 
-  /* Colores personalizados para cada parte de la gráfica */
-  .ct-series-a .ct-slice-donut {
-    stroke: #198754; /* Verde */
+  .ct-completed > .ct-slice-pie {
+    fill: #198754; /* Verde */
   }
 
-  .ct-series-b .ct-slice-donut {
-    stroke: #dc3545; /* Rojo */
+  .ct-late > .ct-slice-pie {
+    fill: #dc3545; /* Rojo */
   }
 
-  .ct-series-c .ct-slice-donut {
-    stroke: #0dcaf0; /* Azul */
+  .ct-assigned > .ct-slice-pie {
+    fill: #0dcaf0; /* Azul */
   }
   #count_comple{
   position: relative;

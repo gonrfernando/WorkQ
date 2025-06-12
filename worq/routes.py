@@ -26,3 +26,6 @@ def includeme(config):
     config.add_route('update_requirement', '/update_requirement')
     config.add_route('forgot_password', '/forgot_password')
     config.add_route('stats', '/stats')
+    config.add_route('edit_task', '/edit_task')
+    config.add_route('delete_task_status', '/delete_task_status')
+    config.add_route('prepare_edit_task', '/prepare_edit_task')

@@ -2,7 +2,7 @@ import os
 import uuid
 import mimetypes
 from pyramid.view import view_config
-#from worq.scripts.s3_utils import upload_file_to_s3
+from worq.scripts.s3_utils import upload_file_to_s3
 from worq.models.models import Files
 
 # Extensiones permitidas (puedes ajustarlas)
@@ -38,11 +38,11 @@ def upload_view(request):
     unique_filename = f"{uuid.uuid4().hex}_{sanitized_filename}"
 
     # Subir a S3
-    #url = upload_file_to_s3(input_file, unique_filename, content_type)
+    url = upload_file_to_s3(input_file, unique_filename, content_type)
 
     # Guardar en base de datos
-   # nuevo_archivo = Files(filename=sanitized_filename, filepath=url)
-  #  request.dbsession.add(nuevo_archivo)
+    nuevo_archivo = Files(filename=sanitized_filename, filepath=url)
+    request.dbsession.add(nuevo_archivo)
     request.dbsession.flush()
 
-  #  return {'status': 'ok', 'url': url}
+    return {'status': 'ok', 'url': url}
