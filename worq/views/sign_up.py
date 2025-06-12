@@ -30,6 +30,7 @@ def sign_up_view(request):
 
             email = session.get('email')
             if not email:
+                request.session.flash('Failed to resend email.', 'error')
                 return {'message': 'No email found in session.', 'status': 'error'}
 
             # Nueva contraseña temporal
@@ -44,7 +45,7 @@ def sign_up_view(request):
                 user.passw = hashed_password.decode('utf-8')
                 request.dbsession.flush()  # guardar los cambios
             session['email_last_sent'] = now.isoformat()
-
+            request.session.flash('Email resent successfully.', 'success')
             return {
                 'message': 'Email resent successfully.',
                 'status': 'success',
@@ -57,6 +58,8 @@ def sign_up_view(request):
 
         if request.method == 'POST':
             email = request.POST.get('email', '').strip()
+            if email == '':
+                return {'message': 'Please complete the email'}
             if not email or '@' not in email or '.' not in email:
                 return {'message': 'Invalid email', 'status': 'error'}
 
@@ -68,6 +71,7 @@ def sign_up_view(request):
             email_sent = send_email_async(request, email, temp_password)
 
             if not email_sent:
+                request.session.flash('Failed to send email.', 'error')
                 return {'message': 'Failed to send email.', 'status': 'error'}
 
             hashed_password = bcrypt.hashpw(temp_password.encode('utf-8'), bcrypt.gensalt())
@@ -84,6 +88,7 @@ def sign_up_view(request):
             for key, value in session.items():
                 print(f"session['{key}'] = {value} (tipo: {type(value)})")
             print("=====================")
+            request.session.flash('Temporary password sent to your email.', 'success')
 
             return {
                 'message': 'Temporary password sent to your email.',

@@ -21,6 +21,9 @@ def sign_in_view(request):
             password = request.POST.get('password', '').strip()
             
             print(f"Received data: email={email}, password={password}")
+            
+            if email == '' or password == '':
+                return {'message': 'Email and password are required.'}
 
             if '@' and '.' not in email:
                 print("Error: Invalid email format")
@@ -28,8 +31,6 @@ def sign_in_view(request):
             dbsession = request.dbsession
             user = dbsession.query(Users).filter(Users.email == email).first()
 
-            if email == '' or password == '':
-                return {'message': 'Email and password are required.'}
             
             if user:
                 # Verificar la contraseña usando bcrypt
