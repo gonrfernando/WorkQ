@@ -74,13 +74,24 @@ def my_view(request):
 
     has_requests = any(task["requests"] for task in json_tasks)
     
+    types = [
+        {"id": 1, "name": "Project"},
+        {"id": 2, "name": "Task"}
+    ]
+    active_type_id = 2  # O el ID que corresponda
+    active_type = next((t for t in types if t["id"] == active_type_id), None)
+    
+    
+    
     return {
         "projects": json_projects,
         "tasks": json_tasks,
         'user_name': user_name,
         'user_email': user_email,
         'user_role': user_role,
-        'has_requests': has_requests
+        'has_requests': has_requests,
+        'types': types,
+        'active_type': active_type
     }
 
 

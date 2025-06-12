@@ -3,6 +3,17 @@
 {% block tasks %}
 <div class="container-fluid">
     <div class="project-bar row">
+        <div class="col-6 bar-wrapper">
+            <div class="project-selector-bar dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_type.name }}</button>
+                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                    {% for type in types %}
+                        <a class="dropdown-item dropdown-project-item" id="{{ type.id }}">{{ type.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-5"></div>
         <div class="view_button col-1">
             <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
         </div>

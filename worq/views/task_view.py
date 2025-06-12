@@ -64,7 +64,8 @@ def task_view(request):
         .filter(
             and_(
                 Tasks.project_id == active_project_id,
-                Tasks.status_id != 7  
+                Tasks.status_id != 7,
+                Tasks.status_id != 6  # Excluir tareas completadas y canceladas  
             )
         )
         .all()
