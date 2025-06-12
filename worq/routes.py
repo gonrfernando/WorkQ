@@ -19,6 +19,7 @@ def includeme(config):
     config.add_route('handle_request_action', '/handle-request-action')
     config.add_route('stats_view', '/stats_view')
     config.add_route('action_view', '/action_view')
+    config.add_route('revision_view', '/revision_view')
     config.add_route('save_active_tab', '/save_active_tab')
     config.add_route('get_active_tab', '/get_active_tab')
     config.add_route('upload_file', '/upload_file')

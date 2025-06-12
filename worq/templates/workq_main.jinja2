@@ -165,6 +165,11 @@
                 <button class="nav-link" id="actions-tab" data-bs-toggle="tab" data-bs-target="#actions" type="button" role="tab" aria-controls="actions" aria-selected="false"><i class="fas fa-history me-1"></i>Logs</button>
             </li>
             {% endif %}
+            {% if user_role in ['superadmin', 'admin', 'projectmanager'] %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="revision-tab" data-bs-toggle="tab" data-bs-target="#revision" type="button" role="tab" aria-controls="revision">Task Revision</button>
+            </li>
+            {% endif %}
         </ul>
         <div class="tab-content" id="myTabsContent">
             {% block content %}
@@ -188,6 +193,11 @@
             <!-- Tab 4 -->
             <div class="tab-pane fade show active" id="actions" role="tabpanel" aria-labelledby="actions-tab">
                 
+            </div>
+            <!-- Tab 5 -->
+            <div class="tab-pane fade show active" id="revision" role="tabpanel" aria-labelledby="revision-tab">
+                {% block revision %}
+                {% endblock revision %}
             </div>
         
         </div>
@@ -343,7 +353,8 @@
               'pm-tab': '/pm_main',
               'tasks-tab': '/task_view',
               'stats-tab': '/stats_view',
-              'actions-tab': '/action_view'
+              'actions-tab': '/action_view',
+              'revision-tab': '/revision_view'
             };
 
             // Redirige si existe una ruta asignada
