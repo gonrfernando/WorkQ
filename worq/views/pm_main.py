@@ -73,10 +73,34 @@ def project_creation_view(request):
 
             session["project_id"] = new_proj.id
 
-# respuesta de éxito
+            # Si es AJAX, responde JSON
+            is_ajax = (
+            request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+            or 'application/json' in request.headers.get('Accept', '')
+        )
+
+            if is_ajax:
+                return Response(
+                    json.dumps({"success": True}),
+                    content_type='application/json; charset=utf-8'
+                )
+            return HTTPFound(location=request.route_url('pm_main'))
+    
         except SQLAlchemyError as e:
+            if is_ajax:
+                return Response(
+                    json.dumps({"success": False, "error": str(e)}),
+                    content_type='application/json; charset=utf-8',
+                    status=500
+                )
             return Response(str(e), status=500, content_type='text/plain')
         except Exception as e:
+            if is_ajax:
+                return Response(
+                    json.dumps({"success": False, "error": "Invalid request: " + str(e)}),
+                    content_type='application/json; charset=utf-8',
+                    status=400
+                )
             return Response("Invalid request: " + str(e), status=400, content_type='text/plain')
 
     # Si es GET (o si caíste acá tras un POST fallido), renderiza normalmente

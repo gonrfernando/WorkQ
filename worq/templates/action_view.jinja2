@@ -1,6 +1,6 @@
 {% extends "workq_main.jinja2" %}
 
-{% block content %}
+{% block actions %}
 <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 8px;">
     <h2 style="background-color: #e0e0e0; padding: 1rem; border-radius: 8px;">Actions history</h2>
     <div class="container-fluid">
@@ -27,7 +27,12 @@
 
     <div style="margin-top: 1rem; background-color: #e0e0e0; border-radius: 8px; padding: 1rem;">
         {% for action in actions %}
-        <div style="background-color: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; flex-wrap: wrap;">
+        <div class="action-row"
+            data-type="{{ action.type }}"
+            data-user="{{ action.user }}"
+            data-date="{{ action.timestamp.strftime('%d/%m/%Y %H:%M UTC%z') }}"
+            style="cursor:pointer; background-color: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; flex-wrap: wrap;"
+            onclick="showActionModal(this)">
             <div><strong>{{ action.type }}</strong></div>
             <div>By {{ action.user }}</div>
             <div>{{ action.timestamp.strftime('%d/%m/%Y %H:%M UTC%z') }}</div>
@@ -42,30 +47,76 @@ document.getElementById('openFilterModal').addEventListener('click', function() 
   const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
   filterModal.show();
 });
+
+function applyActionFilter() {
+  const user = document.getElementById('filter-user').value;
+  const actionType = document.getElementById('filter-action').value;
+
+  document.querySelectorAll('.action-row').forEach(row => {
+    const matchesUser = !user || row.dataset.user === user;
+    const matchesType = !actionType || row.dataset.type === actionType;
+    row.style.display = (matchesUser && matchesType) ? '' : 'none';
+  });
+}
+function showActionModal(element) {
+  document.getElementById('modal-action-type').textContent = element.dataset.type;
+  document.getElementById('modal-action-user').textContent = element.dataset.user;
+  document.getElementById('modal-action-date').textContent = element.dataset.date;
+  const modal = new bootstrap.Modal(document.getElementById('actionDetailModal'));
+  modal.show();
+}
 </script>
+
+<div class="modal fade" id="actionDetailModal" tabindex="-1" aria-labelledby="actionDetailModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="actionDetailModalLabel">Action Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Type:</strong> <span id="modal-action-type"></span></p>
+        <p><strong>User:</strong> <span id="modal-action-user"></span></p>
+        <p><strong>Date:</strong> <span id="modal-action-date"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal de filtro -->
 <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="background: none; border: none;">
-      <section class="TCreation2" style="margin:0;">
-        <section class="TCreation3" style="margin:0;">
-          <div class="outside-task" style="width:100%; margin:0;">
-            <div style="width:100%;">
-              <div class="modal-header" style="border-bottom:none; background:transparent; padding-left:0; padding-right:0;">
-                <h5 class="modal-title" id="filterModalLabel">Filter Options</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body" style="background:transparent;">
-                <!-- Aquí pon tus campos de filtro -->
-                <p>Filter content goes here...</p>
-              </div>
-              <div class="modal-footer" style="border-top:none; background:transparent;">
-                <button type="button" class="buttons" data-bs-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </section>
-      </section>
+    <div class="modal-content">
+      <!-- Interior del modal de filtro -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="filterModalLabel">Filter Actions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <select id="filter-user" class="controls">
+            <option value="">All Users</option>
+            {% for user in users %}
+              <option value="{{ user.name }}">{{ user.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <select id="filter-action" class="controls">
+            <option value="">All Actions</option>
+            {% for action in actions|map(attribute='type')|unique %}
+              <option value="{{ action }}">{{ action }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="buttons" onclick="applyActionFilter()">Apply Filter</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
     </div>
   </div>
 </div>

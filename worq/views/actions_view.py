@@ -101,13 +101,23 @@ def action_view(request):
         .filter_by(project_id=active_project_id)
         .all()
     )
+    filtered_users = [
+    {
+        "id": up.user.id,
+        "name": up.user.name,
+        "email": up.user.email,
+        "role_id": up.user.role_id
+    }
+    for up in proj_users if up.user.role_id != 4
+    ]
     json_proj_users = [
         {
-            "id": up.user.id,
-            "email": up.user.email,
-            "name": up.user.name
-        }
-        for up in proj_users
+        "id": up.user.id,
+        "name": up.user.name,
+        "email": up.user.email,
+        "role_id": up.user.role_id
+    }
+    for up in proj_users if up.user.role_id != 4
     ]
 
     # --- Buscar acciones del proyecto activo ---
@@ -129,7 +139,7 @@ def action_view(request):
             })
 
     return {
-        "users": json_users,
+        "users": filtered_users,
         "roles": json_roles,
         "projects": json_projects,
         "active_project_id": active_project_id,
