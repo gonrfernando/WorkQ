@@ -1,58 +1,107 @@
 {% extends "workq_main.jinja2" %}
-
 {% block tasks %}
 <div class="container-fluid">
     <div class="project-bar row">
+        <div class="col-6 bar-wrapper">
+            <div class="project-selector-bar dropdown">
+                <button class="btn dropdown-toggle" type="button" id="requestmgTaskTypeDropdownButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">
+                    {{ active_type.name }}
+                </button>
+                <div class="dropdown-menu w-100 requestmg-dropdown-menu" aria-labelledby="requestmgTaskTypeDropdownButton">
+                    {% for type in types %}
+                        <button type="button" class="dropdown-item requestmg-dropdown-project-item" data-id="{{ type.id }}">
+                            {{ type.name }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-5"></div>
         <div class="view_button col-1">
             <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
         </div>
     </div>
-    {% if not has_requests %}
-        <div class="alert alert-info mt-4" role="alert">
-            No tasks with requests found.
-        </div>
+    {% set show_tasks = active_type.id != 1 %}
+    {% set show_projects = active_type.id != 2 %}
+    {% set has_tasks = tasks | length > 0 %}
+    {% set has_projects = projects_requests | length > 0 %}
+    {% set all_items = [] %}
+    {% if show_tasks %}
+        {% set all_items = all_items + tasks %}
+    {% endif %}
+    {% if show_projects %}
+        {% set all_items = all_items + projects_requests %}
     {% endif %}
 
-    {% for task in tasks %}
-        {% if loop.index0 % 4 == 0 %}
-        <div class="task-container card-view row gx-5">
-        {% endif %}
+    <div id="tasks-list">
+        {% for item in all_items %}
+            {% if loop.index0 % 4 == 0 %}
+            <div class="task-container card-view row gx-5">
+            {% endif %}
+
             <div class="task-spacer col-3">
-                <div class="task-item" data-task-id="{{ task.id }}" onclick="openTaskModalFromCard(this)">
-                    <h6 class="project-name">Project: {{ task.project_name }}</h6>
-                    <h4 class="task-title">{{ task.title }}</h4>
-                    <div class="task-element task-subheader row">
-                        <p class="priority col-4">
-                            {{ task.priority }}
-                            <span class="task-priority {{ task.priority|lower }}"></span>
-                        </p>
-                        <div class="task-due-date col-8">
-                            <span class="material-icons clock-icon">schedule</span>
-                            <span class="due-date-text">{{ task.due_date }}</span>
+                {% if item.title is defined %}
+                    <!-- Render Task -->
+                    <div class="task-item" data-task-id="{{ item.id }}" onclick="openTaskModalFromCard(this)">
+                        <h6 class="project-name">Project: {{ item.project_name }}</h6>
+                        <h4 class="task-title">{{ item.title }}</h4>
+                        <div class="task-element task-subheader row">
+                            <p class="priority col-4">
+                                {{ item.priority }}
+                                <span class="task-priority {{ item.priority|lower }}"></span>
+                            </p>
+                            <div class="task-due-date col-8">
+                                <span class="material-icons clock-icon">schedule</span>
+                                <span class="due-date-text">{{ item.due_date }}</span>
+                            </div>
+                        </div>
+                        <p class="task-element task-description">{{ item.description }}</p>
+                        <div class="task-requirements">
+                            {% for requirement in item.requirements %}
+                                <div style="display:flex">
+                                    <label class="checkbox-container">
+                                        <input class="custom-checkbox" id="requirement-{{ requirement.id }}" type="checkbox"
+                                            {% if requirement.is_completed %}checked{% endif %}>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                    <label class="custom-checkbox-label" for="requirement-{{ requirement.id }}">{{ requirement.requirement }}</label>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
-                    <p class="task-element task-description">{{ task.description }}</p>
-                    <div class="task-requirements">
-                        {% for requirement in task.requirements %}
-                            <div style="display:flex">
-                                <label class="checkbox-container">
-                                    <input class="custom-checkbox" id="requirement-{{ requirement.id }}"
-                                           {% if requirement.is_completed %}checked{% endif %}
-                                           type="checkbox">
-                                    <span class="checkmark"></span>
-                                </label>
-                                <label class="custom-checkbox-label" for="requirement-{{ requirement.id }}">{{ requirement.requirement }}</label>
+                {% else %}
+                    <!-- Render Project -->
+                    <div class="task-item" onclick="openProjectModal({{ item.id }})">
+                        <h6 class="project-name">Project: {{ item.name }}</h6>
+                        <h4 class="task-title">Project Request</h4>
+                        <div class="task-element task-subheader row">
+                            <div class="task-due-date col-12">
+                                <span class="material-icons clock-icon">event</span>
+                                <span class="due-date-text">Start: {{ item.start_date }} | End: {{ item.end_date }}</span>
                             </div>
-                        {% endfor %}
+                        </div>
+                        <p class="task-element task-description">This project has pending requests.</p>
                     </div>
+                {% endif %}
+            </div>
+
+            {% if loop.index0 % 4 == 3 or loop.last %}
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="modal fade" id="projectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Project Requests</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body modal-body-scrollable" id="project-requests-container">
                 </div>
             </div>
-        {% if loop.index0 % 4 == 3 or loop.last %}
         </div>
-        {% endif %}
-    {% endfor %}
-
-    <!-- Modal de tarea -->
+    </div>
     <div id="task-modal" class="task-modal">
         <div class="task-modal-content">
             <div class="position-absolute top-0 end-0 p-2 d-flex align-items-center gap-2">
@@ -82,14 +131,6 @@
                 <div class="task-stats-modal"></div>
             </div>
             <div class="task-footer-modal">
-                <div class="task-comments-modal">
-                    <h4>Comments</h4>
-                    <textarea id="comment-input" placeholder="Add a comment..."></textarea>
-                </div>
-                <div class="task-modal-buttons">
-                    <button id="save-task" class="btn btn-primary">Save</button>
-                    <button id="deliver-task" class="btn btn-success">Deliver</button>
-                </div>
             </div>
         </div>
     </div>
@@ -99,57 +140,32 @@
         overflow-y: auto;
     }
     .request-accepted {
-        background-color: #d4edda; /* Verde claro */
-        border-left: 5px solid #28a745;
-    }
-
-    .request-rejected {
-        background-color: #f8d7da; /* Rosa claro */
-        border-left: 5px solid #dc3545;
-    }
-
-    .modal-body-scrollable {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-
-    .request-accepted {
         background-color: #d4edda;
         border-left: 5px solid #28a745;
     }
-
     .request-rejected {
         background-color: #f8d7da;
         border-left: 5px solid #dc3545;
     }
-
-    /* Elevamos los modales solo cuando están activos */
     .modal.show#confirmModal .modal-dialog,
     .modal.show#successModal .modal-dialog,
     .modal.show#errorModal .modal-dialog {
         z-index: 1070;
     }
-
     .modal.show#confirmModal ~ .modal-backdrop,
     .modal.show#successModal ~ .modal-backdrop,
     .modal.show#errorModal ~ .modal-backdrop {
         z-index: 1069;
     }
-
     .modal.show#editTaskModal .modal-dialog {
         z-index: 1080 !important;
     }
-
     .modal.show#editTaskModal ~ .modal-backdrop {
         z-index: 1079 !important;
     }
-
     </style>
-
-    <!-- Modal de configuración -->
     <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="settingsModalLabel">Task Requests</h5>
@@ -159,19 +175,15 @@
                     <input type="hidden" name="task_id" id="modal-task-id" value="">
                     <div class="mb-3">
                         <div id="task-requests-container">
-                            <!-- Requests se llenan con JS desde la tarea seleccionada -->
                         </div>
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
-
         </div>
     </div>
-    <!-- Modal de éxito -->
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -188,8 +200,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal de error -->
     <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -206,8 +216,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal de confirmación -->
     <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -226,175 +234,16 @@
         </div>
     </div>
 </div>
-
-<!-- Scripts -->
 <script>
-    function openTaskModalFromCard(element) {
-        const taskId = element.getAttribute('data-task-id');
-        if (!taskId) {
-            console.warn("No task ID found.");
-            return;
-        }
-
-        // Guardar task_id oculto para usarlo en el formulario del modal de configuración
-        document.getElementById('modal-task-id').value = taskId;
-
-        // Buscar la tarea desde la variable `tasks`
-        const tasks = {{ tasks | tojson }};
-        const selectedTask = tasks.find(t => t.id == taskId);
-
-        if (selectedTask) {
-            // Actualiza título, descripción, prioridad, fecha y nombre del proyecto en el modal
-            document.querySelector(".task-title-modal").innerText = selectedTask.title;
-            document.querySelector(".task-description-modal").innerText = selectedTask.description;
-            document.querySelector(".task-priority-modal").innerHTML = `Priority: <span class="task-priority ${selectedTask.priority.toLowerCase()}"></span>`;
-            document.querySelector(".task-due-date-modal .due-date-text").innerText = selectedTask.due_date;
-            
-            document.querySelector(".project-name-modal").innerText = "Project: " + selectedTask.project_name;
-
-            const requirementsContainer = document.getElementById("requirements-list");
-            requirementsContainer.innerHTML = '';
-            selectedTask.requirements.forEach(req => {
-                const reqDiv = document.createElement("div");
-                reqDiv.style.display = "flex";
-                reqDiv.innerHTML = `
-                    <label class="checkbox-container">
-                        <input class="custom-checkbox" type="checkbox" ${req.is_completed ? "checked" : ""}>
-                        <span class="checkmark"></span>
-                    </label>
-                    <label class="custom-checkbox-label">${req.requirement}</label>
-                `;
-                requirementsContainer.appendChild(reqDiv);
-            });
-
-            const container = document.getElementById('task-requests-container');
-            container.innerHTML = '';
-            selectedTask.requests.forEach(req => {
-                let statusClass = '';
-                if (req.accepted_by) {
-                    statusClass = 'request-accepted';
-                } else if (req.rejected_by) {
-                    statusClass = 'request-rejected';
-                }
-
-                const requestHtml = `
-                    <div class="border p-2 mb-2 ${statusClass}">
-                        <strong>Action:</strong> ${req.action_type}<br>
-                        <strong>Status:</strong> ${req.status}<br>
-                        <strong>Reason:</strong> ${req.reason}<br>
-                        <strong>Date:</strong> ${req.date}<br>
-                        ${!req.accepted_by && !req.rejected_by ? `
-                            <button class="btn btn-success btn-sm" onclick="handleRequestAction(${req.id}, 'accept')">Accept</button>
-                            <button class="btn btn-danger btn-sm" onclick="handleRequestAction(${req.id}, 'reject')">Reject</button>
-                        ` : ''}
-                    </div>
-                `;
-                container.innerHTML += requestHtml;
-            });
-        } else {
-            document.getElementById('task-requests-container').innerHTML = "<p>No requests for this task.</p>";
-        }
-
-        document.getElementById('task-modal').style.display = 'block';
-    }
-
-    function closeTaskModal() {
-        document.getElementById('task-modal').style.display = 'none';
-    }
-
-    function openSettingsModal() {
-        const taskId = document.getElementById('modal-task-id').value;
-        if (!taskId) {
-            alert('No task selected.');
-            return;
-        }
-        const bsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
-        bsModal.show();
-    }
-
-    let pendingAction = null;
-    let pendingRequestId = null;
-    let confirmModalInstance = null;
-
-    function handleRequestAction(requestId, action) {
-        pendingRequestId = requestId;
-        pendingAction = action;
-
-        document.getElementById("confirmMessage").textContent =
-            `Are you sure you want to ${action} this request?`;
-
-        const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal"));
-        confirmModalInstance = confirmModal;
-        confirmModal.show();
-
-        const confirmBtn = document.getElementById("confirmActionBtn");
-
-        // Evita múltiples asignaciones duplicadas
-        confirmBtn.onclick = () => {
-            confirmModalInstance.hide();
-
-            // Esperamos a que el modal de confirmación se cierre
-            const confirmEl = document.getElementById("confirmModal");
-            confirmEl.addEventListener("hidden.bs.modal", function onHidden() {
-                // Removemos el listener para que no se dispare múltiples veces
-                confirmEl.removeEventListener("hidden.bs.modal", onHidden);
-
-                // Ahora hacemos la petición
-                fetch("{{ request.route_url('handle_request_action') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-Token": "{{ request.session.get_csrf_token() }}"
-                    },
-                    body: JSON.stringify({ request_id: pendingRequestId, action: pendingAction }),
-                })
-                .then(response => response.json().then(data => {
-                    if (response.ok) {
-                        const acceptedTaskId = pendingRequestId; // o ajusta si el ID de la tarea viene en `data.task_id`
-                        const task = {{ tasks | tojson }}.find(t => t.requests.some(r => r.id == acceptedTaskId));
-
-                        if (pendingAction === 'accept' && data.task_id) {
-                            fetch("{{ request.route_url('prepare_edit_task') }}", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-CSRF-Token": "{{ request.session.get_csrf_token() }}"
-                                },
-                                body: JSON.stringify({ task_id: data.task_id })
-                            })
-                            .then(res => res.json())
-                            .then(prep => {
-                                if (prep.success) {
-                                    window.location.href = "{{ request.route_url('edit_task') }}";
-                                } else {
-                                    document.getElementById("errorMessage").textContent = prep.error || "Could not prepare task for editing.";
-                                    const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
-                                    errorModal.show();
-                                }
-                            });
-                        } else {
-                            document.getElementById("successMessage").textContent = `Request ${pendingAction}ed.`;
-                            const successModal = new bootstrap.Modal(document.getElementById("successModal"));
-                            successModal.show();
-                        }
-
-                        } else {
-                            document.getElementById("errorMessage").textContent = data.error || "Something went wrong.";
-                            const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
-                            errorModal.show();
-                        }
-                                        }))
-                .catch(error => {
-                    console.error("Error:", error);
-                    document.getElementById("errorMessage").textContent = "Error sending request.";
-                    const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
-                    errorModal.show();
-                });
-            });
-        };
-    }
-
+    window.tasks = {{ tasks | tojson | safe }};
+    window.projects = {{ projects_requests | tojson | safe }};
+    window.routes = {
+        handleRequestAction: "{{ request.route_url('handle_request_action') }}",
+        prepareEditTask: "{{ request.route_url('prepare_edit_task') }}",
+        editTask: "{{ request.route_url('edit_task') }}",
+        prepareEditProject: "{{ request.route_url('prepare_edit_project') }}",
+        editProject: "{{ request.route_url('edit_project') }}"
+    };
+    window.csrfToken = "{{ request.session.get_csrf_token() }}";
 </script>
-
-
 {% endblock %}
