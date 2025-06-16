@@ -11,6 +11,5 @@ def main(global_config, **settings):
         config.include('pyramid_jinja2')
         config.include('.routes')
         config.include('.models')
-        config.include('pyramid_tm')
         config.scan()
     return config.make_wsgi_app()
