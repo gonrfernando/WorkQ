@@ -313,21 +313,24 @@ function renderTasksAndProjects(data, typeId) {
 
     if (typeId != 2) {
         projects.forEach(project => {
-        const col = document.createElement("div");
-        col.className = "task-spacer col-3";
-        col.innerHTML = `
-    <div class="task-item" onclick="openProjectModal(${project.id})">
-        <h6 class="project-name">Project: ${project.name}</h6>
-        <h4 class="task-title">Project Request</h4>
-        <div class="task-element task-subheader row">
-            <p class="priority col-12">No priority</p>
-        </div>
-        <p class="task-element task-description">This project has pending requests.</p>
-    </div>
-`;
-        row.appendChild(col);
-    });
-}
+            const col = document.createElement("div");
+            col.className = "task-spacer col-3";
+            col.innerHTML = `
+                <div class="task-item" onclick="openProjectModal(${project.id})">
+                    <h6 class="project-name">Project: ${project.name}</h6>
+                    <h4 class="task-title">Project Request</h4>
+                    <div class="task-element task-subheader row">
+                        <div class="task-due-date col-12">
+                            <span class="material-icons clock-icon">event</span>
+                            <span class="due-date-text">From: ${project.start_date || 'N/A'} to ${project.end_date || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <p class="task-element task-description">This project has pending requests.</p>
+                </div>
+            `;
+            row.appendChild(col);
+        });
+    }
 
 container.appendChild(row);
 

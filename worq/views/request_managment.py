@@ -110,6 +110,8 @@ def my_view(request):
     json_projects_with_requests = [{
         "id": proj.id,
         "name": proj.name,
+        "start_date": proj.startdate.strftime('%Y-%m-%d') if proj.startdate else "N/A",
+        "end_date": proj.enddate.strftime('%Y-%m-%d') if proj.enddate else "N/A",
         "requests": [
             {
                 "id": req.id,
@@ -121,10 +123,13 @@ def my_view(request):
                 "accepted_by": req.accepted_by,
                 "rejected_by": req.rejected_by
             }
-            for req in sorted(proj.requests, key=lambda r: (
-                (1 if r.accepted_by or r.rejected_by else 0),
-                r.request_date or datetime.max
-            ))
+            for req in sorted(
+                [r for r in proj.requests if r.task_id is None],
+                key=lambda r: (
+                    (1 if r.accepted_by or r.rejected_by else 0),
+                    r.request_date or datetime.max
+                )
+            )
         ]
     } for proj in dbprojects]
 
@@ -275,6 +280,8 @@ def get_filtered_requests(request):
         json_projects_with_requests = [{
             "id": proj.id,
             "name": proj.name,
+            "start_date": proj.startdate.strftime('%Y-%m-%d') if proj.startdate else "N/A",
+            "end_date": proj.enddate.strftime('%Y-%m-%d') if proj.enddate else "N/A",
             "requests": [
                 {
                     "id": req.id,

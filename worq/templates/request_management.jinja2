@@ -75,7 +75,10 @@
                         <h6 class="project-name">Project: {{ item.name }}</h6>
                         <h4 class="task-title">Project Request</h4>
                         <div class="task-element task-subheader row">
-                            <p class="priority col-12">No priority</p>
+                            <div class="task-due-date col-12">
+                                <span class="material-icons clock-icon">event</span>
+                                <span class="due-date-text">Start: {{ item.start_date }} | End: {{ item.end_date }}</span>
+                            </div>
                         </div>
                         <p class="task-element task-description">This project has pending requests.</p>
                     </div>
@@ -128,14 +131,6 @@
                 <div class="task-stats-modal"></div>
             </div>
             <div class="task-footer-modal">
-                <div class="task-comments-modal">
-                    <h4>Comments</h4>
-                    <textarea id="comment-input" placeholder="Add a comment..."></textarea>
-                </div>
-                <div class="task-modal-buttons">
-                    <button id="save-task" class="btn btn-primary">Save</button>
-                    <button id="deliver-task" class="btn btn-success">Deliver</button>
-                </div>
             </div>
         </div>
     </div>
