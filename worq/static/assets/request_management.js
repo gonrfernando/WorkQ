@@ -5,7 +5,6 @@ function openTaskModalFromCard(element) {
         console.warn("No task ID found.");
         return;
     }
-    // 🛡 Defensa adicional:
     if (!Array.isArray(window.tasks)) {
         console.error("window.tasks is not an array", window.tasks);
         return;
@@ -54,7 +53,9 @@ function openTaskModalFromCard(element) {
                     ` : ''}
                 </div>
             `;
-            container.innerHTML += requestHtml;
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = requestHtml;
+            container.appendChild(tempDiv.firstElementChild);
         });
     } else {
         document.getElementById('task-requests-container').innerHTML = "<p>No requests for this task.</p>";
@@ -240,8 +241,35 @@ function renderTasksAndProjects(data, typeId) {
     container.innerHTML = ""; 
     const tasks = Array.isArray(data.tasks) ? data.tasks : [];
     window.tasks = tasks;
-    const projects = data.projects_requests || [];
+    const projects = Array.isArray(data.projects_requests) ? data.projects_requests : [];
     window.projects = projects;
+
+    const hasTasks = tasks.length > 0;
+    const hasProjects = projects.length > 0;
+
+    if (typeId === "1" && !hasProjects) {
+        container.innerHTML = `
+            <div class="alert alert-info mt-4" role="alert">
+                No project requests found.
+            </div>`;
+        return;
+    }
+
+    if (typeId === "2" && !hasTasks) {
+        container.innerHTML = `
+            <div class="alert alert-info mt-4" role="alert">
+                No task requests found.
+            </div>`;
+        return;
+    }
+
+    if ((typeId !== "1" && typeId !== "2") && !hasTasks && !hasProjects) {
+        container.innerHTML = `
+            <div class="alert alert-info mt-4" role="alert">
+                No task or project requests found.
+            </div>`;
+        return;
+    }
 
     const row = document.createElement("div");
     row.className = "task-container card-view row gx-5";
@@ -337,4 +365,10 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error fetching filtered data:", e);
         }
     });
+     const initialData = {
+        tasks: window.tasks,
+        projects_requests: window.projects
+    };
+    const initialTypeId = "{{ active_type.id }}";
+    renderTasksAndProjects(initialData, initialTypeId);
 });
