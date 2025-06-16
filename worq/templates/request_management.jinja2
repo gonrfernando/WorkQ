@@ -240,7 +240,9 @@
     window.routes = {
         handleRequestAction: "{{ request.route_url('handle_request_action') }}",
         prepareEditTask: "{{ request.route_url('prepare_edit_task') }}",
-        editTask: "{{ request.route_url('edit_task') }}"
+        editTask: "{{ request.route_url('edit_task') }}",
+        prepareEditProject: "{{ request.route_url('prepare_edit_project') }}",
+        editProject: "{{ request.route_url('edit_project') }}"
     };
     window.csrfToken = "{{ request.session.get_csrf_token() }}";
 </script>

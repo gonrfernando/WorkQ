@@ -170,23 +170,28 @@ def handle_request_action(request):
 
         if action == "accept":
             req_obj.accepted_by = user_id
-            req_obj.status_id = 2  # status aceptada
+            req_obj.status_id = 2  # aceptada
         elif action == "reject":
             req_obj.rejected_by = user_id
-            req_obj.status_id = 3  # status rechazada
+            req_obj.status_id = 3  # rechazada
         else:
             return Response(json_body={'error': 'Invalid action'}, status=400)
 
         request.dbsession.flush()
-        
-        return {
+
+        response_data = {
             "message": "Request updated",
-            "task_id": req_obj.task_id
+            "project_id": req_obj.project_id,
+            "task_id": req_obj.task_id,
         }
+
+
+        return response_data
 
     except Exception as e:
         print(f"Error: {e}")
         return Response(json_body={'error': str(e)}, status=500)
+
 
 @view_config(route_name='prepare_edit_task', request_method='POST', renderer='json')
 def prepare_edit_task_view(request):
@@ -202,6 +207,22 @@ def prepare_edit_task_view(request):
     except Exception as e:
         print(f"[ERROR] Error al preparar tarea para edición: {e}")
         return {"success": False, "error": str(e)}
+
+@view_config(route_name='prepare_edit_project', request_method='POST', renderer='json')
+def prepare_edit_project_view(request):
+    try:
+        data = request.json_body
+        project_id = data.get("project_id")
+        if not project_id:
+            return {"success": False, "error": "Project ID is required."}
+
+        request.session['edit_project_id'] = project_id
+        print(f"[INFO] project_id {project_id} guardado en sesión.")
+        return {"success": True}
+    except Exception as e:
+        print(f"[ERROR] Error al preparar proyecto para edición: {e}")
+        return {"success": False, "error": str(e)}
+
 
 @view_config(route_name='get_filtered_requests', renderer='json')
 def get_filtered_requests(request):

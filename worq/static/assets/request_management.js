@@ -129,39 +129,67 @@ function handleRequestAction(requestId, action) {
                 body: JSON.stringify({ request_id: pendingRequestId, action: pendingAction }),
             })
             .then(response => response.json().then(data => {
+                console.log("Response data:", data);
                 if (response.ok) {
-                    const acceptedTaskId = pendingRequestId;
-                    const task = Array.isArray(window.tasks) ? window.tasks.find(t => t.requests.some(r => r.id == acceptedTaskId)) : null;
-                    if (pendingAction === 'accept' && data.task_id) {
-                        fetch(window.routes.prepareEditTask, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRF-Token": window.csrfToken
-                            },
-                            body: JSON.stringify({ task_id: data.task_id })
-                        })
-                        .then(res => res.json())
-                        .then(prep => {
-                            if (prep.success) {
-                                window.location.href = window.routes.editTask;
-                            } else {
-                                document.getElementById("errorMessage").textContent = prep.error || "Could not prepare task for editing.";
-                                const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
-                                errorModal.show();
-                            }
-                        });
+                    if (pendingAction === 'accept') {
+                        if (data.task_id) {
+                            // Acción para tarea aceptada
+                            fetch(window.routes.prepareEditTask, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-Token": window.csrfToken
+                                },
+                                body: JSON.stringify({ task_id: data.task_id })
+                            })
+                            .then(res => res.json())
+                            .then(prep => {
+                                if (prep.success) {
+                                    window.location.href = window.routes.editTask;
+                                } else {
+                                    document.getElementById("errorMessage").textContent = prep.error || "Could not prepare task for editing.";
+                                    const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                                    errorModal.show();
+                                }
+                            });
+                        } else if (data.project_id) {
+                            // Acción para proyecto aceptado
+                            fetch(window.routes.prepareEditProject, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-Token": window.csrfToken
+                                },
+                                body: JSON.stringify({ project_id: data.project_id })
+                            })
+                            .then(res => res.json())
+                            .then(prep => {
+                                if (prep.success) {
+                                    window.location.href = window.routes.editProject; // Define esta ruta
+                                } else {
+                                    document.getElementById("errorMessage").textContent = prep.error || "Could not prepare project for editing.";
+                                    const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                                    errorModal.show();
+                                }
+                            });
+                        } else {
+                            // Si no hay task_id ni project_id, mostrar éxito genérico
+                            document.getElementById("successMessage").textContent = `Request ${pendingAction}ed.`;
+                            const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+                            successModal.show();
+                        }
                     } else {
+                        // Acción para reject o cualquier otro action
                         document.getElementById("successMessage").textContent = `Request ${pendingAction}ed.`;
                         const successModal = new bootstrap.Modal(document.getElementById("successModal"));
                         successModal.show();
                     }
-                    } else {
-                        document.getElementById("errorMessage").textContent = data.error || "Something went wrong.";
-                        const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
-                        errorModal.show();
-                    }
-                                    }))
+                } else {
+                    document.getElementById("errorMessage").textContent = data.error || "Something went wrong.";
+                    const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                    errorModal.show();
+                }
+            }))
             .catch(error => {
                 console.error("Error:", error);
                 document.getElementById("errorMessage").textContent = "Error sending request.";
@@ -171,6 +199,7 @@ function handleRequestAction(requestId, action) {
         });
     };
 }
+
 let isCardView = true; // Estado global para la vista actual
 
 function applyToggleView() {
