@@ -1,7 +1,7 @@
 from datetime import datetime, date, timedelta
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPInternalServerError
-from worq.models.models import Projects, Tasks, UsersProjects, TaskPriorities
+from worq.models.models import Projects, Tasks, UsersProjects, TaskPriorities, UsersTasks
 from sqlalchemy.orm import joinedload
 
 @view_config(route_name='calendar', renderer='worq:templates/calendar.jinja2')
@@ -36,16 +36,30 @@ def my_view(request):
         }
 
         # Obtener tareas del mes actual
-        tasks = (
-            request.dbsession.query(Tasks)
-            .options(joinedload(Tasks.priority))
-            .filter(
-                Tasks.project_id == active_project_id,
-                Tasks.finished_date >= first_day,
-                Tasks.finished_date < next_month
-            )
-            .all()
+        query = (
+        request.dbsession.query(Tasks)
+        .options(
+            joinedload(Tasks.priority),
+            joinedload(Tasks.task_requirements),
+            joinedload(Tasks.users)
         )
+        .filter(
+            Tasks.project_id == active_project_id,
+            Tasks.finished_date >= first_day,
+            Tasks.finished_date < next_month
+        )
+    )
+
+    # Si es un user normal, le limitas sólo a sus tareas
+        if user_role == "user":
+            query = (
+                query
+                .join(UsersTasks)
+                .filter(UsersTasks.user_id == user_id)
+            )
+
+        # Ordenas como necesites y ejecutas
+        tasks = query.order_by(Tasks.priority_id.desc()).all()
 
 
         # Agrupar tareas por día

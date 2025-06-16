@@ -7,11 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from worq.models.models import Projects
 import json
 
-@view_config(
-    route_name='pm_main',
-    renderer='worq:templates/pm_main.jinja2',
-    request_method=('GET', 'POST')
-)
+@view_config(route_name='pm_main', renderer='worq:templates/pm_main.jinja2', request_method=('GET', 'POST'))
 def project_creation_view(request):
     session = request.session
     user_id = session.get("user_id")
@@ -41,7 +37,18 @@ def project_creation_view(request):
             name = data.get('name')
             startdate = data.get('startdate')
             enddate = data.get('enddate')
+            today = datetime.date.today()
 
+# Validación: startdate no en el pasado
+            start_date_obj = datetime.datetime.strptime(startdate, '%Y-%m-%d').date()
+            if start_date_obj < today:
+                return Response("La fecha de inicio no puede ser en el pasado.", status=400)
+
+            # Validación: enddate no antes de startdate (si se proporciona)
+            if enddate:
+                end_date_obj = datetime.datetime.strptime(enddate, '%Y-%m-%d').date()
+                if end_date_obj < start_date_obj:
+                    return Response("La fecha de fin no puede ser anterior a la de inicio.", status=400)
             if not name or not startdate:
                 return Response(
                     "Missing required fields: 'name' and 'startdate' are mandatory",
@@ -56,18 +63,44 @@ def project_creation_view(request):
                         if enddate else None),
                 creationdate=datetime.date.today(),
                 state_id=1,
-                created_by=user_id
+                user_id=user_id
             )
             dbsession.add(new_proj)
             dbsession.flush()
+            print("Nuevo proyecto ID:", new_proj.id)
+
             transaction.commit()
 
             session["project_id"] = new_proj.id
 
-# respuesta de éxito
+            # Si es AJAX, responde JSON
+            is_ajax = (
+            request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+            or 'application/json' in request.headers.get('Accept', '')
+        )
+
+            if is_ajax:
+                return Response(
+                    json.dumps({"success": True}),
+                    content_type='application/json; charset=utf-8'
+                )
+            return HTTPFound(location=request.route_url('pm_main'))
+    
         except SQLAlchemyError as e:
+            if is_ajax:
+                return Response(
+                    json.dumps({"success": False, "error": str(e)}),
+                    content_type='application/json; charset=utf-8',
+                    status=500
+                )
             return Response(str(e), status=500, content_type='text/plain')
         except Exception as e:
+            if is_ajax:
+                return Response(
+                    json.dumps({"success": False, "error": "Invalid request: " + str(e)}),
+                    content_type='application/json; charset=utf-8',
+                    status=400
+                )
             return Response("Invalid request: " + str(e), status=400, content_type='text/plain')
 
     # Si es GET (o si caíste acá tras un POST fallido), renderiza normalmente
@@ -78,4 +111,5 @@ def project_creation_view(request):
         "user_name":         session.get('user_name'),
         "user_email":        session.get('user_email'),
         "user_role":         session.get('user_role'),
+        "now": datetime.datetime.utcnow().strftime('%Y-%m-%d')
     }
