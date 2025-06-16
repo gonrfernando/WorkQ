@@ -17,9 +17,12 @@
         </div>
     <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
         <div></div>
-        <div style="font-size: 0.9rem; cursor: pointer;">
-            <span style="margin-right: 0.5rem;">&#x1F50D;</span>Filter
-        </div>
+        <button id="openFilterModal" class="btn" type="button" style="background: none; border: none; display: flex; align-items: center;">
+        <span class="material-symbols-outlined">
+            filter_alt
+        </span>
+        <span style="margin-left: 0.5em;">Filter</span>
+        </button>
     </div>
 
     <div style="margin-top: 1rem; background-color: #e0e0e0; border-radius: 8px; padding: 1rem;">
@@ -33,5 +36,37 @@
         <p>No actions found for this project.</p>
         {% endfor %}
     </div>
+</div>
+<script>
+document.getElementById('openFilterModal').addEventListener('click', function() {
+  const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
+  filterModal.show();
+});
+</script>
+<!-- Modal de filtro -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background: none; border: none;">
+      <section class="TCreation2" style="margin:0;">
+        <section class="TCreation3" style="margin:0;">
+          <div class="outside-task" style="width:100%; margin:0;">
+            <div style="width:100%;">
+              <div class="modal-header" style="border-bottom:none; background:transparent; padding-left:0; padding-right:0;">
+                <h5 class="modal-title" id="filterModalLabel">Filter Options</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body" style="background:transparent;">
+                <!-- Aquí pon tus campos de filtro -->
+                <p>Filter content goes here...</p>
+              </div>
+              <div class="modal-footer" style="border-top:none; background:transparent;">
+                <button type="button" class="buttons" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </div>
 </div>
 {% endblock %}
