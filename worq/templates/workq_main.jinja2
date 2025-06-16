@@ -36,6 +36,7 @@
       <script src="{{request.static_url('worq:static/assets/sidebar-scripts.js')}}"></script>
       <script src="{{request.static_url('worq:static/assets/task_view.js')}}"></script>
       <script src="{{request.static_url('worq:static/assets/pm_main.js')}}"></script>
+      <script src="{{request.static_url('worq:static/assets/request_management.js')}}"></script>
     {% endblock %}
       
 
@@ -261,6 +262,8 @@
 
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById('membersSidebar');
+            if (!sidebar) return; 
+
             const isClickInside = sidebar.contains(event.target);
 
             if (!isClickInside && sidebar.classList.contains('expanded')) {
@@ -366,32 +369,38 @@
       });
     </script>
     <script>
-      document.getElementById('uploadForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
+      document.addEventListener('DOMContentLoaded', function () {
+        const uploadForm = document.getElementById('uploadForm');
+        if (uploadForm) {
+          uploadForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-        const formData = new FormData(this);
+            const formData = new FormData(this);
 
-        try {
-          const response = await fetch('/upload_file', {
-            method: 'POST',
-            body: formData
+            try {
+              const response = await fetch('/upload_file', {
+                method: 'POST',
+                body: formData
+              });
+
+              const data = await response.json();
+
+              const messageDiv = document.getElementById('uploadMessage');
+              messageDiv.innerText = data.message;
+              messageDiv.className = data.status === 'success'
+                ? 'alert alert-success'
+                : 'alert alert-danger';
+
+            } catch (error) {
+              console.error('Error al subir archivo:', error);
+              const messageDiv = document.getElementById('uploadMessage');
+              messageDiv.innerText = 'Error al conectar con el servidor.';
+              messageDiv.className = 'alert alert-danger';
+            }
           });
-
-          const data = await response.json();
-
-          const messageDiv = document.getElementById('uploadMessage');
-          messageDiv.innerText = data.message;
-          messageDiv.className = data.status === 'success'
-            ? 'alert alert-success'
-            : 'alert alert-danger';
-
-        } catch (error) {
-          console.error('Error al subir archivo:', error);
-          const messageDiv = document.getElementById('uploadMessage');
-          messageDiv.innerText = 'Error al conectar con el servidor.';
-          messageDiv.className = 'alert alert-danger';
         }
       });
+
 </script>
 {% block footer_scripts %}
 {% endblock %}

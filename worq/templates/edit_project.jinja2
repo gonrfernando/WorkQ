@@ -1,0 +1,186 @@
+{% extends "workq_main.jinja2" %}
+
+{% block tasks %}
+<style>
+.scrollable-section {
+  max-height: 200px; 
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+
+.popup-container {
+  overflow-y: auto;
+}
+
+form.edit-project-form {
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1em;
+}
+</style>
+
+<div id="edit-project-popup" class="popup-container active">
+    <div class="popup-box">
+    <form method="POST" class="edit-project-form">
+        <h5 class="task-header-container">
+        <span class="task-header">Edit Project</span>
+        </h5>
+
+        <input type="hidden" name="form_type" value="edit_project">
+        <input type="hidden" name="project_id" value="{{ project.id }}">
+        <input type="hidden" name="state_id" id="state_id" value="{{ project.state_id }}">
+
+
+        <label><strong>Project Name</strong></label>
+        <input class="controls" type="text" id="project-name" name="name" required>
+
+        <label><strong>Start Date</strong></label>
+        <input class="date-button" type="date" id="startdate" name="startdate" required>
+        <br>
+        <label><strong>End Date</strong></label>
+        <input class="date-button" type="date" id="enddate" name="enddate" required>
+
+        <input class="buttons" type="submit" value="Submit Edit">
+        <input class="buttons" type="button" value="Delete Task" id="delete-task-button">
+
+    </form>
+    </div>
+</div>
+
+<!-- Modals -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="successModalLabel">Project Edited</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        The project was updated successfully!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="errorMessage">
+        Something went wrong while updating the project.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const project = {{ project | tojson }};
+  const form = document.querySelector('.edit-project-form');
+
+  // Rellenar los campos con datos del proyecto
+  document.getElementById('project-name').value = project.name;
+  document.getElementById('startdate').value = project.startdate;
+  document.getElementById('enddate').value = project.enddate;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      jsonData[key] = value;
+    });
+
+    fetch(window.location.pathname, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(jsonData)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+
+        const modalEl = document.getElementById('successModal');
+        modalEl.addEventListener('hidden.bs.modal', () => {
+          window.location.href = data.redirect || '/';
+        }, { once: true });
+
+      } else {
+        document.getElementById('errorModalLabel').innerText = 'Update Error';
+        document.getElementById('errorMessage').innerText = data.error || 'Unknown error';
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById('errorModalLabel').innerText = 'Request Failed';
+      document.getElementById('errorMessage').innerText = 'Could not reach the server.';
+      const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+      errorModal.show();
+    });
+  });
+  document.getElementById('delete-task-button').addEventListener('click', function () {
+    const formData = new FormData(form);
+
+    // Cambiar el state_id a 2
+    formData.set('state_id', '2');
+    formData.set('form_type', 'delete_project');
+
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      jsonData[key] = value;
+    });
+
+    fetch("/delete_project_status", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(jsonData)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+
+        const modalEl = document.getElementById('successModal');
+        modalEl.addEventListener('hidden.bs.modal', () => {
+          window.location.href = data.redirect || '/';
+        }, { once: true });
+
+      } else {
+        document.getElementById('errorModalLabel').innerText = 'Delete Error';
+        document.getElementById('errorMessage').innerText = data.error || 'Unknown error';
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById('errorModalLabel').innerText = 'Request Failed';
+      document.getElementById('errorMessage').innerText = 'Could not reach the server.';
+      const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+      errorModal.show();
+    });
+  });
+});
+
+</script>
+{% endblock %}
