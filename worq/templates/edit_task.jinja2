@@ -1,9 +1,26 @@
 {% extends "workq_main.jinja2" %}
 
-{% block tasks %}  {# Asegúrate de que este bloque existe en workq_main.jinja2 #}
+{% block tasks %} 
+<style>
+.scrollable-section {
+  max-height: 200px; 
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid #ccc;
+}
 
+.popup-container {
+  overflow-y: auto;
+}
+
+form.add-tasks {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+</style>
 <div id="edit-user-popup" class="popup-container active">
-    <form method="POST" class="add-tasks">  {# Asegúrate de incluir esta clase #}
+    <form method="POST" class="add-tasks"> 
       <h5 class="task-header-container">
         <span class="task-header">Edit Task</span>
         <div class="priority-select">

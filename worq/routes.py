@@ -28,3 +28,4 @@ def includeme(config):
     config.add_route('edit_task', '/edit_task')
     config.add_route('delete_task_status', '/delete_task_status')
     config.add_route('prepare_edit_task', '/prepare_edit_task')
+    config.add_route('get_filtered_requests', '/api/requests/filter')
