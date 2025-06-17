@@ -26,3 +26,4 @@
 * [Backend](tools-and-technologies/backend.md)
 * [Frontend](tools-and-technologies/frontend.md)
 * [Infraestructure and Deployment](tools-and-technologies/infraestructure-and-deployment.md)
+* [📄 Software Version Documentation - WorkQ Project](tools-and-technologies/software-version-documentation-workq-project.md)
