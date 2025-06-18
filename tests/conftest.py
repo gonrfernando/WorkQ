@@ -96,10 +96,13 @@ def test_projects(db_session, test_user, test_user_basic):
 
 
 @pytest.fixture
-def assign_user_to_project(db_session, test_user, test_project):
-    link = UsersProjects(user_id=test_user_basic.id, project_id=test_project.id)
-    db_session.add(link)
+def assign_user_to_project(db_session, test_user_basic, test_projects):
+    link1 = UsersProjects(user_id=test_user_basic.id, project_id=test_projects[1].id, role_id=2)
+    link2 = UsersProjects(user_id=test_user_basic.id, project_id=test_projects[2].id, role_id=2)
+    links = [link1, link2]
+    db_session.add_all(links)
     db_session.flush()
+    return links
 
 
 # ---------- FIXTURE DE LA APP WEB (WebTest) ----------

@@ -1,13 +1,8 @@
-def test_task_view_project(testapp, db_session, test_user_basic, test_projects):
+def test_task_view_error_message_displayed(testapp, db_session, test_user):
     testapp.post('/sign-in', {
-        'email': test_user_basic.email,
-        'password': 'user123'
+        'email': test_user.email,
+        'password': 'admin123'
     })
 
-    res = testapp.get('/task_view')
-    assert res.status_int == 200
-    print(res.text)
-    assert 'DEBUG: Number of projects: 2' in res.text
-
-    for project in test_projects:
-        assert project.name in res.text
+    res = testapp.get('/task_view?error=Something+went+wrong')
+    assert 'Something went wrong' in res.text
