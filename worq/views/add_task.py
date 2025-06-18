@@ -187,7 +187,7 @@ def task_creation_view(request):
     roles = dbsession.query(Roles).all()
     json_roles = [{"id": r.id, "name": r.name} for r in roles]
 
-    priorities = dbsession.query(TaskPriorities).all()
+    priorities = dbsession.query(TaskPriorities).filter(TaskPriorities.id != 4).all()
     json_priorities = [{"id": p.id, "priority": p.priority} for p in priorities]
 
     now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M')
