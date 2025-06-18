@@ -111,5 +111,6 @@ def project_creation_view(request):
         "user_name":         session.get('user_name'),
         "user_email":        session.get('user_email'),
         "user_role":         session.get('user_role'),
-        "now": datetime.datetime.utcnow().strftime('%Y-%m-%d')
+        "now": datetime.datetime.utcnow().strftime('%Y-%m-%d'),
+        "active_tab": "pm"
     }

@@ -1,5 +1,5 @@
 import datetime
-from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks
+from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks, Projects
 from sqlalchemy.exc import SQLAlchemyError
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -24,7 +24,7 @@ def task_creation_view(request):
         return HTTPFound(
             location=request.route_url('task_view')
         )
-
+    
     dbsession = request.dbsession
     active_project_id = session.get("project_id")
     user_id = session.get('user_id')
@@ -153,11 +153,19 @@ def task_creation_view(request):
             return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
 
     # --- Datos para renderizado en GET y tras POST ---
-    ups = dbsession.query(UsersProjects).filter_by(user_id=user_id).all()
-    json_projects = [
-        {"id": up.project_id, "name": up.project.name}
-        for up in ups
-    ]
+    if user_role in ['superadmin', 'admin']:
+        # Si es admin o superadmin, traemos todos los proyectos
+        user_projects = request.dbsession.query(Projects).all()
+    else:
+        # Si no, solo los proyectos asociados al usuario
+        user_projects = (
+            request.dbsession.query(Projects)
+            .join(UsersProjects)
+            .filter(UsersProjects.user_id == user_id)
+            .all()
+        )
+ 
+    json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
     active_project = next(
         (p for p in json_projects if p["id"] == active_project_id),
         None
@@ -210,5 +218,5 @@ def task_creation_view(request):
         "user_name": session.get('user_name'),
         "user_email": session.get('user_email'),
         "user_role": session.get('user_role'),
-        "active_tab": "pm"
+        "active_tab": "tasks"
     }
