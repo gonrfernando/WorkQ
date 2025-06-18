@@ -31,5 +31,6 @@ def includeme(config):
     config.add_route('delete_task_status', '/delete_task_status')
     config.add_route('delete_project_status', '/delete_project_status')
     config.add_route('prepare_edit_task', '/prepare_edit_task')
+    config.add_route('deliver_task', '/deliver_task')
     config.add_route('prepare_edit_project', '/prepare_edit_project')
     config.add_route('get_filtered_requests', '/api/requests/filter')

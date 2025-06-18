@@ -3,7 +3,9 @@ from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities
 from sqlalchemy.orm import joinedload
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy import and_
- 
+from pyramid.response import Response
+import json
+
 @view_config(route_name='task_view', renderer='worq:templates/task_view.jinja2')
 def task_view(request):
     session = request.session
@@ -64,8 +66,9 @@ def task_view(request):
         .filter(
             and_(
                 Tasks.project_id == active_project_id,
+                Tasks.status_id != 6,  
                 Tasks.status_id != 7,
-                Tasks.status_id != 6  # Excluir tareas completadas y canceladas  
+                Tasks.status_id != 8
             )
         )
         .all()
@@ -111,3 +114,19 @@ def task_view(request):
         "users": users,
         "active_project_id": active_project_id,
     }
+
+@view_config(route_name='deliver_task', renderer='json', request_method='POST')
+def deliver_task(request):
+    try:
+        task_id = int(request.POST.get('task_id'))
+        task = request.dbsession.query(Tasks).get(task_id)
+
+        if not task:
+            return {"success": False, "error": "Task not found"}
+
+        task.status_id = 6
+        request.dbsession.flush()  # Guarda el cambio
+
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
