@@ -358,6 +358,7 @@ padding: 18px, 40px;
 }
 
 .search-bar2 input {
+  position: relative;
   border: 1px solid #017bab;
   outline: none;
   margin-bottom: 15px;
@@ -377,12 +378,12 @@ padding: 18px, 40px;
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
-  width: 90%; /* Match the input field width */
+  width: 100%; /* Match the input field width */
   margin-top: 0; /* Remove extra margin */
   display: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  top: 20%; /* Position directly below the input field */
-  left: 5%; /* Align with the input field */
+  top: 100%; /* Position directly below the input field */
+  left: 0; /* Align with the input field */
 }
 
 .autocomplete-item {

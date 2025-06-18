@@ -45,6 +45,19 @@
                         </div>
                     </div>
                     <p class="task-element task-description">{{ task.description }}</p>
+                    <div class="task-users mt-2">
+                    {% for user in task.assigned_users %}
+                        <div class="d-flex align-items-center gap-1 small text-muted">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">person</span>
+                            <span>{{ user.name }}</span>
+                        </div>
+                    {% else %}
+                        <div class="text-muted small">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">person_off</span>
+                            <span>No users assigned</span>
+                        </div>
+                    {% endfor %}
+                    </div>
                     <div class="task-requirements">
                         {% for requirement in task.requirements %}
                             <div style="display:flex">
@@ -90,6 +103,12 @@
                     <h4>Requirements</h4>
                     <div id="requirements-list">
                         <!-- Requirements will be dynamically added here -->
+                    </div>
+                    <div class="task-users-modal mt-4">
+                        <h4>Assigned Users</h4>
+                        <div id="assigned-users-list">
+                            <!-- JS insertará aquí los usuarios -->
+                        </div>
                     </div>
                     <div class="task-files-modal">
                         <input type="file" id="file" name="file" multiple>
@@ -206,6 +225,7 @@
 </script>
 
 <script>
+    const allTasks = {{ tasks|tojson|safe }};
     function openTaskModalFromCard(element) {
         const taskId = element.getAttribute('data-task-id');
         if (!taskId) {
@@ -215,7 +235,32 @@
 
         // Guardar task_id oculto para usarlo en el formulario del modal de configuración
         document.getElementById('modal-task-id').value = taskId;
+        // Obtener la data de tareas del DOM (si está disponible)
+        const allTasks = {{ tasks|tojson|safe }};
+        const selectedTask = allTasks.find(t => t.id == taskId);
 
+        const usersContainer = document.getElementById("assigned-users-list");
+        usersContainer.innerHTML = ""; // Limpiar anteriores
+
+        if (selectedTask && selectedTask.assigned_users.length > 0) {
+            selectedTask.assigned_users.forEach(user => {
+                const userRow = document.createElement("div");
+                userRow.className = "d-flex align-items-center gap-1 small text-muted";
+                userRow.innerHTML = `
+                    <span class="material-symbols-outlined" style="font-size: 18px;">person</span>
+                    <span>${user.name}</span>
+                `;
+                usersContainer.appendChild(userRow);
+            });
+        } else {
+            const emptyMsg = document.createElement("div");
+            emptyMsg.className = "text-muted small";
+            emptyMsg.innerHTML = `
+                <span class="material-symbols-outlined" style="font-size: 18px;">person_off</span>
+                <span>No users assigned</span>
+            `;
+            usersContainer.appendChild(emptyMsg);
+        }
         // Mostrar el modal de tarea
         document.getElementById('task-modal').style.display = 'block';
     }

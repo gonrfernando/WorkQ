@@ -9,18 +9,18 @@ import json
 @view_config(route_name='task_view', renderer='worq:templates/task_view.jinja2')
 def task_view(request):
     session = request.session
-
+ 
     # Redirigir si el usuario no está autenticado
     if 'user_name' not in session:
         return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
-
+ 
     # Parámetros de sesión
     user_name  = session['user_name']
     user_email = session.get('user_email')
     user_role  = session.get('user_role')
     user_id    = session.get('user_id')  # Para filtrar proyectos
     error      = request.params.get('error')
-
+ 
     # 1) Obtener proyectos según rol del usuario
     if user_role in ['superadmin', 'admin']:
         # Si es admin o superadmin, traemos todos los proyectos
@@ -33,28 +33,28 @@ def task_view(request):
             .filter(UsersProjects.user_id == user_id)
             .all()
         )
-
+ 
     json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
-
+ 
     # ... el resto de tu código sigue igual
-
+ 
     # 2) Determinar proyecto activo
     active_project_id = session.get("project_id")
     active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
-
+ 
     if not active_project and json_projects:
         active_project = json_projects[0]
         active_project_id = active_project["id"]
         session["project_id"] = active_project_id
-
+ 
     active_project_id = int(active_project_id) if active_project_id is not None else None
-
+ 
     # 3) Cargar prioridades desde la base de datos
     priority_map = {
         p.id: p.priority
         for p in request.dbsession.query(TaskPriorities).all()
     }
-
+ 
     # 4) Consultar tareas con relaciones precargadas
     dbtasks = (
         request.dbsession
@@ -73,7 +73,7 @@ def task_view(request):
         )
         .all()
     )
-
+ 
     # 5) Serializar tareas
     json_tasks = []
     for task in dbtasks:
@@ -93,7 +93,7 @@ def task_view(request):
                 for req in task.task_requirements
             ]
         })
-
+ 
     # 6) Cargar usuarios del proyecto activo
     users = (
         request.dbsession.query(Users)
@@ -101,7 +101,7 @@ def task_view(request):
         .filter(UsersProjects.project_id == active_project_id)
         .all()
     )
-
+ 
     return {
         "projects": json_projects,
         "active_project": active_project,
