@@ -92,6 +92,7 @@ def task_edit_view(request):
             finished_date = get('finished_date')
             task.finished_date = datetime.datetime.strptime(finished_date, '%Y-%m-%dT%H:%M') if finished_date else None
             task.priority_id = int(get('priority')) if get('priority') else None
+            task.status_id = 4
             
 
             # Requisitos
@@ -153,7 +154,7 @@ def task_edit_view(request):
     roles = dbsession.query(Roles).all()
     json_roles = [{"id": r.id, "name": r.name} for r in roles]
 
-    priorities = dbsession.query(TaskPriorities).all()
+    priorities = dbsession.query(TaskPriorities).filter(TaskPriorities.id != 4).all()
     json_priorities = [{"id": p.id, "priority": p.priority} for p in priorities]
 
     proj_users = dbsession.query(UsersProjects).filter_by(project_id=active_project_id).all()

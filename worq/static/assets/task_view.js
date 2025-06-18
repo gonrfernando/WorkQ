@@ -86,13 +86,18 @@ document.addEventListener("DOMContentLoaded", function () {
     tasks.forEach(task => {
         task.addEventListener("click", function () {
             const title = task.querySelector(".task-title").textContent;
-            const priority = task.querySelector(".task-priority").classList[1];
-            const dueDate = task.querySelector(".due-date-text").textContent;
+
+            const priorityEl = task.querySelector(".task-priority");
+            const priority = priorityEl && priorityEl.classList.length > 1 ? priorityEl.classList[1] : "default";
+
+            const dueDateEl = task.querySelector(".due-date-text");
+            const dueDate = dueDateEl ? dueDateEl.textContent : "Sin fecha";
+
             const description = task.querySelector(".task-description").textContent;
             const requirements = task.querySelectorAll(".custom-checkbox");
 
             taskTitleModal.textContent = title;
-            taskPriorityModal.className = `task-priority ${priority}`;
+            taskPriorityModal.className = `task-priority ${priority}`; // Solo una vez
             taskDueDateModal.textContent = dueDate;
             taskDescriptionModal.textContent = description;
 
@@ -101,6 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const div = document.createElement("div");
                 div.style.display = "flex";
                 div.style.marginBottom = "2px";
+
                 let labelText = "";
                 const labelElem = req.closest('div').querySelector('label.custom-checkbox-label');
                 if (labelElem) {
@@ -108,11 +114,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     labelText = req.getAttribute('textContent') || req.value || '';
                 }
+
                 div.innerHTML = `
                     <label class="checkbox-container">
                         <input class="custom-checkbox" id="${req.id}" type="checkbox" ${req.checked ? "checked" : ""} data-reqid="${req.id}">
                         <span class="checkmark"></span>
-                        </label>
+                    </label>
                     <label for="${req.id}">${labelText}</label>
                 `;
                 requirementsList.appendChild(div);
