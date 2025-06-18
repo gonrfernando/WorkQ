@@ -1,5 +1,5 @@
 import datetime
-from worq.models.models import UsersProjects, Roles, Users, UsersTasks, Actions
+from worq.models.models import UsersProjects, Roles, Users, UsersTasks, Actions, Projects
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 from pyramid.view import view_config
@@ -18,63 +18,26 @@ def action_view(request):
     dbsession = request.dbsession
     active_project_id = session.get("project_id")
     user_id = session.get('user_id')
+    user_role = session.get('user_role')
 
-    # Asegura que active_project_id sea int para comparación
-    if active_project_id is not None:
-        try:
-            active_project_id = int(active_project_id)
-        except ValueError:
-            active_project_id = None
+    if user_role in ['superadmin', 'admin']:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            .all()
+        )
+    else:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .join(UsersProjects)
+            .filter(
+                UsersProjects.user_id == user_id,
+                Projects.state_id != 2  # Filtrar también aquí
+            )
+            .all()
+        )
 
-    # --- POST handling ---
-    if request.method == 'POST':
-        if request.content_type and 'application/json' in request.content_type:
-            data = request.json_body
-            get = data.get
-            getall = lambda k: data[k] if isinstance(data.get(k), list) else [data[k]] if data.get(k) else []
-        else:
-            data = request.POST
-            get = data.get
-            getall = data.getall
-
-        form_type = get('form_type')
-
-        if form_type == 'add_user':
-            user_id_selected = get('user_id')
-            role_id_selected = get('role_id')
-            if user_id_selected and active_project_id:
-                try:
-                    exists = dbsession.query(UsersProjects).filter_by(
-                        user_id=user_id_selected,
-                        project_id=active_project_id
-                    ).first()
-                    if not exists:
-                        new_up = UsersProjects(
-                            user_id=user_id_selected,
-                            project_id=active_project_id,
-                            role_id=role_id_selected,
-                            invited_by=user_id
-                        )
-                        dbsession.add(new_up)
-                        dbsession.flush()
-                    if 'application/json' in request.accept:
-                        return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
-                except SQLAlchemyError as e:
-                    print(f"[ERROR] Error al asignar usuario: {e}")
-                    if 'application/json' in request.accept:
-                        return Response(json.dumps({'success': False, 'error': 'Error al editar el usuario'}), content_type='application/json; charset=utf-8')
-                    return Response("Error al asignar usuario al proyecto", status=500)
-
-        # Si es AJAX y no hubo error, responde éxito genérico
-        if 'application/json' in request.accept:
-            return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
-
-    # --- Datos para renderizado en GET y tras POST ---
-    ups = dbsession.query(UsersProjects).filter_by(user_id=user_id).all()
-    json_projects = [
-        {"id": up.project_id, "name": up.project.name}
-        for up in ups
-    ]
+    json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
     active_project = next(
         (p for p in json_projects if p["id"] == active_project_id),
         None
@@ -137,7 +100,7 @@ def action_view(request):
                 "user": action.user.name if action.user else "Sin usuario",
                 "timestamp": action.date
             })
-
+    
     return {
         "users": filtered_users,
         "roles": json_roles,
@@ -148,5 +111,6 @@ def action_view(request):
         "actions": actions,
         "user_name": session.get('user_name'),
         "user_email": session.get('user_email'),
-        "user_role": session.get('user_role')
+        "user_role": session.get('user_role'),
+        "active_tab": "actions"
     }

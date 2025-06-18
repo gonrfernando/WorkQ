@@ -24,7 +24,7 @@ def task_creation_view(request):
         return HTTPFound(
             location=request.route_url('task_view')
         )
-
+    
     dbsession = request.dbsession
     active_project_id = session.get("project_id")
     user_id = session.get('user_id')
@@ -228,5 +228,5 @@ def task_creation_view(request):
         "user_name": session.get('user_name'),
         "user_email": session.get('user_email'),
         "user_role": session.get('user_role'),
-        "active_tab": "pm"
+        "active_tab": "tasks"
     }
