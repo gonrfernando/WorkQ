@@ -206,5 +206,6 @@ def task_creation_view(request):
         "users_projects": json_proj_users,        
         "user_name": session.get('user_name'),
         "user_email": session.get('user_email'),
-        "user_role": session.get('user_role')
+        "user_role": session.get('user_role'),
+        "active_tab": "pm"
     }

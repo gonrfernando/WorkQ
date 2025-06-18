@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from sqlalchemy import Boolean, Date, DateTime, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, String, Text, text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, foreign
 import datetime
 
 class Base(DeclarativeBase):
@@ -174,7 +174,12 @@ class Users(Base):
     users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.invited_by]', back_populates='users')
     users_projects_: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.user_id]', back_populates='user')
     chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='sender')
-    feedbacks: Mapped[List['Feedbacks']] = relationship('Feedbacks', back_populates='user')
+    feedbacks: Mapped[List['Feedbacks']] = relationship(
+    'Feedbacks',
+    back_populates='user',
+    foreign_keys='Feedbacks.user_id'
+    )
+
     requests: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.accepted_by]', back_populates='users')
     requests_: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.ex_user]', back_populates='users_')
     requests1: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.rejected_by]', back_populates='users1')
