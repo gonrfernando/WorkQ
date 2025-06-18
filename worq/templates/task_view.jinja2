@@ -301,5 +301,60 @@
         }
     });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deliverButton = document.getElementById('deliver-task');
+
+    deliverButton.addEventListener('click', function () {
+        const taskId = document.getElementById('modal-task-id').value;
+
+        if (!taskId) {
+            alert("No task selected.");
+            return;
+        }
+
+        fetch("{{ request.route_url('deliver_task') }}", {
+            method: "POST",
+            headers: {
+                'X-CSRF-Token': csrfToken
+            },
+            body: new URLSearchParams({ task_id: taskId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Cierra el modal de tarea
+                closeTaskModal();
+
+                // Actualiza el contenido del modal de éxito
+                const successMessage = document.querySelector('#successModal .modal-body');
+                successMessage.textContent = "Task delivered successfully!";
+
+                // Muestra el modal de éxito
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+
+                // Opcional: refrescar la página al cerrar el modal
+                const modalElement = document.getElementById('successModal');
+                modalElement.addEventListener('hidden.bs.modal', function () {
+                    location.reload();
+                }, { once: true });
+
+            } else {
+                const errorMessage = data.error || "An unexpected error occurred.";
+                document.getElementById('errorMessage').textContent = errorMessage;
+                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+            }
+        })
+        .catch(err => {
+            document.getElementById('errorMessage').textContent = "Error delivering task: " + err;
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        });
+    });
+});
+</script>
+
 
 {% endblock tasks %}

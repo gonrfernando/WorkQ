@@ -1,9 +1,306 @@
 {% extends "workq_main.jinja2" %}
-
 {% block revision %}
-<div>
-    <h3>Revision Content</h3>
-    <p>This is the content for the Revision tab.</p>
+<div class="container-fluid">
+    <div class="project-bar row">
+        <div class="col-6 bar-wrapper">
+            <div class="project-selector-bar dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
+                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                    {% for project in projects %}
+                        <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-5"></div>
+        <div class="view_button col-1">
+            {% if user_role in ['superadmin', 'admin', 'projectmanager'] %}
+            <a href="{{ request.route_url('add_task') }}" title="Add task view" id="add-task" class="material-symbols-outlined btn">add</a>
+            {% endif %}
+            <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
+        </div>
+    </div>
+    {% if tasks|length == 0 %}
+        <div class="alert alert-info mt-4" role="alert">
+            No tasks found for this project.
+        </div>
+    {% endif %}
+
+    {% for task in tasks %}
+        {% if loop.index0 % 4 == 0 %}
+        <div class="task-container card-view row gx-5">
+        {% endif %}
+            <div class="task-spacer col-3">
+                <div class="task-item" data-task-id="{{ task.id }}" onclick="openTaskModalFromCard(this)">
+                    <h3 class="task-title">{{ task.title }}</h3>
+                    <div class="task-element task-subheader row">
+                        <p class="priority col-4">
+                            {{ task.priority }}
+                            <span class="task-priority {{ task.priority|lower }}"></span>
+                        </p>
+                        <div class="task-due-date col-8">
+                            <span class="material-icons clock-icon">schedule</span>
+                            <span class="due-date-text">{{ task.due_date }}</span>
+                        </div>
+                    </div>
+                    <p class="task-element task-description">{{ task.description }}</p>
+                    <div class="task-requirements">
+                        {% for requirement in task.requirements %}
+                            <div style="display:flex">
+                                <label class="checkbox-container">
+                                    <input class="custom-checkbox" id="requirement-{{ requirement.id }}"  
+                                    {% if requirement.is_completed %} 
+                                        checked 
+                                    {% endif %} 
+                                    type="checkbox" textContent="{{requirement.requirement}}">
+                                    <span class="checkmark"></span>
+                                </label>
+                                <label class="custom-checkbox-label" for="requirement-{{ requirement.id }}">{{ requirement.requirement }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% if loop.index0 % 4 == 3 or loop.last %}
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Modal de tarea -->
+    <div id="task-modal" class="task-modal">
+        <div class="task-modal-content">
+            <div class="position-absolute top-0 end-0 p-2 d-flex align-items-center gap-2">
+                <span class="material-icons" onclick="openSettingsModal()" style="cursor: pointer;">settings</span>
+                <span class="material-icons" id="close-modal" onclick="closeTaskModal()" style="cursor: pointer;">close</span>
+            </div>
+            <h1 class="task-title-modal">Task Title</h1>
+            <div class="task-subheader-modal row">
+                <p class="task-priority-modal col">Priority: <span class="task-priority high"></span></p>
+                <div class="due-date-wrapper col">
+                    <p class="task-due-date-modal">
+                        <span class="material-icons clock-icon">schedule</span>
+                        <span class="due-date-text">Due Date</span>
+                    </p>
+                </div>
+            </div>
+            <p class="task-description-modal">Task Description</p>
+            <div class="task-details-modal">
+                <div class="task-requirements-modal">
+                    <h4>Requirements</h4>
+                    <div id="requirements-list">
+                        <!-- Requirements will be dynamically added here -->
+                    </div>
+                    <div class="task-files-modal">
+                        <input type="file" id="file" name="file" multiple>
+                        <button type="submit" id="btnsubir" class="btn btn-primary" disabled>Upload</button>
+                    </div>
+                    </form>
+                   <script>
+                        const file = document.getElementById('file');
+                        const btnsubir = document.getElementById('btnsubir');
+
+                        file.addEventListener('change', () => {
+                        if (file.files.length > 0) {
+                            btnsubir.disabled = false;
+                        } else {
+                            btnsubir.disabled = true;
+                        }
+                        });
+                    </script>   
+                </div>
+                <div class="task-stats-modal"></div>
+            </div>
+            <div class="task-footer-modal">
+                <div class="task-comments-modal">
+                    <h4>Comments</h4>
+                    <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+                </div>
+            </div>
+            <div class="task-modal-buttons">
+                <button id="save-task" class="btn btn-primary">Save</button>
+                <button id="reject-task" class="btn btn-primary">Reject</button>
+                <button id="completed-task" class="btn btn-success">Completed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de configuración -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ request.route_url('submit_request') }}">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="settingsModalLabel">Task Settings Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="task_id" id="modal-task-id" value="">
+                        <div class="mb-3">
+                            <label for="action-type" class="form-label">Action Type</label>
+                            <input type="text" class="form-control" id="action-type" name="action_type" placeholder="Enter action type">
+                        </div>
+                        <div class="mb-3">
+                            <label for="request-reason" class="form-label">Request Reason</label>
+                            <textarea class="form-control" id="request-reason" name="reason" placeholder="Enter reason"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Send Request</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <style>
+    .modal-stack.show .modal-dialog {
+        z-index: 1060 !important;
+    }
+    .modal-stack.show ~ .modal-backdrop {
+        z-index: 1059 !important;
+    }
+
+    </style>
+
+
+    <!-- Modal de éxito -->
+    <div class="modal fade modal-stack" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+            <h5 class="modal-title" id="successModalLabel">Success</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            The request was submitted successfully!
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal de error -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="errorMessage">
+            An error occurred.
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+    </div>
 </div>
+
+<!-- Scripts -->
+<script>
+    const csrfToken = "{{ request.session.get_csrf_token() }}";
+</script>
+
+<script>
+    function openTaskModalFromCard(element) {
+        const taskId = element.getAttribute('data-task-id');
+        if (!taskId) {
+            console.warn("No task ID found.");
+            return;
+        }
+
+        // Guardar task_id oculto para usarlo en el formulario del modal de configuración
+        document.getElementById('modal-task-id').value = taskId;
+
+        // Mostrar el modal de tarea
+        document.getElementById('task-modal').style.display = 'block';
+    }
+
+    function closeTaskModal() {
+        document.getElementById('task-modal').style.display = 'none';
+    }
+
+    function openSettingsModal() {
+        const taskId = document.getElementById('modal-task-id').value;
+        if (!taskId) {
+            console.warn("No task selected.");
+            return;
+        }
+        const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        modal.show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsModal = document.getElementById('settingsModal');
+        settingsModal.addEventListener('show.bs.modal', function (event) {
+            const taskId = document.getElementById('modal-task-id').value;
+            if (!taskId) {
+                event.preventDefault();
+            }
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsModal = document.getElementById('settingsModal');
+        const actionTypeInput = document.getElementById('action-type');
+        const requestReasonTextarea = document.getElementById('request-reason');
+
+        // Limpiar los campos al cerrar el modal
+        settingsModal.addEventListener('hidden.bs.modal', function () {
+            actionTypeInput.value = '';
+            requestReasonTextarea.value = '';
+        });
+
+        // (Opcional extra) Si también quieres limpiar al abrirlo:
+        settingsModal.addEventListener('show.bs.modal', function () {
+            actionTypeInput.value = '';
+            requestReasonTextarea.value = '';
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsForm = document.querySelector('#settingsModal form');
+        if (settingsForm) {
+            settingsForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(settingsForm);
+
+                fetch(settingsForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+
+                    if (data.success) {
+                        // Cerrar modal de configuración
+                        bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+                        successModal.show();
+                    } else {
+                        document.getElementById('errorMessage').textContent = data.error || "An unexpected error occurred.";
+                        errorModal.show();
+                    }
+                })
+                .catch(error => {
+                    console.error("Request error:", error);
+                    document.getElementById('errorMessage').textContent = "Error during submission.";
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
+                });
+            });
+        }
+    });
+</script>
+
 
 {% endblock revision %}
