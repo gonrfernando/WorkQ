@@ -13,11 +13,14 @@ import json
 )
 def task_creation_view(request):
     session = request.session
+    user_email = session.get('user_email')
+    user_role  = session.get('user_role')
+    user_id    = session.get('user_id')
     if 'user_name' not in session:
         return HTTPFound(
             location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'})
         )
-    if 'user_role' not in ['superadmin', 'admin', 'projectmanager']:
+    if user_role not in ['superadmin', 'admin', 'projectmanager']:
         return HTTPFound(
             location=request.route_url('task_view')
         )
