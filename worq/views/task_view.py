@@ -23,14 +23,19 @@ def task_view(request):
  
     # 1) Obtener proyectos según rol del usuario
     if user_role in ['superadmin', 'admin']:
-        # Si es admin o superadmin, traemos todos los proyectos
-        user_projects = request.dbsession.query(Projects).all()
+        user_projects = (
+            request.dbsession.query(Projects)
+            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            .all()
+        )
     else:
-        # Si no, solo los proyectos asociados al usuario
         user_projects = (
             request.dbsession.query(Projects)
             .join(UsersProjects)
-            .filter(UsersProjects.user_id == user_id)
+            .filter(
+                UsersProjects.user_id == user_id,
+                Projects.state_id != 2  # Filtrar también aquí
+            )
             .all()
         )
  

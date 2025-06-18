@@ -5,7 +5,7 @@
         <div class="col-6 bar-wrapper">
             <div class="project-selector-bar dropdown">
                 <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
-                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                <div class="dropdown-menu w-100 dropdown-scroll" aria-labelledby="dropdownMenuButton">
                     {% for project in projects %}
                         <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
                     {% endfor %}
@@ -14,9 +14,6 @@
         </div>
         <div class="col-5"></div>
         <div class="view_button col-1">
-            {% if user_role in ['superadmin', 'admin', 'projectmanager'] %}
-            <a href="{{ request.route_url('add_task') }}" title="Add task view" id="add-task" class="material-symbols-outlined btn">add</a>
-            {% endif %}
             <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
         </div>
     </div>

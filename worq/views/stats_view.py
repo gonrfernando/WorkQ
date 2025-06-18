@@ -16,13 +16,21 @@ def stats_view(request):
     if not user_id:
         return HTTPFound(location=request.route_url('login'))
 
-    if user_role in ['admin', 'superadmin']:
-        user_projects = request.dbsession.query(Projects).all()
+    # 1) Obtener proyectos según rol del usuario
+    if user_role in ['superadmin', 'admin']:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            .all()
+        )
     else:
         user_projects = (
             request.dbsession.query(Projects)
             .join(UsersProjects)
-            .filter(UsersProjects.user_id == user_id)
+            .filter(
+                UsersProjects.user_id == user_id,
+                Projects.state_id != 2  # Filtrar también aquí
+            )
             .all()
         )
 
