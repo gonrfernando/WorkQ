@@ -64,6 +64,9 @@
               <span class="project-icon material-icons-round">&#xea25</span>
             </div>
             <span class="project-label">{{ project.name }}</span>
+            {% if user_role in ['superadmin', 'admin', 'projectmanager'] and project.id == active_project_id %}
+              <span class="material-icons-round" style="padding-left: 3px;" id="settings-icon">settings</span>
+            {% endif %}
             <span class="material-icons-round" id="drag-indicator">drag_indicator</span>
           </li>
         {% endfor %}
