@@ -1,5 +1,5 @@
 import datetime
-from worq.models.models import UsersProjects, Roles, Users, UsersTasks, Actions, Projects
+from worq.models.models import UsersProjects, Projects, Notifications, ProjectNotifications, UsersNotifications, Types
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 from pyramid.view import view_config
@@ -8,7 +8,7 @@ from pyramid.response import Response
 import json
 
 @view_config(route_name='noti_view', renderer='worq:templates/noti_view.jinja2')
-def action_view(request):
+def noti_view(request):
     session = request.session
     if 'user_name' not in session:
         return HTTPFound(
@@ -16,99 +16,65 @@ def action_view(request):
         )
 
     dbsession = request.dbsession
-    active_project_id = session.get("project_id")
     user_id = session.get('user_id')
     user_role = session.get('user_role')
 
+    # 1. Obtener proyectos donde participa el usuario
     if user_role in ['superadmin', 'admin']:
         user_projects = (
-            request.dbsession.query(Projects)
-            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            dbsession.query(Projects)
+            .filter(Projects.state_id != 2)
             .all()
         )
     else:
         user_projects = (
-            request.dbsession.query(Projects)
+            dbsession.query(Projects)
             .join(UsersProjects)
             .filter(
                 UsersProjects.user_id == user_id,
-                Projects.state_id != 2  # Filtrar también aquí
+                Projects.state_id != 2
             )
             .all()
         )
 
-    json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
-    active_project = next(
-        (p for p in json_projects if p["id"] == active_project_id),
-        None
-    )
+    project_ids = [p.id for p in user_projects]
+    json_projects = [{"id": p.id, "name": p.name} for p in user_projects]
 
-    users = dbsession.query(Users).all()
-    json_users = [
-        {
-            "id": u.id,
-            "name": u.name,
-            "email": u.email,
-            "tel": u.tel,
-            "country_id": u.country_id,
-            "area_id": u.area_id,
-            "role_id": u.role_id
-        }
-        for u in users
-    ]
-    roles = dbsession.query(Roles).all()
-    json_roles = [{"id": r.id, "name": r.name} for r in roles]
-
-    proj_users = (
-        dbsession.query(UsersProjects)
-        .filter_by(project_id=active_project_id)
+    # 2. Obtener notificaciones relacionadas a esos proyectos y al usuario
+    notifications = (
+        dbsession.query(Notifications, ProjectNotifications, Types, Projects)
+        .join(ProjectNotifications, ProjectNotifications.noti_id == Notifications.id)
+        .join(Projects, Projects.id == ProjectNotifications.project_id)
+        .join(Types, Types.id == Notifications.type_id)
+        .join(UsersNotifications, UsersNotifications.noti_id == Notifications.id)
+        .filter(
+            ProjectNotifications.project_id.in_(project_ids),
+            UsersNotifications.user_id == user_id
+        )
+        .order_by(Notifications.date.desc())
         .all()
     )
-    filtered_users = [
-    {
-        "id": up.user.id,
-        "name": up.user.name,
-        "email": up.user.email,
-        "role_id": up.user.role_id
-    }
-    for up in proj_users if up.user.role_id != 4
-    ]
-    json_proj_users = [
-        {
-        "id": up.user.id,
-        "name": up.user.name,
-        "email": up.user.email,
-        "role_id": up.user.role_id
-    }
-    for up in proj_users if up.user.role_id != 4
-    ]
 
-    # --- Buscar acciones del proyecto activo ---
-    actions = []
-    if active_project_id:
-        actions_query = (
-            dbsession.query(Actions)
-            .options(joinedload(Actions.type), joinedload(Actions.user))
-            .filter(Actions.project_id == active_project_id)
-            .order_by(Actions.date.desc())
-            .all()
-        )
-        for action in actions_query:
-            actions.append({
-                "id": action.id,
-                "type": action.type.type if action.type else "Sin tipo",
-                "user": action.user.name if action.user else "Sin usuario",
-                "timestamp": action.date
-            })
-    
+    # 3. Formatear notificaciones para la plantilla
+    notifications_list = []
+    for notif, proj_notif, notif_type, project in notifications:
+        notifications_list.append({
+            "id": notif.id,
+            "type": notif_type.type,
+            "project_name": project.name,
+            "date": notif.date,
+            "state": notif.state,
+            "type_id": notif.type_id
+        })
+    print("user_id:", user_id)
+    print("user_role:", user_role)
+    print("project_ids:", project_ids)
+    print("Total notificaciones encontradas:", len(notifications))
+    for notif, proj_notif, notif_type, project in notifications:
+        print("Notificación:", notif.id, notif_type.type, project.name, notif.state)
     return {
-        "users": filtered_users,
-        "roles": json_roles,
+        "notifications": notifications_list,
         "projects": json_projects,
-        "active_project_id": active_project_id,
-        "active_project": active_project,
-        "users_projects": json_proj_users,
-        "actions": actions,
         "user_name": session.get('user_name'),
         "user_email": session.get('user_email'),
         "user_role": session.get('user_role'),

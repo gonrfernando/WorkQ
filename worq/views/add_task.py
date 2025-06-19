@@ -1,5 +1,5 @@
 import datetime
-from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks, Projects
+from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks, Projects, Notifications, UsersNotifications, ProjectNotifications, Types
 from sqlalchemy.exc import SQLAlchemyError
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -42,10 +42,22 @@ def task_creation_view(request):
             getall = data.getall
 
         form_type = get('form_type')
-
+        print("POST recibido")
+        print("Content-Type:", request.content_type)
+        print("Datos recibidos:", data)
+        print("form_type:", form_type)
         if form_type == 'add_user':
             user_id_selected = get('user_id')
             role_id_selected = get('role_id')
+            user_email = get('email')
+            if not user_id_selected and user_email:
+                user = dbsession.query(Users).filter(Users.email.ilike(user_email)).first()
+                if user:
+                    user_id_selected = user.id
+                    print("user_id_selected:", user_id_selected, "role_id_selected:", role_id_selected)
+                    if not user_id_selected or not role_id_selected:
+                        return Response(json.dumps({'success': False, 'error': 'User and role are required'}), content_type='application/json; charset=utf-8')
+                    print("user_id_selected:", user_id_selected, "role_id_selected:", role_id_selected)
             if user_id_selected and active_project_id:
                 try:
                     exists = dbsession.query(UsersProjects).filter_by(
@@ -61,9 +73,34 @@ def task_creation_view(request):
                         )
                         dbsession.add(new_up)
                         dbsession.flush()
-                    # Responde JSON si es petición AJAX
-                    if 'application/json' in request.accept:
-                        return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
+
+                        try:
+                            notif = Notifications(
+                                type_id=9,  # ID fijo para "Usuario agregado a proyecto"
+                                date=datetime.datetime.utcnow(),
+                                state=4
+                            )
+                            dbsession.add(notif)
+                            dbsession.flush()
+                            dbsession.add(ProjectNotifications(
+                                project_id=active_project_id,
+                                noti_id=notif.id
+                            ))
+                            dbsession.add(UsersNotifications(
+                                noti_id=notif.id,
+                                user_id=user_id_selected
+                            ))
+                            dbsession.flush()
+                        except Exception as e:
+                            print(f"[ERROR] Al crear notificación de usuario agregado a proyecto: {e}")
+
+                        # Responde JSON si es petición AJAX
+                        if 'application/json' in request.accept:
+                            return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
+                    else:
+                        # Usuario ya estaba en el proyecto, responde igual con éxito
+                        if 'application/json' in request.accept:
+                            return Response(json.dumps({'success': True, 'info': 'User already in project'}), content_type='application/json; charset=utf-8')
                 except SQLAlchemyError as e:
                     print(f"[ERROR] Error al asignar usuario: {e}")
                     if 'application/json' in request.accept:
@@ -81,6 +118,9 @@ def task_creation_view(request):
             priority      = get('priority')
             requirements  = getall('requirements')
             collaborators = getall('collaborators')
+            print("title:", title, "description:", description, "priority:", priority)
+            print("requirements:", requirements)
+            print("collaborators:", collaborators)
 
             try:
                 new_task = Tasks(
@@ -135,7 +175,37 @@ def task_creation_view(request):
                         task_id=new_task.id,
                         user_id=user.id
                     ))
-
+                try:
+                    notif_type = dbsession.query(Types).filter_by(type='Tarea asignada').first()
+                    if not notif_type:
+                        notif_type = Types(type='Tarea asignada', active=True)
+                        dbsession.add(notif_type)
+                        dbsession.flush()
+                    notif = Notifications(
+                        type_id=notif_type.id,
+                        date=datetime.datetime.utcnow(),
+                        state='unread'
+                    )
+                    dbsession.add(notif)
+                    dbsession.flush()
+                    dbsession.add(ProjectNotifications(
+                        project_id=active_project_id,
+                        noti_id=notif.id
+                    ))
+                    # Notificar a cada colaborador
+                    for collab in collaborators:
+                        collab_text = collab.strip().lower()
+                        if not collab_text:
+                            continue
+                        user = dbsession.query(Users).filter(Users.email.ilike(collab_text)).first()
+                        if user:
+                            dbsession.add(UsersNotifications(
+                                noti_id=notif.id,
+                                user_id=user.id
+                            ))
+                    dbsession.flush()
+                except Exception as e:
+                    print(f"[ERROR] Al crear notificación de tarea asignada: {e}")
                 dbsession.flush()
                 print(f"[INFO] Tarea '{title}' creada con ID {new_task.id}")
 

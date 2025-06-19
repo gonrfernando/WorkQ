@@ -356,14 +356,13 @@ if (taskForm) {
           errorModal.show();
         }
       })
-      .catch(error => {
-        document.getElementById('errorModalLabel').innerText = 'Error';
-        document.getElementById('errorMessage').innerText = 'Request failed!';
-        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-        errorModal.show();
-      });
     });
   }
+  document.getElementById('errorModal').addEventListener('hidden.bs.modal', function () {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style = '';
+    });
 });
 </script>
 <!-- Modal de éxito -->

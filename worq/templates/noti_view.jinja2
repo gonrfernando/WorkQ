@@ -2,7 +2,7 @@
 
 {% block actions %}
 <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 8px;">
-    <h2 style="background-color: #e0e0e0; padding: 1rem; border-radius: 8px;">Actions history</h2>
+    <h2 style="background-color: #e0e0e0; padding: 1rem; border-radius: 8px;">Notifications</h2>
     <div class="container-fluid">
     <div class="project-bar row">
     <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
@@ -16,19 +16,23 @@
     </div>
 
     <div style="margin-top: 1rem; background-color: #e0e0e0; border-radius: 8px; padding: 1rem;">
-        {% for action in actions %}
-        <div class="action-row"
-            data-type="{{ action.type }}"
-            data-user="{{ action.user }}"
-            data-date="{{ action.timestamp.strftime('%d/%m/%Y %H:%M UTC%z') }}"
+        {% for noti in notifications %}
+        <div class="notification-row"
+            data-type="{{ noti.type }}"
+            data-project="{{ noti.project_name }}"
+            data-date="{{ noti.date.strftime('%d/%m/%Y %H:%M') }}"
+            data-state="{{ noti.state }}"
             style="cursor:pointer; background-color: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; flex-wrap: wrap;"
-            onclick="showActionModal(this)">
-            <div><strong>{{ action.type }}</strong></div>
-            <div>By {{ action.user }}</div>
-            <div>{{ action.timestamp.strftime('%d/%m/%Y %H:%M UTC%z') }}</div>
+            onclick="showNotificationModal(this)">
+            <div>
+                <strong>{{ noti.type }}</strong>
+                <span style="font-size:0.9em; color: #888;">({{ noti.state|capitalize }})</span>
+            </div>
+            <div>Project: <strong>{{ noti.project_name }}</strong></div>
+            <div>{{ noti.date.strftime('%d/%m/%Y %H:%M') }}</div>
         </div>
         {% else %}
-        <p>No actions found for this project.</p>
+        <p>No notifications found.</p>
         {% endfor %}
     </div>
 </div>
@@ -38,36 +42,44 @@ document.getElementById('openFilterModal').addEventListener('click', function() 
   filterModal.show();
 });
 
-function applyActionFilter() {
-  const user = document.getElementById('filter-user').value;
-  const actionType = document.getElementById('filter-action').value;
+function applyNotificationFilter() {
+  const project = document.getElementById('filter-project').value;
+  const type = document.getElementById('filter-type').value;
+  const state = document.getElementById('filter-state').value;
 
-  document.querySelectorAll('.action-row').forEach(row => {
-    const matchesUser = !user || row.dataset.user === user;
-    const matchesType = !actionType || row.dataset.type === actionType;
-    row.style.display = (matchesUser && matchesType) ? '' : 'none';
+  document.querySelectorAll('.notification-row').forEach(row => {
+    const matchesProject = !project || row.dataset.project === project;
+    const matchesType = !type || row.dataset.type === type;
+    const matchesState = !state || row.dataset.state === state;
+    row.style.display = (matchesProject && matchesType && matchesState) ? '' : 'none';
   });
+
+// Cierra el modal de filtro
+  const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
+  if (filterModal) filterModal.hide();
 }
-function showActionModal(element) {
-  document.getElementById('modal-action-type').textContent = element.dataset.type;
-  document.getElementById('modal-action-user').textContent = element.dataset.user;
-  document.getElementById('modal-action-date').textContent = element.dataset.date;
-  const modal = new bootstrap.Modal(document.getElementById('actionDetailModal'));
+function showNotificationModal(element) {
+  document.getElementById('modal-noti-type').textContent = element.dataset.type;
+  document.getElementById('modal-noti-project').textContent = element.dataset.project;
+  document.getElementById('modal-noti-date').textContent = element.dataset.date;
+  document.getElementById('modal-noti-state').textContent = element.dataset.state;
+  const modal = new bootstrap.Modal(document.getElementById('notificationDetailModal'));
   modal.show();
 }
 </script>
 
-<div class="modal fade" id="actionDetailModal" tabindex="-1" aria-labelledby="actionDetailModalLabel">
+<div class="modal fade" id="notificationDetailModal" tabindex="-1" aria-labelledby="notificationDetailModalLabel">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="actionDetailModalLabel">Action Details</h5>
+        <h5 class="modal-title" id="notificationDetailModalLabel">Notification Details</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p><strong>Type:</strong> <span id="modal-action-type"></span></p>
-        <p><strong>User:</strong> <span id="modal-action-user"></span></p>
-        <p><strong>Date:</strong> <span id="modal-action-date"></span></p>
+        <p><strong>Type:</strong> <span id="modal-noti-type"></span></p>
+        <p><strong>Project:</strong> <span id="modal-noti-project"></span></p>
+        <p><strong>Date:</strong> <span id="modal-noti-date"></span></p>
+        <p><strong>Status:</strong> <span id="modal-noti-state"></span></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -82,29 +94,37 @@ function showActionModal(element) {
     <div class="modal-content">
       <!-- Interior del modal de filtro -->
       <div class="modal-header">
-        <h5 class="modal-title" id="filterModalLabel">Filter Actions</h5>
+        <h5 class="modal-title" id="filterModalLabel">Filter Notifications</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <select id="filter-user" class="controls">
-            <option value="">All Users</option>
-            {% for user in users %}
-              <option value="{{ user.name }}">{{ user.name }}</option>
+          <select id="filter-project" class="controls">
+            <option value="">All Projects</option>
+            {% for project in projects %}
+              <option value="{{ project.name }}">{{ project.name }}</option>
             {% endfor %}
           </select>
         </div>
         <div class="mb-3">
-          <select id="filter-action" class="controls">
-            <option value="">All Actions</option>
-            {% for action in actions|map(attribute='type')|unique %}
-              <option value="{{ action }}">{{ action }}</option>
+          <select id="filter-type" class="controls">
+            <option value="">All Types</option>
+            {% for t in notifications|map(attribute='type')|unique %}
+              <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <select id="filter-state" class="controls">
+            <option value="">All Status</option>
+            {% for s in notifications|map(attribute='state')|unique %}
+              <option value="{{ s }}">{{ s|capitalize }}</option>
             {% endfor %}
           </select>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="buttons" onclick="applyActionFilter()">Apply Filter</button>
+        <button type="button" class="buttons" onclick="applyNotificationFilter()">Apply Filter</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
