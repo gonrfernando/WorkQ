@@ -17,18 +17,17 @@
             <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
         </div>
     </div>
-    {% if tasks|length == 0 %}
-        <div class="alert alert-info mt-4" role="alert">
-            No tasks found for this project.
-        </div>
-    {% endif %}
+    <div id="no-tasks-alert" class="alert alert-info mt-4" role="alert"
+        style="display: {% if tasks|length > 0 %}none{% else %}block{% endif %};">
+        No tasks found for this project.
+    </div>
 
     {% for task in tasks %}
         {% if loop.index0 % 4 == 0 %}
         <div class="task-container card-view row gx-5">
         {% endif %}
             <div class="task-spacer col-3">
-                <div class="task-item" data-task-id="{{ task.id }}" onclick="openTaskModalFromCard(this)">
+                <div class="task-item" id="task-card-{{ task.id }}" data-task-id="{{ task.id }}" onclick="openTaskModalFromCard(this)">
                     <h3 class="task-title">{{ task.title }}</h3>
                     <div class="task-element task-subheader row">
                         <p class="priority col-4">
@@ -111,6 +110,10 @@
                 <div class="task-comments-modal">
                     <h4>Comments</h4>
                     <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+                    <button id="save-comment-btn" class="btn btn-sm btn-primary mt-2">Save comment</button>
+                    <div id="task-feedbacks" class="task-feedbacks">
+                        <!-- Feedbacks will be inserted via JavaScript -->
+                    </div>
                 </div>
             </div>
             <div class="task-modal-buttons">
@@ -200,6 +203,88 @@
 <!-- Scripts -->
 <script>
     const csrfToken = "{{ request.session.get_csrf_token() }}";
+    const currentUserId = {{ current_user_id }};
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const rejectBtn = document.getElementById("reject-task");
+    const completeBtn = document.getElementById("completed-task");
+
+    rejectBtn.addEventListener("click", () => {
+        updateTaskStatus(4); // status_id = 4 => Rejected
+    });
+
+    completeBtn.addEventListener("click", () => {
+        updateTaskStatus(8); // status_id = 8 => Completed
+    });
+
+    function updateTaskStatus(newStatusId) {
+        const taskId = document.getElementById("modal-task-id").value;
+
+        fetch("update_task_status", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": csrfToken
+            },
+            body: JSON.stringify({
+                task_id: parseInt(taskId),
+                status_id: newStatusId
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+                const successTitle = document.getElementById("successModalLabel");
+                const successBody = document.querySelector("#successModal .modal-body");
+
+                if (newStatusId === 4) {
+                    successTitle.textContent = "Task Rejected";
+                    successBody.textContent = "The task was successfully marked as rejected.";
+                } else if (newStatusId === 8) {
+                    successTitle.textContent = "Task Completed";
+                    successBody.textContent = "Great! The task has been marked as completed.";
+                } else {
+                    successTitle.textContent = "Success";
+                    successBody.textContent = "The task status was updated successfully.";
+                }
+
+                successModal.show();
+                closeTaskModal();
+                const cardToRemove = document.getElementById(`task-card-${taskId}`);
+                if (cardToRemove) {
+                    const parentCol = cardToRemove.closest(".task-spacer");
+                    const parentRow = cardToRemove.closest(".task-container");
+                    parentCol.remove();
+
+                    // Si la fila queda vacía, elimínala también (opcional)
+                    if (parentRow && parentRow.querySelectorAll(".task-spacer").length === 0) {
+                        parentRow.remove();
+                    }
+                }
+                const remainingTasks = document.querySelectorAll(".task-spacer .task-item");
+                if (remainingTasks.length === 0) {
+                    const noTasksAlert = document.getElementById("no-tasks-alert");
+                    if (noTasksAlert) {
+                        noTasksAlert.style.display = "block";
+                    }
+                }
+            }
+            else {
+                document.getElementById("errorMessage").textContent = data.error || "Unknown error.";
+                const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                errorModal.show();
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            document.getElementById("errorMessage").textContent = "Request failed.";
+            const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+            errorModal.show();
+        });
+    }
+});
 </script>
 
 <script>
@@ -209,13 +294,30 @@
             console.warn("No task ID found.");
             return;
         }
-
+        loadLastFeedback(task);
         // Guardar task_id oculto para usarlo en el formulario del modal de configuración
         document.getElementById('modal-task-id').value = taskId;
-
-        // Mostrar el modal de tarea
         document.getElementById('task-modal').style.display = 'block';
     }
+
+    function loadLastFeedback(task) {
+        const feedbackContainer = document.getElementById("task-feedbacks");
+        feedbackContainer.innerHTML = "";  // Limpiar contenido antes
+
+        if (task.feedbacks.length > 0) {
+            const fb = task.feedbacks[task.feedbacks.length - 1];
+            feedbackContainer.innerHTML = `
+                <div class="feedback-item">
+                    <strong>${fb.user_name}</strong> (${fb.date}):<br>
+                    <span>${fb.comment}</span>
+                </div>
+            `;
+        } else {
+            feedbackContainer.innerHTML = "<p>No feedback yet.</p>";
+        }
+    }
+
+
 
     function closeTaskModal() {
         document.getElementById('task-modal').style.display = 'none';
@@ -297,6 +399,122 @@
             });
         }
     });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const commentInput = document.getElementById("comment-input");
+    const saveCommentBtn = document.getElementById("save-comment-btn");
+
+    // Variable global para saber si ya existe comentario del usuario actual
+    let currentUserFeedbackId = null;
+
+    // Cargar feedback al abrir modal
+    function loadTaskFeedback(task) {
+        const feedbackContainer = document.getElementById("task-feedbacks");
+        feedbackContainer.innerHTML = "";
+        commentInput.value = "";
+        currentUserFeedbackId = null;
+
+        if (task.feedbacks.length > 0) {
+            const fb = task.feedbacks[task.feedbacks.length - 1];
+            feedbackContainer.innerHTML = `
+                <div class="feedback-item">
+                    <strong>${fb.user_name}</strong> (${fb.date}):<br>
+                    <span>${fb.comment}</span>
+                </div>
+            `;
+
+            if (fb.user_id === currentUserId) {
+                commentInput.value = fb.comment;
+                currentUserFeedbackId = fb.id;
+            }
+        } else {
+            feedbackContainer.innerHTML = "<p>No feedback yet.</p>";
+        }
+    }
+
+    // Guardar comentario
+    saveCommentBtn.addEventListener("click", () => {
+        const taskId = parseInt(document.getElementById("modal-task-id").value);
+        const comment = commentInput.value;
+
+        if (!comment.trim()) {
+            alert("The comment cannot be empty.");
+            return;
+        }
+
+        fetch("/feedback/save", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": csrfToken
+            },
+            body: JSON.stringify({
+                task_id: taskId,
+                comment: comment,
+                feedback_id: currentUserFeedbackId  // null = nuevo
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                    const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+                    const successTitle = document.getElementById("successModalLabel");
+                    const successBody = document.querySelector("#successModal .modal-body");
+
+                    successTitle.textContent = "Comment saved";
+                    successBody.textContent = "The comment was successfully updated.";
+                    successModal.show();
+
+                const fb = data.feedback; // feedback actualizado o nuevo del backend
+                currentUserFeedbackId = fb.feedback_id;
+                commentInput.value = fb.comment;
+
+                const feedbackContainer = document.getElementById("task-feedbacks");
+                let foundOwn = false;
+
+                [...feedbackContainer.children].forEach(div => {
+                    if (div.dataset.feedbackId == currentUserFeedbackId) {
+                        div.innerHTML = `<strong>${fb.user_name}</strong> (${fb.date}):<br><span>${fb.comment}</span>`;
+                        foundOwn = true;
+                    }
+                });
+
+                if (!foundOwn) {
+                    const newDiv = document.createElement("div");
+                    newDiv.className = "feedback-item";
+                    newDiv.dataset.feedbackId = fb.feedback_id;
+                    newDiv.innerHTML = `<strong>${fb.user_name}</strong> (${fb.date}):<br><span>${fb.comment}</span>`;
+                    feedbackContainer.appendChild(newDiv);
+                }
+            }
+
+             else {
+                alert("Error al guardar: " + data.error);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error al enviar comentario.");
+        });
+    });
+
+    // Reemplaza openTaskModalFromCard con esta versión actualizada:
+    window.openTaskModalFromCard = function (element) {
+        const taskId = element.getAttribute('data-task-id');
+        const task = {{ tasks|tojson }}.find(t => t.id === parseInt(taskId));
+
+        loadTaskFeedback(task); // 👈 usa la nueva función
+
+        // Llenar otros datos del modal
+        document.querySelector(".task-title-modal").textContent = task.title;
+        document.querySelector(".due-date-text").textContent = task.due_date;
+        document.querySelector(".task-description-modal").textContent = task.description;
+
+        document.getElementById('modal-task-id').value = taskId;
+        document.getElementById('task-modal').style.display = 'block';
+    }
+});
 </script>
 
 
