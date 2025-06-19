@@ -18,15 +18,18 @@
     <div style="margin-top: 1rem; background-color: #e0e0e0; border-radius: 8px; padding: 1rem;">
         {% for noti in notifications %}
         <div class="notification-row"
+            data-id="{{ noti.id }}"
             data-type="{{ noti.type }}"
             data-project="{{ noti.project_name }}"
             data-date="{{ noti.date.strftime('%d/%m/%Y %H:%M') }}"
-            data-state="{{ noti.state }}"
+            data-state="{% if noti.state_id == 4 %}unread{% else %}read{% endif %}"
             style="cursor:pointer; background-color: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; flex-wrap: wrap;"
             onclick="showNotificationModal(this)">
             <div>
                 <strong>{{ noti.type }}</strong>
-                <span style="font-size:0.9em; color: #888;">({{ noti.state|capitalize }})</span>
+                <span class="noti-state-text" style="font-size:0.9em; color: #888;">
+                    ({{ noti.state|lower|capitalize }})
+                </span>
             </div>
             <div>Project: <strong>{{ noti.project_name }}</strong></div>
             <div>{{ noti.date.strftime('%d/%m/%Y %H:%M') }}</div>
@@ -58,14 +61,81 @@ function applyNotificationFilter() {
   const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
   if (filterModal) filterModal.hide();
 }
+function capitalizeFirst(str) {
+  if (!str) return "";
+  str = str.toLowerCase();
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Guarda el elemento de la notificación abierta
+let currentNotificationElement = null;
+
 function showNotificationModal(element) {
+  currentNotificationElement = element;
+
   document.getElementById('modal-noti-type').textContent = element.dataset.type;
   document.getElementById('modal-noti-project').textContent = element.dataset.project;
   document.getElementById('modal-noti-date').textContent = element.dataset.date;
-  document.getElementById('modal-noti-state').textContent = element.dataset.state;
+  document.getElementById('modal-noti-state').textContent = capitalizeFirst(element.dataset.state);
+
+  // Llama al backend para marcar como leída
+  fetch('/mark_notification_read', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': '{{ request.session.get_csrf_token() }}'
+    },
+    body: JSON.stringify({ noti_id: element.dataset.id })
+  }).then(response => response.json())
+    .then(data => {
+      // Opcional: podrías manejar errores aquí
+    });
+
   const modal = new bootstrap.Modal(document.getElementById('notificationDetailModal'));
   modal.show();
 }
+
+// Al cerrar el modal, actualiza el estado visual y el badge
+document.getElementById('notificationDetailModal').addEventListener('hidden.bs.modal', function () {
+  console.log("Modal cerrado");
+  if (currentNotificationElement) {
+    currentNotificationElement.dataset.state = "read";
+    const stateSpan = currentNotificationElement.querySelector('.noti-state-text');
+    if (stateSpan) {
+      stateSpan.textContent = "(Read)";
+      console.log("Texto cambiado");
+    } else {
+      console.log("No encontró el span");
+    }
+    updateNotificationBadge();
+  }
+});
+
+function updateNotificationBadge() {
+  // Asegúrate que el valor "unread" es el que usas en data-state para no leídas
+  const unread = document.querySelectorAll('.notification-row[data-state="unread"]').length;
+  let badge = document.getElementById('notification-badge');
+  if (!badge) {
+    const icon = document.getElementById('notification-icon');
+    if (!icon) return;
+    badge = document.createElement('span');
+    badge.id = 'notification-badge';
+    badge.style.position = 'absolute';
+    badge.style.top = '0';
+    badge.style.right = '0';
+    badge.style.width = '12px';
+    badge.style.height = '12px';
+    badge.style.background = 'red';
+    badge.style.borderRadius = '50%';
+    badge.style.border = '2px solid white';
+    badge.style.display = 'inline-block';
+    icon.parentNode.appendChild(badge);
+  }
+  badge.style.display = unread > 0 ? 'inline-block' : 'none';
+}
+
+// Llama al cargar la página
+updateNotificationBadge();
 </script>
 
 <div class="modal fade" id="notificationDetailModal" tabindex="-1" aria-labelledby="notificationDetailModalLabel">
@@ -117,9 +187,8 @@ function showNotificationModal(element) {
         <div class="mb-3">
           <select id="filter-state" class="controls">
             <option value="">All Status</option>
-            {% for s in notifications|map(attribute='state')|unique %}
-              <option value="{{ s }}">{{ s|capitalize }}</option>
-            {% endfor %}
+            <option value="unread">Unread</option>
+            <option value="read">Read</option>
           </select>
         </div>
       </div>

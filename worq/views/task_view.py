@@ -102,6 +102,12 @@ def task_view(request):
     # 5) Serializar tareas
     json_tasks = []
     for task in dbtasks:
+        assigned_users = (
+            request.dbsession.query(Users)
+            .join(UsersTasks, Users.id == UsersTasks.user_id)
+            .filter(UsersTasks.task_id == task.id)
+            .all()
+        )
         json_tasks.append({
             "id": task.id,
             "title": task.title,
@@ -116,6 +122,10 @@ def task_view(request):
                     "is_completed": req.is_completed
                 }
                 for req in task.task_requirements
+            ],
+            "assigned_users": [
+                {"id": u.id, "name": u.name, "email": u.email}
+                for u in assigned_users
             ]
         })
  

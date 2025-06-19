@@ -35,3 +35,4 @@ def includeme(config):
     config.add_route('prepare_edit_project', '/prepare_edit_project')
     config.add_route('get_filtered_requests', '/api/requests/filter')
     config.add_route('noti_view', 'noti_view')
+    config.add_route('mark_notification_read', '/mark_notification_read')

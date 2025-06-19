@@ -63,7 +63,8 @@ def noti_view(request):
             "type": notif_type.type,
             "project_name": project.name,
             "date": notif.date,
-            "state": notif.state,
+            "state_id": notif.state_id,
+            "state": notif.state.state if notif.state else None,
             "type_id": notif.type_id
         })
     print("user_id:", user_id)
@@ -77,6 +78,19 @@ def noti_view(request):
         "projects": json_projects,
         "user_name": session.get('user_name'),
         "user_email": session.get('user_email'),
-        "user_role": session.get('user_role'),
-        "active_tab": "actions"
+        "user_role": session.get('user_role')
     }
+    
+@view_config(route_name='mark_notification_read', renderer='json', request_method='POST')
+def mark_notification_read(request):
+    try:
+        data = request.json_body
+        noti_id = data.get('noti_id')
+        dbsession = request.dbsession
+        notif = dbsession.query(Notifications).filter_by(id=noti_id).first()
+        if notif and notif.state_id == 4:
+            notif.state_id = 3
+            dbsession.flush()
+        return {'success': True}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}

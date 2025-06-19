@@ -78,7 +78,7 @@ def task_creation_view(request):
                             notif = Notifications(
                                 type_id=9,  # ID fijo para "Usuario agregado a proyecto"
                                 date=datetime.datetime.utcnow(),
-                                state=4
+                                state_id=4
                             )
                             dbsession.add(notif)
                             dbsession.flush()
@@ -176,15 +176,10 @@ def task_creation_view(request):
                         user_id=user.id
                     ))
                 try:
-                    notif_type = dbsession.query(Types).filter_by(type='Tarea asignada').first()
-                    if not notif_type:
-                        notif_type = Types(type='Tarea asignada', active=True)
-                        dbsession.add(notif_type)
-                        dbsession.flush()
                     notif = Notifications(
-                        type_id=notif_type.id,
+                        type_id=10,  # ID para "Tarea asignada"
                         date=datetime.datetime.utcnow(),
-                        state='unread'
+                        state_id=4  # Estado "Pendiente"
                     )
                     dbsession.add(notif)
                     dbsession.flush()
@@ -192,6 +187,19 @@ def task_creation_view(request):
                         project_id=active_project_id,
                         noti_id=notif.id
                     ))
+                    for collab_email in collaborators:
+                        collab_email = collab_email.strip().lower()
+                        if not collab_email:
+                            continue
+                        user = dbsession.query(Users).filter(Users.email.ilike(collab_email)).first()
+                        if user:
+                            dbsession.add(UsersNotifications(
+                                noti_id=notif.id,
+                                user_id=user.id
+                            ))
+                    dbsession.flush()
+                except Exception as e:
+                    print(f"[ERROR] Al crear notificación de tarea asignada: {e}")
                     # Notificar a cada colaborador
                     for collab in collaborators:
                         collab_text = collab.strip().lower()
