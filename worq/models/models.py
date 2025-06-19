@@ -177,12 +177,12 @@ class Users(Base):
     users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.invited_by]', back_populates='users')
     users_projects_: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.user_id]', back_populates='user')
     chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='sender')
-    feedbacks: Mapped[List['Feedbacks']] = relationship('Feedbacks', back_populates='user')
     requests: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.accepted_by]', back_populates='users')
     requests_: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.ex_user]', back_populates='users_')
     requests1: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.rejected_by]', back_populates='users1')
     requests2: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.user_id]', back_populates='user')
     users_tasks: Mapped[List['UsersTasks']] = relationship('UsersTasks', back_populates='user')
+    users_feedbacks: Mapped[List['UsersFeedbacks']] = relationship('UsersFeedbacks', back_populates='user')
 
 
 class Files(Base):
@@ -389,17 +389,15 @@ class Feedbacks(Tasks):
     __tablename__ = 'feedbacks'
     __table_args__ = (
         ForeignKeyConstraint(['id'], ['tasks.id'], name='task_fk'),
-        ForeignKeyConstraint(['user_id'], ['users.id'], name='user_fk'),
         PrimaryKeyConstraint('id', name='feedbacks_pkey')
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[Optional[int]] = mapped_column(Integer)
     task_id: Mapped[Optional[int]] = mapped_column(Integer)
     comment: Mapped[Optional[str]] = mapped_column(Text)
     date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
 
-    user: Mapped[Optional['Users']] = relationship('Users', back_populates='feedbacks')
+    users_feedbacks: Mapped[List['UsersFeedbacks']] = relationship('UsersFeedbacks', back_populates='feedback')
 
 
 class Requests(Base):
@@ -497,3 +495,19 @@ class ChatFiles(Base):
 
     chat_message: Mapped['ChatsMessages'] = relationship('ChatsMessages', back_populates='chat_files')
     file: Mapped['Files'] = relationship('Files', back_populates='chat_files')
+
+
+class UsersFeedbacks(Base):
+    __tablename__ = 'users_feedbacks'
+    __table_args__ = (
+        ForeignKeyConstraint(['feedback_id'], ['feedbacks.id'], name='feedback_fk'),
+        ForeignKeyConstraint(['user_id'], ['users.id'], name='user_fk'),
+        PrimaryKeyConstraint('id', name='users_feedbacks_pkey')
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    feedback_id: Mapped[Optional[int]] = mapped_column(Integer)
+    user_id: Mapped[Optional[int]] = mapped_column(Integer)
+
+    feedback: Mapped[Optional['Feedbacks']] = relationship('Feedbacks', back_populates='users_feedbacks')
+    user: Mapped[Optional['Users']] = relationship('Users', back_populates='users_feedbacks')
