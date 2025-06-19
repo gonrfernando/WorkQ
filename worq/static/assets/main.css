@@ -194,6 +194,10 @@ body {
     display: none;
 }
 
+.sidebar:not(.expanded) #settings-icon {
+    display: none;
+}
+
 .sidebar.expanded .project-label {
     display: inline-block;
 }
