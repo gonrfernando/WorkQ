@@ -1,3 +1,8 @@
+def test_task_view_error_message_displayed(testapp, db_session, test_user):
+    testapp.post('/sign-in', {
+        'email': test_user.email,
+        'password': 'admin123'
+    })
 def test_forgot_password_success(monkeypatch, testapp, db_session):
     # Setup: agregar usuario a la DB
     from worq.models.models import Users, Roles
@@ -26,5 +31,5 @@ def test_forgot_password_success(monkeypatch, testapp, db_session):
     assert 'Recovery email sent.' in res.text
     assert 'success' in res.text
 
-
-
+    res = testapp.get('/task_view?error=Something+went+wrong')
+    assert 'Something went wrong' in res.text
