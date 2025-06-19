@@ -1,5 +1,5 @@
 from pyramid.view import view_config
-from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities, UsersProjects, Users
+from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities, UsersProjects, Users, UsersTasks
 from sqlalchemy.orm import joinedload
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy import and_
@@ -59,9 +59,9 @@ def task_view(request):
         p.id: p.priority
         for p in request.dbsession.query(TaskPriorities).all()
     }
- 
-    # 4) Consultar tareas con relaciones precargadas
-    dbtasks = (
+
+    if user_role in ['superadmin', 'admin','projectmanager']:
+            dbtasks = (
         request.dbsession
         .query(Tasks)
         .options(
@@ -78,7 +78,27 @@ def task_view(request):
         )
         .all()
     )
- 
+    else:
+            dbtasks = (
+        request.dbsession
+        .query(Tasks)
+        .options(
+            joinedload(Tasks.task_requirements),
+            joinedload(Tasks.priority)
+        )
+        .join(UsersTasks)
+                .filter(UsersTasks.user_id == user_id)
+        .filter(
+            and_(
+                Tasks.project_id == active_project_id,
+                Tasks.status_id != 6,  
+                Tasks.status_id != 7,
+                Tasks.status_id != 8
+            )
+        )
+        .all()
+    )
+
     # 5) Serializar tareas
     json_tasks = []
     for task in dbtasks:
