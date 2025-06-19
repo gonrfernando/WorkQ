@@ -16,6 +16,7 @@ TEST_DB_URL = "postgresql://postgres:CETI360@3.137.178.132/test_db"
 
 @pytest.fixture(scope='session')
 def engine():
+    print(f"🧪 Connecting to DB: {TEST_DB_URL}")
     return create_engine(TEST_DB_URL)
 
 
