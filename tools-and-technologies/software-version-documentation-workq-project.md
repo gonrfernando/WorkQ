@@ -1,4 +1,8 @@
-# 📄 Software Version Documentation - WorkQ Project
+---
+icon: file-lines
+---
+
+# Software Version Documentation - WorkQ Project
 
 **Last updated:** 2025-06-17\
 **Documented by:** Axel Orquiz
