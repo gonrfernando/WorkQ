@@ -59,15 +59,16 @@ def stats_view(request):
     )
 
     # 4️⃣ Filtrar por usuario si el rol es estrictamente "user"
-    if user_role == ['user']:  # exact match
+    if user_role == 'user':  # exact match
         query = query.join(UsersTasks).filter(UsersTasks.user_id == user_id)
 
     dbtasks = query.order_by(Tasks.priority_id.desc()).all()
 
     # 5️⃣ Calcular estadísticas
     total_assigned = sum(1 for t in dbtasks if t.status_id == 4)
-    total_completed = sum(1 for t in dbtasks if t.status_id == 6)
     total_late = sum(1 for t in dbtasks if t.status_id == 5)
+    total_delivered = sum(1 for t in dbtasks if t.status_id == 6)
+    total_completed = sum(1 for t in dbtasks if t.status_id == 8)
 
     return {
         "projects": json_projects,
@@ -80,6 +81,7 @@ def stats_view(request):
         "stats": {
             "assigned": total_assigned,
             "completed": total_completed,
-            "late": total_late
+            "late": total_late,
+            "delivered": total_delivered
         }
     }
