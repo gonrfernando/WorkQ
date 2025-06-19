@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from sqlalchemy import Boolean, Date, DateTime, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, String, Text, text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, foreign
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 
 class Base(DeclarativeBase):
@@ -68,6 +68,7 @@ class States(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     state: Mapped[str] = mapped_column(String(100))
 
+    notifications: Mapped[List['Notifications']] = relationship('Notifications', back_populates='state')
     projects: Mapped[List['Projects']] = relationship('Projects', back_populates='state')
 
 
@@ -114,15 +115,17 @@ class Types(Base):
 class Notifications(Base):
     __tablename__ = 'notifications'
     __table_args__ = (
+        ForeignKeyConstraint(['state_id'], ['states.id'], name='state_fk'),
         ForeignKeyConstraint(['type_id'], ['types.id'], name='type'),
         PrimaryKeyConstraint('id', name='notifications_pkey')
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     type_id: Mapped[int] = mapped_column(Integer)
-    date: Mapped[datetime.date] = mapped_column(Date)
-    state: Mapped[str] = mapped_column(String)
+    date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    state_id: Mapped[Optional[int]] = mapped_column(Integer)
 
+    state: Mapped[Optional['States']] = relationship('States', back_populates='notifications')
     type: Mapped['Types'] = relationship('Types', back_populates='notifications')
     users_notifications: Mapped[List['UsersNotifications']] = relationship('UsersNotifications', back_populates='noti')
     project_notifications: Mapped[List['ProjectNotifications']] = relationship('ProjectNotifications', back_populates='noti')
@@ -174,12 +177,7 @@ class Users(Base):
     users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.invited_by]', back_populates='users')
     users_projects_: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.user_id]', back_populates='user')
     chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='sender')
-    feedbacks: Mapped[List['Feedbacks']] = relationship(
-    'Feedbacks',
-    back_populates='user',
-    foreign_keys='Feedbacks.user_id'
-    )
-
+    feedbacks: Mapped[List['Feedbacks']] = relationship('Feedbacks', back_populates='user')
     requests: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.accepted_by]', back_populates='users')
     requests_: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.ex_user]', back_populates='users_')
     requests1: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.rejected_by]', back_populates='users1')
