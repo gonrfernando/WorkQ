@@ -4,4 +4,4 @@ icon: diagram-project
 
 # Entity-Relationship Diagram
 
-<figure><img src="../.gitbook/assets/ERD_Workq.pgerd.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Untitled.png" alt=""><figcaption></figcaption></figure>
