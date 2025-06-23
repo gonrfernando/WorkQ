@@ -145,6 +145,7 @@ class Users(Base):
     tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='users')
     users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.invited_by]', back_populates='users')
     users_projects_: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.user_id]', back_populates='user')
+    feedbacks: Mapped[List['Feedbacks']] = relationship('Feedbacks', back_populates='user')
     requests: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.accepted_by]', back_populates='users')
     requests_: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.ex_user]', back_populates='users_')
     requests1: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.rejected_by]', back_populates='users1')
@@ -231,6 +232,7 @@ class Actions(Base):
     type: Mapped['Types'] = relationship('Types', back_populates='actions')
     user: Mapped['Users'] = relationship('Users', back_populates='actions')
 
+
 class Icons(Base):
     __tablename__ = 'icons'
     __table_args__ = (
@@ -312,10 +314,12 @@ class UsersProjects(Base):
     project: Mapped['Projects'] = relationship('Projects', back_populates='users_projects')
     user: Mapped['Users'] = relationship('Users', foreign_keys=[user_id], back_populates='users_projects_')
 
+
 class Feedbacks(Tasks):
     __tablename__ = 'feedbacks'
     __table_args__ = (
         ForeignKeyConstraint(['id'], ['tasks.id'], name='task_fk'),
+        ForeignKeyConstraint(['user_id'], ['users.id'], name='user_fk'),
         PrimaryKeyConstraint('id', name='feedbacks_pkey')
     )
 
@@ -323,7 +327,9 @@ class Feedbacks(Tasks):
     task_id: Mapped[Optional[int]] = mapped_column(Integer)
     comment: Mapped[Optional[str]] = mapped_column(Text)
     date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    user_id: Mapped[Optional[int]] = mapped_column(Integer)
 
+    user: Mapped[Optional['Users']] = relationship('Users', back_populates='feedbacks')
     users_feedbacks: Mapped[List['UsersFeedbacks']] = relationship('UsersFeedbacks', back_populates='feedback')
 
 
@@ -406,6 +412,7 @@ class UsersTasks(Base):
 
     task: Mapped['Tasks'] = relationship('Tasks', back_populates='users_tasks')
     user: Mapped['Users'] = relationship('Users', back_populates='users_tasks')
+
 
 class UsersFeedbacks(Base):
     __tablename__ = 'users_feedbacks'

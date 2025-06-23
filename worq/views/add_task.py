@@ -48,16 +48,16 @@ def task_creation_view(request):
         print("form_type:", form_type)
         if form_type == 'add_user':
             user_id_selected = get('user_id')
-            role_id_selected = get('role_id')
             user_email = get('email')
+            # Elimina el uso de role_id_selected
             if not user_id_selected and user_email:
                 user = dbsession.query(Users).filter(Users.email.ilike(user_email)).first()
                 if user:
                     user_id_selected = user.id
-                    print("user_id_selected:", user_id_selected, "role_id_selected:", role_id_selected)
-                    if not user_id_selected or not role_id_selected:
-                        return Response(json.dumps({'success': False, 'error': 'User and role are required'}), content_type='application/json; charset=utf-8')
-                    print("user_id_selected:", user_id_selected, "role_id_selected:", role_id_selected)
+                    print("user_id_selected:", user_id_selected)
+                    if not user_id_selected:
+                        return Response(json.dumps({'success': False, 'error': 'User is required'}), content_type='application/json; charset=utf-8')
+                    print("user_id_selected:", user_id_selected)
             if user_id_selected and active_project_id:
                 try:
                     exists = dbsession.query(UsersProjects).filter_by(
@@ -68,7 +68,6 @@ def task_creation_view(request):
                         new_up = UsersProjects(
                             user_id=user_id_selected,
                             project_id=active_project_id,
-                            role_id=role_id_selected,
                             invited_by=user_id
                         )
                         dbsession.add(new_up)
@@ -263,12 +262,9 @@ def task_creation_view(request):
             "tel": u.tel,
             "country_id": u.country_id,
             "area_id": u.area_id,
-            "role_id": u.role_id
         }
         for u in users
     ]
-    roles = dbsession.query(Roles).all()
-    json_roles = [{"id": r.id, "name": r.name} for r in roles]
 
     priorities = dbsession.query(TaskPriorities).filter(TaskPriorities.id != 4).all()
     json_priorities = [{"id": p.id, "priority": p.priority} for p in priorities]
@@ -296,7 +292,6 @@ def task_creation_view(request):
 
     return {
         "users": json_users,
-        "roles": json_roles,
         "projects": json_projects,
         "active_project_id": active_project_id,
         "active_project": active_project,
