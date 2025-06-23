@@ -18,6 +18,7 @@ def my_view(request):
         user_name = session.get('user_name')
         user_email = session.get('user_email')
         user_role = session.get('user_role')
+        user_icon = session.get('user_icon')
         active_project_id = session.get("project_id")
 
         if user_role in ['superadmin', 'admin']:
@@ -66,7 +67,8 @@ def my_view(request):
             'user_email': user_email,
             'user_role': user_role,
             'current_route': request.path,
-            'message': error if error else None
+            'message': error if error else None,
+            'user_icon': user_icon
         }
 
     except Exception as e:

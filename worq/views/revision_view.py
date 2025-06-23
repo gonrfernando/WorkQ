@@ -1,8 +1,9 @@
 from pyramid.view import view_config
-from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities, UsersProjects, Users
+from worq.models.models import Projects, Tasks, TaskRequirements, TaskPriorities, UsersProjects, Users, Feedbacks
 from sqlalchemy.orm import joinedload
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, HTTPBadRequest
 from sqlalchemy import and_
+from datetime import datetime
 
 from pyramid.httpexceptions import HTTPFound
 @view_config(route_name='revision_view', renderer='worq:templates/revision_view.jinja2')
@@ -75,7 +76,8 @@ def my_view(request):
                 Tasks.project_id == active_project_id,
                 Tasks.status_id != 4,
                 Tasks.status_id != 5,
-                Tasks.status_id != 7  
+                Tasks.status_id != 7,
+                Tasks.status_id != 8
             )
         )
         .all()
@@ -84,6 +86,23 @@ def my_view(request):
     # 5) Serializar tareas
     json_tasks = []
     for task in dbtasks:
+        task_feedbacks = (
+            request.dbsession.query(Feedbacks)
+            .filter(Feedbacks.task_id == task.id)
+            .order_by(Feedbacks.date.desc())
+            .all()
+        )
+
+        feedback_list = [
+            {
+                "user_id": feedback.user_id,
+                "user_name": feedback.user.name if feedback.user else "Unknown",
+                "comment": feedback.comment,
+                "date": feedback.date.strftime("%Y-%m-%d %H:%M") if feedback.date else ""
+            }
+            for feedback in task_feedbacks
+        ]
+
         json_tasks.append({
             "id": task.id,
             "title": task.title,
@@ -98,7 +117,8 @@ def my_view(request):
                     "is_completed": req.is_completed
                 }
                 for req in task.task_requirements
-            ]
+            ],
+            "feedbacks": feedback_list
         })
 
     # 6) Cargar usuarios del proyecto activo
@@ -120,5 +140,107 @@ def my_view(request):
         'message': error if error else None,
         "users": users,
         "active_project_id": active_project_id,
-        'active_tab':"revision"
+        'active_tab':"revision",
+        "current_user_id": user_id,
     }
+
+@view_config(route_name='save_feedback', renderer='json', request_method='POST')
+def save_feedback(request):
+    data = request.json_body
+    user_id = request.session.get('user_id')
+
+    if not user_id:
+        return {"success": False, "error": "Usuario no autenticado"}
+
+    user = request.dbsession.query(Users).filter_by(id=user_id).first()
+    if not user:
+        return {"success": False, "error": "Usuario no encontrado"}
+
+    feedback_id = data.get("feedback_id")
+    comment = data.get("comment")
+    task_id_raw = data.get("task_id")
+
+    if not comment or task_id_raw is None:
+        return {"success": False, "error": "Faltan datos."}
+
+    try:
+        task_id = int(task_id_raw)
+    except (ValueError, TypeError):
+        return {"success": False, "error": "ID de tarea inválido."}
+
+    task = request.dbsession.query(Tasks).filter_by(id=task_id).first()
+    if not task:
+        return {"success": False, "error": "Tarea no encontrada."}
+
+    try:
+        if feedback_id:
+            # Actualizar feedback existente del usuario
+            feedback = (
+                request.dbsession.query(Feedbacks)
+                .filter_by(id=feedback_id, user_id=user.id)
+                .first()
+            )
+            if feedback:
+                feedback.comment = comment
+                feedback.date = datetime.utcnow()
+            else:
+                return {"success": False, "error": "Feedback no encontrado o no autorizado"}
+        else:
+            # Verificar si ya existe feedback del usuario para esta tarea
+            feedback = (
+                request.dbsession.query(Feedbacks)
+                .filter_by(task_id=task_id, user_id=user.id)
+                .first()
+            )
+            if feedback:
+                # Actualizar si ya existe
+                feedback.comment = comment
+                feedback.date = datetime.utcnow()
+            else:
+                # Crear nuevo feedback
+                feedback = Feedbacks(
+                    user_id=user.id,
+                    task_id=task_id,
+                    comment=comment,
+                    date=datetime.utcnow()
+                )
+                request.dbsession.add(feedback)
+
+        request.dbsession.flush()  # para obtener id y datos actualizados
+
+        # Devolver el último feedback guardado para este usuario y tarea
+        latest_feedback = {
+            "feedback_id": feedback.id,
+            "user_id": feedback.user_id,
+            "user_name": user.name,
+            "comment": feedback.comment,
+            "date": feedback.date.strftime("%Y-%m-%d %H:%M")
+        }
+
+        return {"success": True, "feedback": latest_feedback}
+
+    except Exception as e:
+        request.dbsession.rollback()
+        return {"success": False, "error": f"Error interno: {str(e)}"}
+
+@view_config(route_name='update_task_status', renderer='json', request_method='POST')
+def update_task_status(request):
+    try:
+        data = request.json_body
+        task_id = data.get('task_id')
+        status_id = data.get('status_id')
+
+        if not task_id or not status_id:
+            return {"success": False, "error": "Missing task_id or status_id"}
+
+        task = request.dbsession.query(Tasks).filter_by(id=task_id).first()
+        if not task:
+            return {"success": False, "error": "Task not found"}
+
+        task.status_id = status_id
+        request.dbsession.flush()  # Guardar en la DB
+
+        return {"success": True}
+    except Exception as e:
+        request.dbsession.rollback()
+        return {"success": False, "error": f"Internal error: {str(e)}"}

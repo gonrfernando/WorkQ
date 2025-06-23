@@ -133,7 +133,9 @@
             <div class="task-footer-modal">
                 <div class="task-comments-modal">
                     <h4>Comments</h4>
-                    <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+                    <div id="task-feedbacks-list" class="mb-2">
+                        <!-- Aquí irán los feedbacks -->
+                    </div>
                 </div>
                 <div class="task-modal-buttons">
                     <button id="save-task" class="btn btn-primary">Save</button>
@@ -238,6 +240,24 @@
         // Obtener la data de tareas del DOM (si está disponible)
         const allTasks = {{ tasks|tojson|safe }};
         const selectedTask = allTasks.find(t => t.id == taskId);
+
+        const feedbacksContainer = document.getElementById("task-feedbacks-list");
+        feedbacksContainer.innerHTML = ""; // Limpiar anteriores
+
+        if (selectedTask && selectedTask.feedbacks && selectedTask.feedbacks.length > 0) {
+            selectedTask.feedbacks.forEach(fb => {
+                const feedbackItem = document.createElement("div");
+                feedbackItem.className = "mb-1 small border-bottom pb-1";
+                feedbackItem.innerHTML = `
+                    <strong>${fb.user_name}</strong> <span class="text-muted" style="font-size: 0.8em;">(${fb.date})</span><br>
+                    ${fb.comment}
+                `;
+                feedbacksContainer.appendChild(feedbackItem);
+            });
+        } else {
+            feedbacksContainer.innerHTML = `<div class="text-muted small">No comments yet.</div>`;
+        }
+
 
         const usersContainer = document.getElementById("assigned-users-list");
         usersContainer.innerHTML = ""; // Limpiar anteriores

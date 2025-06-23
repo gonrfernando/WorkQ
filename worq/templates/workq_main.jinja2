@@ -64,6 +64,9 @@
               <span class="project-icon material-icons-round">&#xea25</span>
             </div>
             <span class="project-label">{{ project.name }}</span>
+            {% if user_role in ['superadmin', 'admin', 'projectmanager'] and project.id == active_project_id %}
+              <span class="material-icons-round" style="padding-left: 3px;" id="settings-icon">settings</span>
+            {% endif %}
             <span class="material-icons-round" id="drag-indicator">drag_indicator</span>
           </li>
         {% endfor %}
@@ -106,7 +109,7 @@
       </div>
       <span class="toolbar-separator"></span>
       <div class="profile" id="profile-menu">
-        <img src="{{request.static_url('worq:static/profile-icon.png')}}" class="toolbar-icon" id="profile-icon">
+        <img src="{{ request.session['user_icon'] }}" class="toolbar-icon" id="profile-icon">
         <ul id="dropdown-menu">
           <li><p style="margin-bottom: 0;">Welcome {{ user_name }}</p></li>
           <li><p class="Role">{{user_role}}</p></li>
