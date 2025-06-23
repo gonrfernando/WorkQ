@@ -16,7 +16,7 @@
               aria-expanded="false">
         {{ active_project.name }}
       </button>
-      <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+      <div class="dropdown-menu w-100 dropdown-scroll" aria-labelledby="dropdownMenuButton">
         {% for project in projects %}
           <a class="dropdown-item dropdown-project-item"
              id="{{ project.id }}">{{ project.name }}</a>

@@ -16,13 +16,21 @@ def stats_view(request):
     if not user_id:
         return HTTPFound(location=request.route_url('login'))
 
-    if user_role in ['admin', 'superadmin']:
-        user_projects = request.dbsession.query(Projects).all()
+    # 1) Obtener proyectos según rol del usuario
+    if user_role in ['superadmin', 'admin']:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            .all()
+        )
     else:
         user_projects = (
             request.dbsession.query(Projects)
             .join(UsersProjects)
-            .filter(UsersProjects.user_id == user_id)
+            .filter(
+                UsersProjects.user_id == user_id,
+                Projects.state_id != 2  # Filtrar también aquí
+            )
             .all()
         )
 
@@ -51,15 +59,16 @@ def stats_view(request):
     )
 
     # 4️⃣ Filtrar por usuario si el rol es estrictamente "user"
-    if user_role == ['user']:  # exact match
+    if user_role == 'user':  # exact match
         query = query.join(UsersTasks).filter(UsersTasks.user_id == user_id)
 
     dbtasks = query.order_by(Tasks.priority_id.desc()).all()
 
     # 5️⃣ Calcular estadísticas
     total_assigned = sum(1 for t in dbtasks if t.status_id == 4)
-    total_completed = sum(1 for t in dbtasks if t.status_id == 6)
     total_late = sum(1 for t in dbtasks if t.status_id == 5)
+    total_delivered = sum(1 for t in dbtasks if t.status_id == 6)
+    total_completed = sum(1 for t in dbtasks if t.status_id == 8)
 
     return {
         "projects": json_projects,
@@ -72,6 +81,7 @@ def stats_view(request):
         "stats": {
             "assigned": total_assigned,
             "completed": total_completed,
-            "late": total_late
+            "late": total_late,
+            "delivered": total_delivered
         }
     }

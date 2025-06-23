@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, String, Text, text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, foreign
+from sqlalchemy import Column, ForeignKey, Boolean, Date, DateTime, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, String, Text, text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, foreign, relationships
 import datetime
 
 class Base(DeclarativeBase):
@@ -185,6 +185,7 @@ class Users(Base):
     requests1: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.rejected_by]', back_populates='users1')
     requests2: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.user_id]', back_populates='user')
     users_tasks: Mapped[List['UsersTasks']] = relationship('UsersTasks', back_populates='user')
+    feedbacks = relationship('Feedbacks', back_populates='user')
 
 
 class Files(Base):
@@ -344,6 +345,7 @@ class Tasks(Base):
     task_files: Mapped[List['TaskFiles']] = relationship('TaskFiles', back_populates='task')
     task_requirements: Mapped[List['TaskRequirements']] = relationship('TaskRequirements', back_populates='task')
     users_tasks: Mapped[List['UsersTasks']] = relationship('UsersTasks', back_populates='task')
+    feedbacks = relationship('Feedbacks', back_populates='task')
 
 
 class UsersProjects(Base):
@@ -387,21 +389,17 @@ class ChatsMessages(Base):
     chat_files: Mapped[List['ChatFiles']] = relationship('ChatFiles', back_populates='chat_message')
 
 
-class Feedbacks(Tasks):
+class Feedbacks(Base):
     __tablename__ = 'feedbacks'
-    __table_args__ = (
-        ForeignKeyConstraint(['id'], ['tasks.id'], name='task_fk'),
-        ForeignKeyConstraint(['user_id'], ['users.id'], name='user_fk'),
-        PrimaryKeyConstraint('id', name='feedbacks_pkey')
-    )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[Optional[int]] = mapped_column(Integer)
-    task_id: Mapped[Optional[int]] = mapped_column(Integer)
-    comment: Mapped[Optional[str]] = mapped_column(Text)
-    date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    task_id = Column(Integer, ForeignKey('tasks.id'), nullable=False)
+    comment = Column(Text, nullable=False)
+    date = Column(DateTime, default=datetime.datetime.utcnow)
 
-    user: Mapped[Optional['Users']] = relationship('Users', back_populates='feedbacks')
+    user = relationship('Users', back_populates='feedbacks')
+    task = relationship('Tasks', back_populates='feedbacks')
 
 
 class Requests(Base):

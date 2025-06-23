@@ -4,13 +4,14 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
 from sqlalchemy.exc import SQLAlchemyError
-from worq.models.models import Projects
+from worq.models.models import Projects, UsersProjects
 import json
 
 @view_config(route_name='pm_main', renderer='worq:templates/pm_main.jinja2', request_method=('GET', 'POST'))
 def project_creation_view(request):
     session = request.session
     user_id = session.get("user_id")
+    user_role = session.get("user_role")
     if 'user_name' not in session:
         return HTTPFound(
             location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'})
@@ -18,10 +19,25 @@ def project_creation_view(request):
 
     dbsession = request.dbsession
 
-    # Datos para GET (lista de proyectos, etc.)
-    all_projects = dbsession.query(Projects).all()
-    json_projects = [{"id": p.id, "name": p.name} for p in all_projects]
-    active_project_id = session.get("project_id") or (all_projects[0].id if all_projects else None)
+    if user_role in ['superadmin', 'admin']:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            .all()
+        )
+    else:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .join(UsersProjects)
+            .filter(
+                UsersProjects.user_id == user_id,
+                Projects.state_id != 2  # Filtrar también aquí
+            )
+            .all()
+        )
+
+    json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
+    active_project_id = session.get("project_id") or (user_projects[0].id if user_projects else None)
     session["project_id"] = active_project_id
     active_project_id = int(active_project_id) if active_project_id else None
     active_project = next((p for p in json_projects if p["id"] == active_project_id), None)

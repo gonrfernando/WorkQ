@@ -75,6 +75,11 @@
     text-align: center;
 }
 
+.dropdown-scroll {
+    max-height: 300px; /* o el alto que desees */
+    overflow-y: auto;
+}
+
 .task-container{
     margin-top: clamp(10px, 2%, 20px);
     margin-left: 0 !important;

@@ -34,3 +34,6 @@ def includeme(config):
     config.add_route('deliver_task', '/deliver_task')
     config.add_route('prepare_edit_project', '/prepare_edit_project')
     config.add_route('get_filtered_requests', '/api/requests/filter')
+    config.add_route('save_feedback', '/feedback/save')
+    config.add_route('reject_task', '/task/reject')
+    config.add_route('update_task_status', 'update_task_status')

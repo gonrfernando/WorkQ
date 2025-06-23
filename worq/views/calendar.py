@@ -3,6 +3,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPInternalServerError
 from worq.models.models import Projects, Tasks, UsersProjects, TaskPriorities, UsersTasks
 from sqlalchemy.orm import joinedload
+from sqlalchemy import and_
 
 @view_config(route_name='calendar', renderer='worq:templates/calendar.jinja2')
 def my_view(request):
@@ -25,9 +26,25 @@ def my_view(request):
         first_day = date(year, month, 1)
         next_month = date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
 
-        # Obtener proyectos del usuario
-        user_projects = request.dbsession.query(UsersProjects).filter_by(user_id=user_id).all()
-        json_projects = [{"id": up.project_id, "name": up.project.name} for up in user_projects]
+
+        if user_role in ['superadmin', 'admin']:
+            user_projects = (
+                request.dbsession.query(Projects)
+                .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+                .all()
+            )
+        else:
+            user_projects = (
+                request.dbsession.query(Projects)
+                .join(UsersProjects)
+                .filter(
+                    UsersProjects.user_id == user_id,
+                    Projects.state_id != 2  # Filtrar también aquí
+                )
+                .all()
+            )
+
+        json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
 
         # Mapeo de prioridades
         all_priorities = request.dbsession.query(TaskPriorities).all()
@@ -46,7 +63,13 @@ def my_view(request):
         .filter(
             Tasks.project_id == active_project_id,
             Tasks.finished_date >= first_day,
-            Tasks.finished_date < next_month
+            Tasks.finished_date < next_month,
+            and_(
+                Tasks.project_id == active_project_id,
+                Tasks.status_id != 6,  
+                Tasks.status_id != 7,
+                Tasks.status_id != 8
+            )
         )
     )
 
