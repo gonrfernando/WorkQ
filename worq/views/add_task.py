@@ -1,5 +1,5 @@
 import datetime
-from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks, Projects
+from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks, Projects, Notifications, UsersNotifications, ProjectNotifications, Types
 from sqlalchemy.exc import SQLAlchemyError
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -42,10 +42,22 @@ def task_creation_view(request):
             getall = data.getall
 
         form_type = get('form_type')
-
+        print("POST recibido")
+        print("Content-Type:", request.content_type)
+        print("Datos recibidos:", data)
+        print("form_type:", form_type)
         if form_type == 'add_user':
             user_id_selected = get('user_id')
-            role_id_selected = get('role_id')
+            user_email = get('email')
+            # Elimina el uso de role_id_selected
+            if not user_id_selected and user_email:
+                user = dbsession.query(Users).filter(Users.email.ilike(user_email)).first()
+                if user:
+                    user_id_selected = user.id
+                    print("user_id_selected:", user_id_selected)
+                    if not user_id_selected:
+                        return Response(json.dumps({'success': False, 'error': 'User is required'}), content_type='application/json; charset=utf-8')
+                    print("user_id_selected:", user_id_selected)
             if user_id_selected and active_project_id:
                 try:
                     exists = dbsession.query(UsersProjects).filter_by(
@@ -56,14 +68,38 @@ def task_creation_view(request):
                         new_up = UsersProjects(
                             user_id=user_id_selected,
                             project_id=active_project_id,
-                            role_id=role_id_selected,
                             invited_by=user_id
                         )
                         dbsession.add(new_up)
                         dbsession.flush()
-                    # Responde JSON si es petición AJAX
-                    if 'application/json' in request.accept:
-                        return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
+
+                        try:
+                            notif = Notifications(
+                                type_id=9,  # ID fijo para "Usuario agregado a proyecto"
+                                date=datetime.datetime.utcnow(),
+                                state_id=4
+                            )
+                            dbsession.add(notif)
+                            dbsession.flush()
+                            dbsession.add(ProjectNotifications(
+                                project_id=active_project_id,
+                                noti_id=notif.id
+                            ))
+                            dbsession.add(UsersNotifications(
+                                noti_id=notif.id,
+                                user_id=user_id_selected
+                            ))
+                            dbsession.flush()
+                        except Exception as e:
+                            print(f"[ERROR] Al crear notificación de usuario agregado a proyecto: {e}")
+
+                        # Responde JSON si es petición AJAX
+                        if 'application/json' in request.accept:
+                            return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
+                    else:
+                        # Usuario ya estaba en el proyecto, responde igual con éxito
+                        if 'application/json' in request.accept:
+                            return Response(json.dumps({'success': True, 'info': 'User already in project'}), content_type='application/json; charset=utf-8')
                 except SQLAlchemyError as e:
                     print(f"[ERROR] Error al asignar usuario: {e}")
                     if 'application/json' in request.accept:
@@ -81,6 +117,9 @@ def task_creation_view(request):
             priority      = get('priority')
             requirements  = getall('requirements')
             collaborators = getall('collaborators')
+            print("title:", title, "description:", description, "priority:", priority)
+            print("requirements:", requirements)
+            print("collaborators:", collaborators)
 
             try:
                 new_task = Tasks(
@@ -135,7 +174,45 @@ def task_creation_view(request):
                         task_id=new_task.id,
                         user_id=user.id
                     ))
-
+                try:
+                    notif = Notifications(
+                        type_id=10,  # ID para "Tarea asignada"
+                        date=datetime.datetime.utcnow(),
+                        state_id=4  # Estado "Pendiente"
+                    )
+                    dbsession.add(notif)
+                    dbsession.flush()
+                    dbsession.add(ProjectNotifications(
+                        project_id=active_project_id,
+                        noti_id=notif.id
+                    ))
+                    for collab_email in collaborators:
+                        collab_email = collab_email.strip().lower()
+                        if not collab_email:
+                            continue
+                        user = dbsession.query(Users).filter(Users.email.ilike(collab_email)).first()
+                        if user:
+                            dbsession.add(UsersNotifications(
+                                noti_id=notif.id,
+                                user_id=user.id
+                            ))
+                    dbsession.flush()
+                except Exception as e:
+                    print(f"[ERROR] Al crear notificación de tarea asignada: {e}")
+                    # Notificar a cada colaborador
+                    for collab in collaborators:
+                        collab_text = collab.strip().lower()
+                        if not collab_text:
+                            continue
+                        user = dbsession.query(Users).filter(Users.email.ilike(collab_text)).first()
+                        if user:
+                            dbsession.add(UsersNotifications(
+                                noti_id=notif.id,
+                                user_id=user.id
+                            ))
+                    dbsession.flush()
+                except Exception as e:
+                    print(f"[ERROR] Al crear notificación de tarea asignada: {e}")
                 dbsession.flush()
                 print(f"[INFO] Tarea '{title}' creada con ID {new_task.id}")
 
@@ -154,17 +231,22 @@ def task_creation_view(request):
 
     # --- Datos para renderizado en GET y tras POST ---
     if user_role in ['superadmin', 'admin']:
-        # Si es admin o superadmin, traemos todos los proyectos
-        user_projects = request.dbsession.query(Projects).all()
+        user_projects = (
+            request.dbsession.query(Projects)
+            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            .all()
+        )
     else:
-        # Si no, solo los proyectos asociados al usuario
         user_projects = (
             request.dbsession.query(Projects)
             .join(UsersProjects)
-            .filter(UsersProjects.user_id == user_id)
+            .filter(
+                UsersProjects.user_id == user_id,
+                Projects.state_id != 2  # Filtrar también aquí
+            )
             .all()
         )
- 
+
     json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
     active_project = next(
         (p for p in json_projects if p["id"] == active_project_id),
@@ -180,12 +262,9 @@ def task_creation_view(request):
             "tel": u.tel,
             "country_id": u.country_id,
             "area_id": u.area_id,
-            "role_id": u.role_id
         }
         for u in users
     ]
-    roles = dbsession.query(Roles).all()
-    json_roles = [{"id": r.id, "name": r.name} for r in roles]
 
     priorities = dbsession.query(TaskPriorities).filter(TaskPriorities.id != 4).all()
     json_priorities = [{"id": p.id, "priority": p.priority} for p in priorities]
@@ -194,9 +273,14 @@ def task_creation_view(request):
 
     proj_users = (
         dbsession.query(UsersProjects)
-        .filter_by(project_id=active_project_id)
+        .join(Projects, UsersProjects.project_id == Projects.id)
+        .filter(
+            UsersProjects.project_id == active_project_id,
+            Projects.state_id != 2
+        )
         .all()
     )
+
     json_proj_users = [
         {
             "id": up.user.id,
@@ -208,7 +292,6 @@ def task_creation_view(request):
 
     return {
         "users": json_users,
-        "roles": json_roles,
         "projects": json_projects,
         "active_project_id": active_project_id,
         "active_project": active_project,
