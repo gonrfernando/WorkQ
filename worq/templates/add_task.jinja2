@@ -99,6 +99,16 @@
           </div>
           <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
           <input class="buttons" type="submit" value="Assign to Project">
+          <!-- Debajo del formulario de agregar usuario -->
+<h5>Project Users</h5>
+<ul>
+  {% for u in users_projects %}
+    <li>
+      {{ u.name }} ({{ u.email }})
+      <button class="btn btn-danger btn-sm" onclick="deleteUser({{ u.id }})">Delete</button>
+    </li>
+  {% endfor %}
+</ul>
         </form>
 
       </div>
