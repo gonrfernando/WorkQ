@@ -20,3 +20,4 @@ Data*.fs*
 coverage
 test
 *.sqlite
+tests/views/testing.py

@@ -142,3 +142,16 @@ def test_task_view_error_message_displayed(testapp, db_session, test_user):
 
     res = testapp.get('/task_view?error=Something+went+wrong')
     assert 'Something went wrong' in res.text
+
+@pytest.mark.parametrize("path", [
+    "/pm_main",
+    "/action_view",
+    "/revision_view",
+])
+def test_views_roles_management(testapp, db_session, test_user_basic, path):
+    testapp.post('/sign-in', {
+        'email':test_user_basic.email,
+        'password':'user123'
+    })
+    res = testapp.get(path, status=302)
+    assert res.location.startswith("http://localhost/task_view")
