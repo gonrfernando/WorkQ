@@ -1,4 +1,16 @@
 import pytest
+import json
+
+pytest.mark.parametrize("path", [
+    "/edit_project",
+    "/edit_task",
+    "/stats_view",
+    "/action_view",
+    "/revision_view",
+])
+def test_views_require_authentication(testapp, db_session, test_user, path):
+    res = testapp.get(path, status=302)
+    assert res.location.startswith("http://localhost/sign-in")
 def test_task_creation_get_renders(testapp, test_user, db_session, test_priorities):
     testapp.post('/sign-in', {
         'email': test_user.email,
@@ -105,3 +117,60 @@ def test_edit_project_missing_fields(testapp, test_user, test_projects, name, st
     json_data = res.json
     assert json_data['success'] is False
     assert json_data['error'] == 'Name, Start Date and End Date are required'
+
+def test_delete_project_status_success(testapp, db_session, test_user, test_projects, test_state):
+    # Simular login
+    testapp.post('/sign-in', {
+        'email': test_user.email,
+        'password': 'admin123'
+    })
+
+    # Enviar POST JSON a la ruta
+    res = testapp.post('/delete_project_status',
+        params=json.dumps({'project_id': test_projects[0].id}),
+        content_type='application/json'
+    )
+
+    # Verificar respuesta
+    assert res.status_code == 200
+    json_data = res.json
+    assert json_data['success'] is True
+    assert 'redirect' in json_data
+
+def test_delete_project_no_project_id(testapp, db_session, test_user, test_projects, test_state):
+    
+    testapp.post('/sign-in', {
+        'email': test_user.email,
+        'password': 'admin123'
+    })
+
+
+    res = testapp.post('/delete_project_status',
+        params=json.dumps({'project_id': ''}),
+        content_type='application/json'
+    )
+
+    # Verificar respuesta
+    assert res.status_code == 200
+    json_data = res.json
+    assert json_data['success'] is False
+    assert json_data['error'] == 'No project ID provided'
+
+def test_delete_project_status_success(testapp, db_session, test_user, test_projects):
+    # Simular login
+    testapp.post('/sign-in', {
+        'email': test_user.email,
+        'password': 'admin123'
+    })
+
+    # Enviar POST JSON a la ruta
+    res = testapp.post('/delete_project_status',
+        params=json.dumps({'project_id': 50}),
+        content_type='application/json'
+    )
+
+    # Verificar respuesta
+    assert res.status_code == 200
+    json_data = res.json
+    assert json_data['success'] is False
+    assert json_data['error'] == 'Project not found'

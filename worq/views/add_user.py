@@ -4,6 +4,9 @@ from worq.models.models import *
 
 @view_config(route_name='add_user', renderer='templates/add_user.jinja2', request_method='GET')
 def add_user_form_view(request):
+    session = request.session
+    if 'user_name' not in session:
+        return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
     # Datos para renderizar el formulario
     departments = [
         {'id': 1, 'name': 'Engineering'},

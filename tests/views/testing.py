@@ -1,17 +1,22 @@
 import pytest
 from worq.models.models import *
 import json
-def delete_projects_success(testapp , capsys, test_user, db_session, test_projects, test_priorities):
+
+def test_delete_project_status_success(testapp, db_session, test_user, test_projects):
+    # Simular login
     testapp.post('/sign-in', {
         'email': test_user.email,
         'password': 'admin123'
     })
-    res = testapp.post('/delete_projects_status',params=json.dumps({
-        'project_id': 1
-    }),
-    content_type='application/json'
+
+    # Enviar POST JSON a la ruta
+    res = testapp.post('/delete_project_status',
+        params=json.dumps({'project_id': 50}),
+        content_type='application/json'
     )
 
-
-    captured = capsys.readouterr()
-    assert f"[SUCCESS] Project marked as deleted: ID {test_projects[0].id} (state_id={test_projects[0].state_id})" in captured.out
+    # Verificar respuesta
+    assert res.status_code == 200
+    json_data = res.json
+    assert json_data['success'] is False
+    assert json_data['error'] == 'Project not found'

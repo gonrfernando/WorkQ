@@ -106,13 +106,18 @@ def assign_user_to_project(db_session, test_user_basic, test_projects):
 
 @pytest.fixture
 def test_priorities(db_session):
-    from worq.models.models import TaskPriorities
     p1 = TaskPriorities(id=1, priority="High")
     p2 = TaskPriorities(id=2, priority="Medium")
     db_session.add_all([p1, p2])
     db_session.commit()
     return [p1, p2]
 
+@pytest.fixture
+def test_state(db_session):
+    deleteds = States(id=2, state='Deleted')
+    db_session.add(deleteds)
+    db_session.commit()
+    return deleteds
 # ---------- FIXTURE DE LA APP WEB (WebTest) ----------
 
 @pytest.fixture
