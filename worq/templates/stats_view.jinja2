@@ -7,7 +7,7 @@
                 <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">
                     {{ active_project.name }}
                 </button>
-                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                <div class="dropdown-menu w-100 dropdown-scroll" aria-labelledby="dropdownMenuButton">
                     {% for project in projects %}
                         <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
                     {% endfor %}
@@ -25,7 +25,10 @@
         <h3> Tasks assigned</h3><span id ="count_assign" class="badge text-bg-info">{{ stats.assigned }}</span>
       </div>
       <div class="row">
-        <h3> Tasks pending</h3><span id ="count_late" class="badge text-bg-danger">{{ stats.late }}</span>
+        <h3> Tasks expired</h3><span id ="count_late" class="badge text-bg-danger">{{ stats.late }}</span>
+      </div>
+      <div class="row">
+        <h3> Tasks delivered</h3><span id ="count_deliver" class="badge text-bg-warning">{{ stats.delivered }}</span>
       </div>
     </div>
     <style>
@@ -86,6 +89,11 @@
   .ct-assigned > .ct-slice-pie {
     fill: #0dcaf0; /* Azul */
   }
+
+  .ct-delivered > .ct-slice-pie {
+    fill: #ffc107; /* Amarillo */
+  }
+
   #count_comple{
   position: relative;
   left :5%;
@@ -97,6 +105,10 @@
    #count_late{
   position: relative;
   left :19%;
+   }
+    #count_deliver{
+  position: relative;
+  left :10%;
    }
 </style>
 

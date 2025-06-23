@@ -18,14 +18,27 @@ def my_view(request):
         user_name = session.get('user_name')
         user_email = session.get('user_email')
         user_role = session.get('user_role')
+        user_icon = session.get('user_icon')
         active_project_id = session.get("project_id")
 
-        # 🔍 Obtener los proyectos asociados al usuario
-        user_projects = request.dbsession.query(UsersProjects).filter_by(user_id=user_id).all()
-        json_projects = [
-            {"id": up.project_id, "name": up.project.name}
-            for up in user_projects
-        ]
+        if user_role in ['superadmin', 'admin']:
+            user_projects = (
+                request.dbsession.query(Projects)
+                .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+                .all()
+            )
+        else:
+            user_projects = (
+                request.dbsession.query(Projects)
+                .join(UsersProjects)
+                .filter(
+                    UsersProjects.user_id == user_id,
+                    Projects.state_id != 2  # Filtrar también aquí
+                )
+                .all()
+            )
+
+        json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
 
         # 👥 Obtener usuarios del proyecto activo (si hay uno definido)
         json_users = []
@@ -54,7 +67,8 @@ def my_view(request):
             'user_email': user_email,
             'user_role': user_role,
             'current_route': request.path,
-            'message': error if error else None
+            'message': error if error else None,
+            'user_icon': user_icon
         }
 
     except Exception as e:

@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const entries = [
         { label: 'Completed', value: taskStats.completed },
         { label: 'Late', value: taskStats.late },
-        { label: 'Assigned', value: taskStats.assigned }
+        { label: 'Assigned', value: taskStats.assigned },
+        { label: 'Delivered', value: taskStats.delivered }
     ];
 
     const filtered = entries.filter(e => e.value && e.value > 0);
@@ -32,7 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const classMap = {
                 'Completed': 'ct-completed',
                 'Late': 'ct-late',
-                'Assigned': 'ct-assigned'
+                'Assigned': 'ct-assigned',
+                'Delivered': 'ct-delivered'
             };
             if(classMap[label]) {
                 data.element.removeClass(`ct-series-${String.fromCharCode(97 + data.index)}`);
@@ -40,7 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.element._node.setAttribute('fill', {
                     'Completed': '#198754',
                     'Late': '#dc3545',
-                    'Assigned': '#0dcaf0'
+                    'Assigned': '#0dcaf0',
+                    'Delivered': '#ffc107'
                 }[label]);
             }
         }

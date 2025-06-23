@@ -1,0 +1,123 @@
+{% extends "workq_main.jinja2" %}
+
+{% block actions %}
+<div style="background-color: #f5f5f5; padding: 1rem; border-radius: 8px;">
+    <h2 style="background-color: #e0e0e0; padding: 1rem; border-radius: 8px;">Actions history</h2>
+    <div class="container-fluid">
+    <div class="project-bar row">
+        <div class="col-6 bar-wrapper">
+            <div class="project-selector-bar dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
+                <div class="dropdown-menu w-100 dropdown-scroll" aria-labelledby="dropdownMenuButton">
+                    {% for project in projects %}
+                        <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div></div>
+        <button id="openFilterModal" class="btn" type="button" style="background: none; border: none; display: flex; align-items: center;">
+        <span class="material-symbols-outlined">
+            filter_alt
+        </span>
+        <span style="margin-left: 0.5em;">Filter</span>
+        </button>
+    </div>
+
+    <div style="margin-top: 1rem; background-color: #e0e0e0; border-radius: 8px; padding: 1rem;">
+        {% for action in actions %}
+        <div class="action-row"
+            data-type="{{ action.type }}"
+            data-user="{{ action.user }}"
+            data-date="{{ action.timestamp.strftime('%d/%m/%Y %H:%M UTC%z') }}"
+            style="cursor:pointer; background-color: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; flex-wrap: wrap;"
+            onclick="showActionModal(this)">
+            <div><strong>{{ action.type }}</strong></div>
+            <div>By {{ action.user }}</div>
+            <div>{{ action.timestamp.strftime('%d/%m/%Y %H:%M UTC%z') }}</div>
+        </div>
+        {% else %}
+        <p>No actions found for this project.</p>
+        {% endfor %}
+    </div>
+</div>
+<script>
+document.getElementById('openFilterModal').addEventListener('click', function() {
+  const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
+  filterModal.show();
+});
+
+function applyActionFilter() {
+  const user = document.getElementById('filter-user').value;
+  const actionType = document.getElementById('filter-action').value;
+
+  document.querySelectorAll('.action-row').forEach(row => {
+    const matchesUser = !user || row.dataset.user === user;
+    const matchesType = !actionType || row.dataset.type === actionType;
+    row.style.display = (matchesUser && matchesType) ? '' : 'none';
+  });
+}
+function showActionModal(element) {
+  document.getElementById('modal-action-type').textContent = element.dataset.type;
+  document.getElementById('modal-action-user').textContent = element.dataset.user;
+  document.getElementById('modal-action-date').textContent = element.dataset.date;
+  const modal = new bootstrap.Modal(document.getElementById('actionDetailModal'));
+  modal.show();
+}
+</script>
+
+<div class="modal fade" id="actionDetailModal" tabindex="-1" aria-labelledby="actionDetailModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="actionDetailModalLabel">Action Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Type:</strong> <span id="modal-action-type"></span></p>
+        <p><strong>User:</strong> <span id="modal-action-user"></span></p>
+        <p><strong>Date:</strong> <span id="modal-action-date"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de filtro -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <!-- Interior del modal de filtro -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="filterModalLabel">Filter Actions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <select id="filter-user" class="controls">
+            <option value="">All Users</option>
+            {% for user in users %}
+              <option value="{{ user.name }}">{{ user.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <select id="filter-action" class="controls">
+            <option value="">All Actions</option>
+            {% for action in actions|map(attribute='type')|unique %}
+              <option value="{{ action }}">{{ action }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="buttons" onclick="applyActionFilter()">Apply Filter</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

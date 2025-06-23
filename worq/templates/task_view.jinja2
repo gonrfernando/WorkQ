@@ -8,7 +8,7 @@
         <div class="col-6 bar-wrapper">
             <div class="project-selector-bar dropdown">
                 <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false">{{ active_project.name }}</button>
-                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                <div class="dropdown-menu w-100 dropdown-scroll" aria-labelledby="dropdownMenuButton">
                     {% for project in projects %}
                         <a class="dropdown-item dropdown-project-item" id="{{ project.id }}">{{ project.name }}</a>
                     {% endfor %}
@@ -47,6 +47,19 @@
                         </div>
                     </div>
                     <p class="task-element task-description">{{ task.description }}</p>
+                    <div class="task-users mt-2">
+                    {% for user in task.assigned_users %}
+                        <div class="d-flex align-items-center gap-1 small text-muted">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">person</span>
+                            <span>{{ user.name }}</span>
+                        </div>
+                    {% else %}
+                        <div class="text-muted small">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">person_off</span>
+                            <span>No users assigned</span>
+                        </div>
+                    {% endfor %}
+                    </div>
                     <div class="task-requirements">
                         {% for requirement in task.requirements %}
                             <div style="display:flex">
@@ -93,6 +106,12 @@
                     <div id="requirements-list">
                         <!-- Requirements will be dynamically added here -->
                     </div>
+                    <div class="task-users-modal mt-4">
+                        <h4>Assigned Users</h4>
+                        <div id="assigned-users-list">
+                            <!-- JS insertará aquí los usuarios -->
+                        </div>
+                    </div>
                     <div class="task-files-modal">
                         <input type="file" id="file" name="file" multiple>
                         <button type="submit" id="btnsubir" class="btn btn-primary" disabled>Upload</button>
@@ -116,7 +135,9 @@
             <div class="task-footer-modal">
                 <div class="task-comments-modal">
                     <h4>Comments</h4>
-                    <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+                    <div id="task-feedbacks-list" class="mb-2">
+                        <!-- Aquí irán los feedbacks -->
+                    </div>
                 </div>
                 <div class="task-modal-buttons">
                     <button id="save-task" class="btn btn-primary">Save</button>
@@ -208,6 +229,7 @@
 </script>
 
 <script>
+    const allTasks = {{ tasks|tojson|safe }};
     function openTaskModalFromCard(element) {
         const taskId = element.getAttribute('data-task-id');
         if (!taskId) {
@@ -217,7 +239,50 @@
 
         // Guardar task_id oculto para usarlo en el formulario del modal de configuración
         document.getElementById('modal-task-id').value = taskId;
+        // Obtener la data de tareas del DOM (si está disponible)
+        const allTasks = {{ tasks|tojson|safe }};
+        const selectedTask = allTasks.find(t => t.id == taskId);
 
+        const feedbacksContainer = document.getElementById("task-feedbacks-list");
+        feedbacksContainer.innerHTML = ""; // Limpiar anteriores
+
+        if (selectedTask && selectedTask.feedbacks && selectedTask.feedbacks.length > 0) {
+            selectedTask.feedbacks.forEach(fb => {
+                const feedbackItem = document.createElement("div");
+                feedbackItem.className = "mb-1 small border-bottom pb-1";
+                feedbackItem.innerHTML = `
+                    <strong>${fb.user_name}</strong> <span class="text-muted" style="font-size: 0.8em;">(${fb.date})</span><br>
+                    ${fb.comment}
+                `;
+                feedbacksContainer.appendChild(feedbackItem);
+            });
+        } else {
+            feedbacksContainer.innerHTML = `<div class="text-muted small">No comments yet.</div>`;
+        }
+
+
+        const usersContainer = document.getElementById("assigned-users-list");
+        usersContainer.innerHTML = ""; // Limpiar anteriores
+
+        if (selectedTask && selectedTask.assigned_users.length > 0) {
+            selectedTask.assigned_users.forEach(user => {
+                const userRow = document.createElement("div");
+                userRow.className = "d-flex align-items-center gap-1 small text-muted";
+                userRow.innerHTML = `
+                    <span class="material-symbols-outlined" style="font-size: 18px;">person</span>
+                    <span>${user.name}</span>
+                `;
+                usersContainer.appendChild(userRow);
+            });
+        } else {
+            const emptyMsg = document.createElement("div");
+            emptyMsg.className = "text-muted small";
+            emptyMsg.innerHTML = `
+                <span class="material-symbols-outlined" style="font-size: 18px;">person_off</span>
+                <span>No users assigned</span>
+            `;
+            usersContainer.appendChild(emptyMsg);
+        }
         // Mostrar el modal de tarea
         document.getElementById('task-modal').style.display = 'block';
     }
@@ -303,6 +368,61 @@
         }
     });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deliverButton = document.getElementById('deliver-task');
+
+    deliverButton.addEventListener('click', function () {
+        const taskId = document.getElementById('modal-task-id').value;
+
+        if (!taskId) {
+            alert("No task selected.");
+            return;
+        }
+
+        fetch("{{ request.route_url('deliver_task') }}", {
+            method: "POST",
+            headers: {
+                'X-CSRF-Token': csrfToken
+            },
+            body: new URLSearchParams({ task_id: taskId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Cierra el modal de tarea
+                closeTaskModal();
+
+                // Actualiza el contenido del modal de éxito
+                const successMessage = document.querySelector('#successModal .modal-body');
+                successMessage.textContent = "Task delivered successfully!";
+
+                // Muestra el modal de éxito
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+
+                // Opcional: refrescar la página al cerrar el modal
+                const modalElement = document.getElementById('successModal');
+                modalElement.addEventListener('hidden.bs.modal', function () {
+                    location.reload();
+                }, { once: true });
+
+            } else {
+                const errorMessage = data.error || "An unexpected error occurred.";
+                document.getElementById('errorMessage').textContent = errorMessage;
+                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+            }
+        })
+        .catch(err => {
+            document.getElementById('errorMessage').textContent = "Error delivering task: " + err;
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        });
+    });
+});
+</script>
+
 
 
 {% endblock tasks %}

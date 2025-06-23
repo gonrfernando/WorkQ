@@ -2,7 +2,7 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from countryinfo import CountryInfo
 from pyramid.httpexceptions import HTTPFound
-from worq.models.models import UsersProjects, Users, Countries, Areas, Roles
+from worq.models.models import UsersProjects, Users, Countries, Areas, Roles, Projects
 from sqlalchemy.exc import SQLAlchemyError
 
 @view_config(route_name='edit_user', renderer='templates/edit_user.jinja2')
@@ -21,8 +21,24 @@ def my_view(request):
     countries = request.dbsession.query(Countries).all()
     areas = request.dbsession.query(Areas).all()
     roles = request.dbsession.query(Roles).all()
-    project_ids = request.dbsession.query(UsersProjects).filter_by(user_id=user_id).all()
-    json_projects = [{"id": project.project_id, "name": project.project.name} for project in project_ids]
+    if user_role in ['superadmin', 'admin']:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            .all()
+        )
+    else:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .join(UsersProjects)
+            .filter(
+                UsersProjects.user_id == user_id,
+                Projects.state_id != 2  # Filtrar también aquí
+            )
+            .all()
+        )
+ 
+    json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
     
     json_users = [{"id": user.id, 
                    "name": user.name, 

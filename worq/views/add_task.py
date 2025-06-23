@@ -1,5 +1,5 @@
 import datetime
-from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks
+from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks, Projects
 from sqlalchemy.exc import SQLAlchemyError
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -13,15 +13,18 @@ import json
 )
 def task_creation_view(request):
     session = request.session
+    user_email = session.get('user_email')
+    user_role  = session.get('user_role')
+    user_id    = session.get('user_id')
     if 'user_name' not in session:
         return HTTPFound(
             location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'})
         )
-    if 'user_role' not in ['superadmin', 'admin', 'projectmanager']:
+    if user_role not in ['superadmin', 'admin', 'projectmanager']:
         return HTTPFound(
             location=request.route_url('task_view')
         )
-
+    
     dbsession = request.dbsession
     active_project_id = session.get("project_id")
     user_id = session.get('user_id')
@@ -71,6 +74,10 @@ def task_creation_view(request):
             title         = get('title')
             description   = get('description')
             finished_date = get('finished_date')
+            if finished_date:
+                dt = datetime.datetime.strptime(finished_date, '%Y-%m-%dT%H:%M')
+                if dt < datetime.datetime.utcnow():
+                    return Response("The due date cant be in the past.", status=400)
             priority      = get('priority')
             requirements  = getall('requirements')
             collaborators = getall('collaborators')
@@ -146,11 +153,24 @@ def task_creation_view(request):
             return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
 
     # --- Datos para renderizado en GET y tras POST ---
-    ups = dbsession.query(UsersProjects).filter_by(user_id=user_id).all()
-    json_projects = [
-        {"id": up.project_id, "name": up.project.name}
-        for up in ups
-    ]
+    if user_role in ['superadmin', 'admin']:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            .all()
+        )
+    else:
+        user_projects = (
+            request.dbsession.query(Projects)
+            .join(UsersProjects)
+            .filter(
+                UsersProjects.user_id == user_id,
+                Projects.state_id != 2  # Filtrar también aquí
+            )
+            .all()
+        )
+
+    json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
     active_project = next(
         (p for p in json_projects if p["id"] == active_project_id),
         None
@@ -172,16 +192,21 @@ def task_creation_view(request):
     roles = dbsession.query(Roles).all()
     json_roles = [{"id": r.id, "name": r.name} for r in roles]
 
-    priorities = dbsession.query(TaskPriorities).all()
+    priorities = dbsession.query(TaskPriorities).filter(TaskPriorities.id != 4).all()
     json_priorities = [{"id": p.id, "priority": p.priority} for p in priorities]
 
-    started_date_value = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M')
+    now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M')
 
     proj_users = (
         dbsession.query(UsersProjects)
-        .filter_by(project_id=active_project_id)
+        .join(Projects, UsersProjects.project_id == Projects.id)
+        .filter(
+            UsersProjects.project_id == active_project_id,
+            Projects.state_id != 2
+        )
         .all()
     )
+
     json_proj_users = [
         {
             "id": up.user.id,
@@ -197,10 +222,11 @@ def task_creation_view(request):
         "projects": json_projects,
         "active_project_id": active_project_id,
         "active_project": active_project,
-        "started_date_value": started_date_value,
+        "now": now,
         "priorities": json_priorities,
         "users_projects": json_proj_users,        
         "user_name": session.get('user_name'),
         "user_email": session.get('user_email'),
-        "user_role": session.get('user_role')
+        "user_role": session.get('user_role'),
+        "active_tab": "tasks"
     }

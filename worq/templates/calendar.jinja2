@@ -96,6 +96,8 @@
             No tasks found for this month.
         </div>
     {% endif %}
+    <input class="back-btn" type="button" value="Task View" onclick="window.location='{{ request.route_url('task_view') }}';">
+    <br>
 </div>
 
 <script>

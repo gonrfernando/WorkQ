@@ -24,7 +24,7 @@ def test_actions_view_load(testapp, db_session, test_user):
     })
     res = testapp.get('/action_view')
     assert res.status_int == 200
-    assert 'Actions Content' in res.text
+    assert 'Actions history' in res.text
 
 def test_stats_view_load(testapp, db_session, test_user):
     testapp.post('/sign-in', {

@@ -100,7 +100,7 @@ def test_sign_up_email_format(testapp, db_session, test_user):
 
 def test_sign_up_user_already_existing(testapp, db_session, test_user):
     existing_email = 'user@exists.com'
-    existing_user = Users(email=existing_email, passw='dummyhash', role_id=1)
+    existing_user = Users(id=4, email=existing_email, passw='dummyhash', role_id=1)
     db_session.add(existing_user)
     db_session.flush()
 
