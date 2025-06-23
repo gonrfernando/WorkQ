@@ -94,7 +94,7 @@
       </div>
       <span class="toolbar-separator"></span>
       <div class="profile" id="profile-menu">
-        <img src="{{request.static_url('worq:static/profile-icon.png')}}" class="toolbar-icon" id="profile-icon">
+        <img src="{{ request.session['user_icon'] }}" class="toolbar-icon" id="profile-icon">
         <ul id="dropdown-menu">
           <li><p style="margin-bottom: 0;">Welcome {{ user_name }}</p></li>
           <li><p class="Role">{{user_role}}</p></li>

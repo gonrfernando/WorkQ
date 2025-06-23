@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPInternalServerError, HTTPFound
-from worq.models.models import Users
+from worq.models.models import Users, Icons
 import bcrypt
 
 @view_config(route_name='sign_in', renderer='templates/sign_in.jinja2')
@@ -39,6 +39,12 @@ def sign_in_view(request):
                     session['user_email'] = user.email
                     session['user_role'] = user.role.name
                     session['user_id'] = user.id
+                    
+                    user_icon = dbsession.query(Icons).filter(Icons.user_id == user.id).first()
+                    if user_icon and user_icon.file:
+                        session['user_icon'] = user_icon.file.filepath  # Asumiendo que filepath tiene la URL
+                    else:
+                        session['user_icon'] = '/static/img/default-icon.svg'  # Ruta al ícono por defecto
                     return HTTPFound(location=request.route_url('task_view'))
                 else:
                     # Contraseña inválida
