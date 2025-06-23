@@ -225,10 +225,31 @@ def task_creation_view(request):
                     return Response(json.dumps({'success': False, 'error': 'Error al crear la tarea'}), content_type='application/json; charset=utf-8')
                 return Response("Error al crear la tarea", status=500)
 
+        elif form_type == 'remove_user':
+            user_id_selected = get('user_id')
+            if not user_id_selected or not active_project_id:
+                return Response(json.dumps({'success': False, 'error': 'User or project not specified'}), content_type='application/json; charset=utf-8')
+            try:
+                up = dbsession.query(UsersProjects).filter_by(
+                    user_id=user_id_selected,
+                    project_id=active_project_id
+                ).first()
+                if up:
+                    dbsession.delete(up)
+                    dbsession.flush()
+                    if 'application/json' in request.accept:
+                        return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
+                else:
+                    if 'application/json' in request.accept:
+                        return Response(json.dumps({'success': False, 'error': 'User not found in project'}), content_type='application/json; charset=utf-8')
+            except SQLAlchemyError as e:
+                print(f"[ERROR] Error al eliminar usuario del proyecto: {e}")
+                if 'application/json' in request.accept:
+                    return Response(json.dumps({'success': False, 'error': 'Error al eliminar usuario del proyecto'}), content_type='application/json; charset=utf-8')
+                return Response("Error al eliminar usuario del proyecto", status=500)
         # Si es AJAX y no hubo error, responde éxito genérico
-        if 'application/json' in request.accept:
-            return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
-
+        
+            
     # --- Datos para renderizado en GET y tras POST ---
     if user_role in ['superadmin', 'admin']:
         user_projects = (

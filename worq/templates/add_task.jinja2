@@ -92,23 +92,30 @@
           <input type="hidden" name="form_type" value="add_user">
           <input type="hidden" id="user_id" name="user_id">
           <div class="search-bar2">
-          <input type="text"
-                placeholder="Search User Email"
-                oninput="handleEmailSearchInput(event)">
+            <input type="text"
+                  placeholder="Search User Email"
+                  oninput="handleEmailSearchInput(event)">
             <div id="email-autocomplete-results" class="autocomplete-results"></div>
           </div>
           <input class="controls" type="email" id="email" name="email" placeholder="Email Address">
           <input class="buttons" type="submit" value="Assign to Project">
           <!-- Debajo del formulario de agregar usuario -->
-<h5>Project Users</h5>
-<ul>
-  {% for u in users_projects %}
-    <li>
-      {{ u.name }} ({{ u.email }})
-      <button class="btn btn-danger btn-sm" onclick="deleteUser({{ u.id }})">Delete</button>
-    </li>
-  {% endfor %}
-</ul>
+          <h5>Project Users</h5>
+          <div class="scrollable-section" style="max-height: 200px; overflow-y: auto;">
+            <ul>
+              {% for u in users_projects %}
+                <li>
+                  {{ u.name }} ({{ u.email }})
+                  <span class="material-symbols-outlined btn delete-user" 
+                        title="Remove user" 
+                        data-user-id="{{ u.id }}" 
+                        data-user-name="{{ u.name }}">
+                    group_remove
+                  </span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
         </form>
 
       </div>
@@ -273,6 +280,51 @@ function resetFormFields(form) {
 
 // --- AJAX para ambos formularios con mensajes personalizados ---
 document.addEventListener('DOMContentLoaded', function() {
+
+let userToDeleteId = null;
+
+  // Delegación para el span de eliminar usuario
+  document.querySelectorAll('.delete-user').forEach(span => {
+    span.addEventListener('click', function() {
+      userToDeleteId = this.getAttribute('data-user-id');
+      const userName = this.getAttribute('data-user-name');
+      document.getElementById('confirmDeleteUserModalBody').innerText =
+        `Are you sure you want to remove "${userName}" from the project?`;
+      const modal = new bootstrap.Modal(document.getElementById('confirmDeleteUserModal'));
+      modal.show();
+    });
+  });
+
+  // Acción al confirmar en el modal
+  document.getElementById('confirmDeleteUserBtn').addEventListener('click', function() {
+    if (!userToDeleteId) return;
+    fetch(window.location.pathname, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        form_type: 'remove_user',
+        user_id: userToDeleteId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const liToRemove = document.querySelector(`.delete-user[data-user-id="${userToDeleteId}"]`).closest('li');
+        const successModal = new bootstrap.Modal(document.getElementById('removeUserSuccessModal'));
+        successModal.show();
+        // Elimina el usuario del DOM solo cuando se cierra el modal de éxito
+        document.getElementById('removeUserSuccessModal').addEventListener('hidden.bs.modal', function handler() {
+          liToRemove.remove();
+          // Remueve el listener para evitar duplicados si borras varios usuarios
+          document.getElementById('removeUserSuccessModal').removeEventListener('hidden.bs.modal', handler);
+        });
+    } else {
+    alert(data.error || 'Could not remove user.');
+  }
+    // Cierra el modal de confirmación
+    bootstrap.Modal.getInstance(document.getElementById('confirmDeleteUserModal')).hide();
+  });
+
   // FORMULARIO DE TAREA
 const taskForm = document.querySelector('.add-tasks');
 if (taskForm) {
@@ -368,6 +420,7 @@ if (taskForm) {
       document.body.style = '';
     });
 });
+});
 </script>
 <!-- Modal de éxito -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
@@ -400,6 +453,43 @@ if (taskForm) {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación para eliminar usuario -->
+<div class="modal fade" id="confirmDeleteUserModal" tabindex="-1" aria-labelledby="confirmDeleteUserModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="confirmDeleteUserModalLabel">Confirm Remove User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="confirmDeleteUserModalBody">
+        Are you sure you want to remove this user from the project?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteUserBtn">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de éxito al eliminar usuario -->
+<div class="modal fade" id="removeUserSuccessModal" tabindex="-1" aria-labelledby="removeUserSuccessModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="removeUserSuccessModalLabel">User Removed</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        The user has been removed from the project successfully!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
