@@ -145,7 +145,7 @@ class Users(Base):
     tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='users')
     users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.invited_by]', back_populates='users')
     users_projects_: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.user_id]', back_populates='user')
-    feedbacks: Mapped[List['Feedbacks']] = relationship('Feedbacks', back_populates='user')
+    feedbacks: Mapped[List['Feedbacks']] = relationship('Feedbacks', back_populates='user', foreign_keys='Feedbacks.user_id')
     requests: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.accepted_by]', back_populates='users')
     requests_: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.ex_user]', back_populates='users_')
     requests1: Mapped[List['Requests']] = relationship('Requests', foreign_keys='[Requests.rejected_by]', back_populates='users1')
@@ -330,7 +330,7 @@ class Feedbacks(Tasks):
     user_id: Mapped[Optional[int]] = mapped_column(Integer)
 
     user: Mapped[Optional['Users']] = relationship('Users', back_populates='feedbacks')
-    users_feedbacks: Mapped[List['UsersFeedbacks']] = relationship('UsersFeedbacks', back_populates='feedback')
+    users_feedbacks: Mapped[List['UsersFeedbacks']] = relationship('UsersFeedbacks', back_populates='feedback', foreign_keys='UsersFeedbacks.feedback_id' )
 
 
 class Requests(Base):
