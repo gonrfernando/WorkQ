@@ -112,7 +112,9 @@
                             <!-- JS insertará aquí los usuarios -->
                         </div>
                     </div>
+                    <form id="upload-form" action="/upload_file" method="POST" enctype="multipart/form-data">
                     <div class="task-files-modal">
+                        <input type="hidden" id="task_id" name="task_id" value="">
                         <input type="file" id="file" name="file" multiple>
                         <button type="submit" id="btnsubir" class="btn btn-primary" disabled>Upload</button>
                     </div>
@@ -222,7 +224,22 @@
     </div>
     </div>
 </div>
-
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">The request was submitted successfully!</div>
+    </div>
+  </div>
+</div>
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body" id="errorMessage">An error occurred.</div>
+    </div>
+  </div>
+</div>
 <!-- Scripts -->
 <script>
     const csrfToken = "{{ request.session.get_csrf_token() }}";
@@ -237,8 +254,12 @@
             return;
         }
 
-        // Guardar task_id oculto para usarlo en el formulario del modal de configuración
+        // Ya existente:
         document.getElementById('modal-task-id').value = taskId;
+
+        // NUEVO: también para el input de subida de archivos
+        document.getElementById('task_id').value = taskId;
+
         // Obtener la data de tareas del DOM (si está disponible)
         const allTasks = {{ tasks|tojson|safe }};
         const selectedTask = allTasks.find(t => t.id == taskId);
@@ -422,7 +443,56 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const uploadForm = document.getElementById('uploadForm');
+        if (uploadForm) {
+          uploadForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
 
+            const formData = new FormData(this);
 
+            try {
+              const response = await fetch('/upload_file', {
+                method: 'POST',
+                body: formData
+              });
+
+              const data = await response.json();
+
+              const messageDiv = document.getElementById('uploadMessage');
+              messageDiv.innerText = data.message;
+              messageDiv.className = data.status === 'success'
+                ? 'alert alert-success'
+                : 'alert alert-danger';
+
+            } catch (error) {
+              console.error('Error al subir archivo:', error);
+              const messageDiv = document.getElementById('uploadMessage');
+              messageDiv.innerText = 'Error al conectar con el servidor.';
+              messageDiv.className = 'alert alert-danger';
+            }
+          });
+        }
+      });
+
+</script>
+
+{% for msg in request.session.pop_flash('success') %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('successModal').querySelector('.modal-body').textContent = "{{ msg|tojson }}";
+      new bootstrap.Modal(document.getElementById('successModal')).show();
+    });
+  </script>
+{% endfor %}
+{% for msg in request.session.pop_flash('error') %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('errorMessage').textContent = "{{ msg|tojson }}";
+      new bootstrap.Modal(document.getElementById('errorModal')).show();
+    });
+  </script>
+{% endfor %}
 
 {% endblock tasks %}

@@ -1,48 +1,48 @@
 import os
 import uuid
-import mimetypes
 from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPFound
 from worq.scripts.s3_utils import upload_file_to_s3
-from worq.models.models import Files
+from worq.models.models import Files, TaskFiles
 
-# Extensiones permitidas (puedes ajustarlas)
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'pdf', 'docx', 'xlsx', 'txt'}
 
 def secure_filename(filename):
-    """
-    Sanitiza el nombre del archivo para evitar inyecciones o caracteres maliciosos.
-    """
-    filename = os.path.basename(filename)  # Evita path traversal
-    filename = filename.replace(" ", "_")  # Opcional: reemplaza espacios
-    # Solo caracteres alfanuméricos, guiones y puntos
+    filename = os.path.basename(filename)
+    filename = filename.replace(" ", "_")
     return ''.join(c for c in filename if c.isalnum() or c in ('_', '-', '.'))
 
 def allowed_file(filename):
-    """
-    Verifica que el archivo tenga una extensión permitida.
-    """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@view_config(route_name='upload_file', renderer='json', request_method='POST')
+@view_config(route_name='upload_file', request_method='POST')
 def upload_view(request):
-    archivo = request.POST['file']
-    input_file = archivo.file
-    original_filename = archivo.filename
-    content_type = archivo.type
+    try:
+        archivo = request.POST['file']
+        task_id = request.POST['task_id']
+        input_file = archivo.file
+        original_filename = archivo.filename
+        content_type = archivo.type
 
-    # Validación y sanitización
-    if not allowed_file(original_filename):
-        return {'status': 'error', 'message': 'Extensión de archivo no permitida'}
+        if not allowed_file(original_filename):
+            request.session.flash('File extension not allowed', 'error')
+            return HTTPFound(location=request.route_url('task_view'))
 
-    sanitized_filename = secure_filename(original_filename)
-    unique_filename = f"{uuid.uuid4().hex}_{sanitized_filename}"
+        sanitized_filename = secure_filename(original_filename)
+        unique_filename = f"{uuid.uuid4().hex}_{sanitized_filename}"
 
-    # Subir a S3
-    url = upload_file_to_s3(input_file, unique_filename, content_type)
+        url = upload_file_to_s3(input_file, unique_filename, content_type)
 
-    # Guardar en base de datos
-    nuevo_archivo = Files(filename=sanitized_filename, filepath=url)
-    request.dbsession.add(nuevo_archivo)
-    request.dbsession.flush()
+        nuevo_archivo = Files(filename=sanitized_filename, filepath=url)
+        request.dbsession.add(nuevo_archivo)
+        request.dbsession.flush()
 
-    return {'status': 'ok', 'url': url}
+        relacion = TaskFiles(task_id=task_id, file_id=nuevo_archivo.id)
+        request.dbsession.add(relacion)
+        request.dbsession.flush()
+
+        request.session.flash('File uploaded successfully', 'success')
+        return HTTPFound(location=request.route_url('task_view'))
+    except Exception as e:
+        request.session.flash(f'Error: {str(e)}', 'error')
+        return HTTPFound(location=request.route_url('task_view'))
