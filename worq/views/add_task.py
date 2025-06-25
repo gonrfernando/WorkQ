@@ -92,9 +92,12 @@ def task_creation_view(request):
                             dbsession.flush()
                         except Exception as e:
                             print(f"[ERROR] Al crear notificación de usuario agregado a proyecto: {e}")
-                        # Usuario ya estaba en el proyecto, responde igual con éxito
                         if 'application/json' in request.accept:
-                            return Response(json.dumps({'success': True, 'info': 'User already in project'}), content_type='application/json; charset=utf-8')
+                            return Response(json.dumps({'success': True}), content_type='application/json; charset=utf-8')
+                    else:
+                        # Usuario ya estaba en el proyecto, responde igual con éxito
+                            if 'application/json' in request.accept:
+                                return Response(json.dumps({'success': True, 'info': 'User already in project'}), content_type='application/json; charset=utf-8')
                 except SQLAlchemyError as e:
                     print(f"[ERROR] Error al asignar usuario: {e}")
                     if 'application/json' in request.accept:

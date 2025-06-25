@@ -88,8 +88,14 @@ function showNotificationModal(element) {
     body: JSON.stringify({ noti_id: element.dataset.id })
   }).then(response => response.json())
     .then(data => {
-      // Opcional: podrías manejar errores aquí
-    });
+        element.dataset.state = "read";
+        const stateSpan = element.querySelector('.noti-state-text');
+        if (stateSpan) {
+          stateSpan.textContent = "(Read)";
+        }
+        updateNotificationBadge();
+        updateTopNotificationBadge(); // <-- aquí
+      });
 
   const modal = new bootstrap.Modal(document.getElementById('notificationDetailModal'));
   modal.show();
@@ -132,6 +138,21 @@ function updateNotificationBadge() {
     icon.parentNode.appendChild(badge);
   }
   badge.style.display = unread > 0 ? 'inline-block' : 'none';
+}
+
+function updateTopNotificationBadge() {
+  // Busca el badge en la barra superior (fuera del panel de notificaciones)
+  const badge = document.querySelector('.notification-badge');
+  // Cuenta las notificaciones no leídas en la vista actual
+  const unread = document.querySelectorAll('.notification-row[data-state="unread"]').length;
+  if (badge) {
+    if (unread > 0) {
+      badge.textContent = unread;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
 }
 
 // Llama al cargar la página
