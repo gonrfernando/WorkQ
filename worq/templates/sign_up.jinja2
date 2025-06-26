@@ -95,7 +95,15 @@
             </div>
           </div>
         </div>
-       
+        {% for msg in request.session.pop_flash('success') %}
+          <div class="alert alert-success">{{ msg }}</div>
+        {% endfor %}
+
+        {% for msg in request.session.pop_flash('error') %}
+          <div class="alert alert-danger">{{ msg }}</div>
+        {% endfor %}
+
+
 
         {% if redirect %}
             <script>

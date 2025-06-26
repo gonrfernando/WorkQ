@@ -10,7 +10,7 @@ from pyramid.httpexceptions import HTTPFound
 def my_view(request):
     session = request.session
     error = request.params.get('error')
-    if not 'user_name' in session:
+    if not 'user_email' in session:
         return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
     error = request.params.get('error')
     if error:

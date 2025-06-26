@@ -11,7 +11,7 @@ def task_view(request):
     session = request.session
  
     # Redirigir si el usuario no está autenticado
-    if 'user_name' not in session:
+    if 'user_email' not in session:
         return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
  
     # Parámetros de sesión
