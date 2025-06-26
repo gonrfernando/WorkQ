@@ -9,7 +9,6 @@ icon: file-circle-exclamation
 * Creation, editing, and deletion of projects.
 * Association of users with projects through teams.
 * A user can be involved in multiple projects.
-* Predefined roles in projects.
 * Supervisors can approve tasks.
 
 **2. Task Management within Projects**
@@ -18,21 +17,20 @@ icon: file-circle-exclamation
 * Task attributes:
   * Title
   * Description
+  * Sub tasks
   * Dates
   * Assigned user
   * Estimated time
   * Priority
   * Attachments
-  * Observations
   * Feedback
 * Tasks can be assigned to more than one user.
-* Record of which user completed each task.
 * Monthly calendar with assignments.
 * Task statuses:
-  * Pending
-  * In progress
   * Completed
-  * Postponed
+  * Assigned
+  * Expired
+  * Delivered
 
 **3. Attachments**
 

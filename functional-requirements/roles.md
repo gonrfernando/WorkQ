@@ -2,16 +2,16 @@
 icon: circle-check
 ---
 
-# Roles and Permissions
+# Roles
 
 **System Administrator**
 
 The System Administrator has the highest level of access and can:
 
 * Delegate Area Administrators.
-* Create user accounts.
+* Edit user accounts.
 * Change a user's role from a regular user to a Project Manager.
-* Manage permission settings for projects.
+* Manage requests settings for projects and tasks.
 * View the general project duration calendar.
 
 ***
@@ -20,10 +20,9 @@ The System Administrator has the highest level of access and can:
 
 The Area Administrator has control over their assigned area and can:
 
-* Create user accounts.
+* Edit user accounts.
 * Change a user's role from a regular user to a Project Manager.
-* Receive and process requests for task modifications within their area’s projects.
-* Manage permission settings for projects in their area.
+* Receive and process requests for tasks and projects modifications.
 * View the general project duration calendar.
 
 ***
@@ -58,19 +57,7 @@ Regular users have limited access and can:
 
 ***
 
-#### **Project Permissions**
+**Tasks and Projects Modification Rules**
 
-**Task Modification Rules**
-
-* **With approval request**: Modifications require approval.
-* **Free modification**: Users can modify tasks without approval.
-* **Free modification with a custom cooldown period**: Users can modify tasks but with a time restriction.
-* **Modification not allowed**: Users cannot modify tasks.
-
-***
-
-**Additional Configuration**
-
-* Users can choose to receive notificactions for all events or only important ones
-* Users can select wheter to receive specific notificacion categories via email
+* **With approval request**: Modifications require admin approval.
 

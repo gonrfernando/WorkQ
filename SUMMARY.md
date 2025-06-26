@@ -3,13 +3,17 @@
 ## Introduction
 
 * [System Description](README.md)
-* [General objectives](introduction/general-objectives.md)
-* [Target Audience](introduction/target-audience.md)
+
+***
+
+* [Problem statement](problem-statement.md)
+* [Target Audience](target-audience.md)
+* [General objectives](general-objectives.md)
 
 ## Functional Requirements
 
 * [Authentication and User management](functional-requirements/authentication-and-user-management.md)
-* [Roles and Permissions](functional-requirements/roles-and-permissions.md)
+* [Roles](functional-requirements/roles.md)
 * [Access Control Diagram](functional-requirements/access-control-diagram.md)
 * [Project and Task Management](functional-requirements/project-and-task-management.md)
 * [Dashboard and Stats](functional-requirements/dashboard-and-stats.md)
@@ -18,7 +22,7 @@
 
 ## non-functional requeriments
 
-* [Security and Permissions](non-functional-requeriments/security-and-permissions.md)
+* [Security](non-functional-requeriments/security.md)
 * [Deployment and Monitoring](non-functional-requeriments/deployment-and-monitoring.md)
 
 ## tools and technologies

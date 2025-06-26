@@ -4,6 +4,7 @@ icon: bell-exclamation
 
 # Notifications
 
-* Email and in-platform notifications.
-* Alerts for upcoming task deadlines, new assignments, project invitations, and system messages.
-* Notification history visible only to administrators.
+**In-Platform Notifications**
+
+The system provides real-time alerts for new task assignments, project invitations, and task updates. Users can view a history of notifications to stay informed and never miss important changes.
+
