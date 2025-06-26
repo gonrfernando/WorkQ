@@ -4,6 +4,8 @@ icon: ellipsis
 
 # Navigation
 
+To ensure smooth navigation and improve user experience, the system provides a structured interface that includes a project sidebar, a top toolbar, and a general template for accessing and managing project content. These elements allow users to quickly access relevant views, manage their projects efficiently, and perform role-specific actions when necessary.
+
 **Functional Requirements**
 
 1. **Project Sidebar**
@@ -20,5 +22,8 @@ icon: ellipsis
      * **Calendar**: Redirects to the calendar view.
      * **Notifications**: Redirects to the notifications view.
      * **Profile**: Redirects to the user's profile view.
+   * The toolbar contains clickable icons exclusive to admins for the following actions:
+     * **Reply Requests**: Allows Admins to respond to task or project change requests.
+     * **Edit Users**: Provides access to the user management interface.
 6. **General Template**
    * The system displays a general template for the project view.
