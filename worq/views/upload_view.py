@@ -33,7 +33,11 @@ def upload_view(request):
 
         url = upload_file_to_s3(input_file, unique_filename, content_type)
 
-        nuevo_archivo = Files(filename=sanitized_filename, filepath=url)
+        nuevo_archivo = Files(
+                                filename=sanitized_filename,
+                                filepath=url  # solo el key
+                            )
+
         request.dbsession.add(nuevo_archivo)
         request.dbsession.flush()
 

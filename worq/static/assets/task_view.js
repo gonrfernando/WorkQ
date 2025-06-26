@@ -176,5 +176,31 @@ document.addEventListener("DOMContentLoaded", function () {
     deliverTaskButton.addEventListener("click", function () {
         modal.style.display = "none";
     });
+
+    function loadTaskFiles(taskId) {
+        fetch(`/files_by_task?task_id=${taskId}`)
+            .then(response => response.json())
+            .then(data => {
+                const filesList = document.getElementById('task-files-list');
+                filesList.innerHTML = '';
+
+                if (data.status === 'ok' && data.files.length > 0) {
+                    data.files.forEach(file => {
+                        const fileItem = document.createElement('div');
+                        fileItem.classList.add('mb-2');
+
+                        fileItem.innerHTML = `
+                            <a href="${file.url}" target="_blank">${file.filename}</a>
+                            <a href="${file.url}" download class="ms-2 text-decoration-none">⬇️</a>
+                        `;
+
+                        filesList.appendChild(fileItem);
+                    });
+                } else {
+                    filesList.innerHTML = '<p>No files uploaded for this task.</p>';
+                }
+            });
+    }
+
 });
 

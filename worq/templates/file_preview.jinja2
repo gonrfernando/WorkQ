@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Preview: {{ file.filename }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4 bg-light">
+  <div class="container bg-white shadow rounded p-4">
+    <h2 class="mb-3">{{ file.filename }}</h2>
+
+    {% if file.filename.endswith('.pdf') %}
+      <iframe src="{{ file.filepath }}" width="100%" height="600px" style="border: none;"></iframe>
+
+    {% elif file.filename.endswith('.txt') %}
+      <pre style="white-space: pre-wrap; background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+        <pre style="white-space: pre-wrap;">{{ txt_content }}</pre>
+      </pre>
+
+    {% else %}
+      <div class="alert alert-info">
+        This file cannot be previewed here. You can <a href="{{ file.filepath }}" target="_blank">download it</a> instead.
+      </div>
+    {% endif %}
+    
+    <a href="{{ file.filepath }}" download class="btn btn-primary mt-3">Download</a>
+    <a href="{{ request.route_url('task_view') }}" class="btn btn-secondary mt-3">Back</a>
+  </div>
+</body>
+</html>
