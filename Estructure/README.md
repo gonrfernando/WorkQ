@@ -30,10 +30,9 @@ icon: cubes
 * **Task Modification & Request**
 * **Task Revision**
 * **Stats Module**
-* <mark style="color:blue;">**Chat Module**</mark>
+* **Chat Module**
 * **Members Sidebar:**
   * User Preview
   * Sidebar User Click
 * **Files** ( tasks)
 * **Notifications** (dependent on almost everything)
-* <mark style="color:blue;">**Priority of Notifications, Tasks, and Projects**</mark> <mark style="color:blue;"></mark><mark style="color:blue;">(TBD, how it will be defined)</mark>
