@@ -10,8 +10,8 @@ icon: file-lock
 The system must allow users to attach files to tasks.
 
 * The user must be able to click on a task to open the task menu.
-* A clip icon should be visible in the task menu for the user to click.
-* Upon clicking the clip icon, a “File Explorer” menu from the user's PC should open.
+* A button should be visible in the task menu for the user to click.
+* Upon clicking the button, a “File Explorer” menu from the user's PC should open.
 * The user should be able to select the desired file(s) for upload.
 * The system should confirm that the selected file(s) are correct and ready to be uploaded.
 

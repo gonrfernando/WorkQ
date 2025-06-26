@@ -11,7 +11,6 @@ icon: square-plus
    * The project data must include:
      * Project name
      * Description
-     * Project icon
      * Start date
      * End date
 2. **Empty Inputs Validation**

@@ -4,16 +4,25 @@ icon: square-pen
 
 # Modification and Request
 
-F**unctional Requirements**
+**Functional Requirements**
 
-1. **Permission-based Modification**
-   * The project manager (PM) will be able to request modifications to project aspects depending on the permissions granted.
-   * If the permission is given, the PM must be able to fill out a request form explaining:
-     * Why the modification is being requested
-     * The action requested
-2. **Project Deletion Request**
-   * A project can be deleted without a request within 48 hours of creation.
-   * After 48 hours, the PM will need to submit a request to delete the project, providing an explanation for the deletion.
+**Task Modification**
+
+The Project Manager (PM) can request modifications or deletions of task details. Each request should include:
+
+* The reason for the modification or deletion
+* The specific action being requested
+
+***
+
+**Project Request**
+
+Similarly, the Project Manager (PM) can request modifications or deletions of project details. Each request should include:
+
+* The reason for the modification or deletion
+* The specific action being requested
+
+***
 
 **Non-Functional Requirements**
 

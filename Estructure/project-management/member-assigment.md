@@ -6,10 +6,10 @@ icon: square-user
 
 **Functional Requirements**
 
-1. **Add Members and Define Roles**
-   * The project manager (PM) will be able to add members to a project and define their roles.
+1. **Add Members**
+   * The Project Manager (PM) will be able to add members to a project, allowing collaboration and task assignment within the team.
 2. **Delete Member**
-   * To delete a member from a project, the PM must have the request permission and must receive acceptance from a super admin or area admin.
+   * The Project Manager (PM) will be able to remove members from a project when necessary, such as in cases of role changes or team restructuring.
 
 **Non-Functional Requirements**
 
