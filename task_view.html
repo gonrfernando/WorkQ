@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pyramid web application">
+    <meta name="author" content="Pylons Project">
+    <link rel="shortcut icon" href="http://localhost/static/workq.png">
+
+    <title>WorkQ</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Round|Material+Icons+Sharp|Material+Icons+Two+Tone" rel="stylesheet"/>
+      <link rel="stylesheet" href="http://localhost/static/assets/pm.css">
+      <link rel="stylesheet" href="http://localhost/static/assets/style.css">
+      <link rel="stylesheet" href="http://localhost/static/assets/main.css">
+      <link rel="stylesheet" href="http://localhost/static/assets/task_view.css">
+      <link rel="stylesheet" href="http://localhost/static/assets/customElements.css">
+    
+
+    
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+      <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="http://localhost/static/assets/sidebar-scripts.js"></script>
+      <script src="http://localhost/static/assets/task_view.js"></script>
+      <script src="http://localhost/static/assets/pm_main.js"></script>
+    
+      
+
+  </head>
+  <body>
+
+
+    <div id="mySidebar" class="sidebar" onmouseleave="closeNav()" onmouseover="openNav()">
+      <!-- Top Branding -->
+      <div class="sidebar-header">
+        <img src="http://localhost/static/workq.png" class="sidebar-logo">
+        <span class="sidebar-title">WorkQ</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search..." oninput="handleSearchInput(event)">
+        <div id="autocomplete-results" class="autocomplete-results"></div>
+      </div>
+
+      <!-- Project List -->
+      <ul class="sidebar-projects" id="sortable">
+        
+      </ul>
+    </div>
+
+    <div id="overlay-blur" class="blur-overlay"></div>
+    
+    <div class="toolbar">
+      
+        <a href="http://localhost/request_management">
+          <span class="toolbar-icon material-icons-round">reply</span>
+        </a>
+      
+      
+      <a href="http://localhost/edit_user">
+        <span class="toolbar-icon material-icons-round">person_add</span>
+      </a>
+      
+      <div class="notification-icon">
+        <span class="toolbar-icon material-icons-round">notifications</span>
+      </div>
+      <div class="calendar-icon">
+        <span class="toolbar-icon material-icons-round">calendar_today</span>
+      </div>
+      <span class="toolbar-separator"></span>
+      <div class="profile" id="profile-menu">
+        <img src="http://localhost/static/profile-icon.png" class="toolbar-icon" id="profile-icon">
+        <ul id="dropdown-menu">
+          <li><p style="margin-bottom: 0;">Welcome Admin</p></li>
+          <li><p class="Role">admin</p></li>
+          <li><a href="http://localhost/info_user">Profile</a></li>
+          <li><a href="">Tutorial</a></li>
+          <li><a href="http://localhost/logout">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="main">
+      
+        
+      
+      
+      <div class="container" id="navigation">
+        <ul class="nav nav-tabs" id="myTabs" role="tablist">
+
+            
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pm-tab" data-bs-toggle="tab" data-bs-target="#pm" type="button" role="tab" aria-controls="pm">Projects</button>
+            </li>
+            
+            <li class="nav-item" role="presentation">
+                <button class="nav-link " id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab" aria-controls="tasks" aria-selected="false"><i class="fas fa-tasks me-1"></i> Tasks</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false"><i class="fas fa-chart-line me-1"></i> Stats</button>
+            </li>
+            
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="actions-tab" data-bs-toggle="tab" data-bs-target="#actions" type="button" role="tab" aria-controls="actions" aria-selected="false"><i class="fas fa-history me-1"></i>Logs</button>
+            </li>
+            
+            
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="revision-tab" data-bs-toggle="tab" data-bs-target="#revision" type="button" role="tab" aria-controls="revision">Task Revision</button>
+            </li>
+            
+        </ul>
+        <div class="tab-content" id="myTabsContent">
+            
+            
+            <!-- Tab 1 -->
+            <div class="tab-pane fade show active" id="pm" role="tabpanel" aria-labelledby="pm-tab">
+                
+                
+            </div>
+
+            <!-- Tab 2 -->
+            <div class="tab-pane fade show active" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
+                
+<div class="container-fluid">
+    <div class="project-bar row">
+        <div class="col-6 bar-wrapper">
+            <div class="project-selector-bar dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" data-bs-container="body" aria-haspopup="true" aria-expanded="false"></button>
+                <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                    
+                </div>
+            </div>
+        </div>
+        <div class="col-5"></div>
+        <div class="view_button col-1">
+            
+            <a href="http://localhost/add_task" title="Add task view" id="add-task" class="material-symbols-outlined btn">add</a>
+            
+            <span id="toggle-view" class="material-icons btn " title="Change task display">view_list</span>
+        </div>
+    </div>
+    
+        <div class="alert alert-info mt-4" role="alert">
+            No tasks found for this project.
+        </div>
+    
+
+    
+
+    <!-- Modal de tarea -->
+    <div id="task-modal" class="task-modal">
+        <div class="task-modal-content">
+            <div class="position-absolute top-0 end-0 p-2 d-flex align-items-center gap-2">
+                <span class="material-icons" onclick="openSettingsModal()" style="cursor: pointer;">settings</span>
+                <span class="material-icons" id="close-modal" onclick="closeTaskModal()" style="cursor: pointer;">close</span>
+            </div>
+            <h1 class="task-title-modal">Task Title</h1>
+            <div class="task-subheader-modal row">
+                <p class="task-priority-modal col">Priority: <span class="task-priority high"></span></p>
+                <div class="due-date-wrapper col">
+                    <p class="task-due-date-modal">
+                        <span class="material-icons clock-icon">schedule</span>
+                        <span class="due-date-text">Due Date</span>
+                    </p>
+                </div>
+            </div>
+            <p class="task-description-modal">Task Description</p>
+            <div class="task-details-modal">
+                <div class="task-requirements-modal">
+                    <h4>Requirements</h4>
+                    <div id="requirements-list">
+                        <!-- Requirements will be dynamically added here -->
+                    </div>
+                    <div class="task-files-modal">
+                        <input type="file" id="file" name="file" multiple>
+                        <button type="submit" id="btnsubir" class="btn btn-primary" disabled>Upload</button>
+                    </div>
+                    </form>
+                   <script>
+                        const file = document.getElementById('file');
+                        const btnsubir = document.getElementById('btnsubir');
+
+                        file.addEventListener('change', () => {
+                        if (file.files.length > 0) {
+                            btnsubir.disabled = false;
+                        } else {
+                            btnsubir.disabled = true;
+                        }
+                        });
+                    </script>   
+                </div>
+                <div class="task-stats-modal"></div>
+            </div>
+            <div class="task-footer-modal">
+                <div class="task-comments-modal">
+                    <h4>Comments</h4>
+                    <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+                </div>
+                <div class="task-modal-buttons">
+                    <button id="save-task" class="btn btn-primary">Save</button>
+                    <button id="deliver-task" class="btn btn-success">Deliver</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de configuración -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="http://localhost/submit-request">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="settingsModalLabel">Task Settings Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="task_id" id="modal-task-id" value="">
+                        <div class="mb-3">
+                            <label for="action-type" class="form-label">Action Type</label>
+                            <input type="text" class="form-control" id="action-type" name="action_type" placeholder="Enter action type">
+                        </div>
+                        <div class="mb-3">
+                            <label for="request-reason" class="form-label">Request Reason</label>
+                            <textarea class="form-control" id="request-reason" name="reason" placeholder="Enter reason"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Send Request</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <style>
+    .modal-stack.show .modal-dialog {
+        z-index: 1060 !important;
+    }
+    .modal-stack.show ~ .modal-backdrop {
+        z-index: 1059 !important;
+    }
+
+    </style>
+
+
+    <!-- Modal de éxito -->
+    <div class="modal fade modal-stack" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+            <h5 class="modal-title" id="successModalLabel">Success</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            The request was submitted successfully!
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal de error -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="errorMessage">
+            An error occurred.
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    const csrfToken = "0fe13dfd02cc5ff9e4d01d3b8a2e873554051537";
+</script>
+
+<script>
+    function openTaskModalFromCard(element) {
+        const taskId = element.getAttribute('data-task-id');
+        if (!taskId) {
+            console.warn("No task ID found.");
+            return;
+        }
+
+        // Guardar task_id oculto para usarlo en el formulario del modal de configuración
+        document.getElementById('modal-task-id').value = taskId;
+
+        // Mostrar el modal de tarea
+        document.getElementById('task-modal').style.display = 'block';
+    }
+
+    function closeTaskModal() {
+        document.getElementById('task-modal').style.display = 'none';
+    }
+
+    function openSettingsModal() {
+        const taskId = document.getElementById('modal-task-id').value;
+        if (!taskId) {
+            console.warn("No task selected.");
+            return;
+        }
+        const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        modal.show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsModal = document.getElementById('settingsModal');
+        settingsModal.addEventListener('show.bs.modal', function (event) {
+            const taskId = document.getElementById('modal-task-id').value;
+            if (!taskId) {
+                event.preventDefault();
+            }
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsModal = document.getElementById('settingsModal');
+        const actionTypeInput = document.getElementById('action-type');
+        const requestReasonTextarea = document.getElementById('request-reason');
+
+        // Limpiar los campos al cerrar el modal
+        settingsModal.addEventListener('hidden.bs.modal', function () {
+            actionTypeInput.value = '';
+            requestReasonTextarea.value = '';
+        });
+
+        // (Opcional extra) Si también quieres limpiar al abrirlo:
+        settingsModal.addEventListener('show.bs.modal', function () {
+            actionTypeInput.value = '';
+            requestReasonTextarea.value = '';
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsForm = document.querySelector('#settingsModal form');
+        if (settingsForm) {
+            settingsForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(settingsForm);
+
+                fetch(settingsForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+
+                    if (data.success) {
+                        // Cerrar modal de configuración
+                        bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+                        successModal.show();
+                    } else {
+                        document.getElementById('errorMessage').textContent = data.error || "An unexpected error occurred.";
+                        errorModal.show();
+                    }
+                })
+                .catch(error => {
+                    console.error("Request error:", error);
+                    document.getElementById('errorMessage').textContent = "Error during submission.";
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
+                });
+            });
+        }
+    });
+</script>
+
+
+            </div>
+            <!-- Tab 3 -->
+            <div class="tab-pane fade show active" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+                
+                
+            </div>
+            <!-- Tab 4 -->
+            <div class="tab-pane fade show active" id="actions" role="tabpanel" aria-labelledby="actions-tab">
+                
+            </div>
+            <!-- Tab 5 -->
+            <div class="tab-pane fade show active" id="revision" role="tabpanel" aria-labelledby="revision-tab">
+                
+                
+            </div>
+        
+        </div>
+      </div>
+      
+    </div>
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            None
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      const projects = [];
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const profileIcon = document.getElementById('profile-icon');
+          const dropdownMenu = document.getElementById('dropdown-menu');
+          const profileContainer = document.getElementById('profile-menu');
+      
+          profileIcon.addEventListener('click', function (event) {
+            event.stopPropagation();
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+          });
+          document.addEventListener('DOMContentLoaded', function () {
+            const message = "None";
+              if (message) {
+                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+              }
+            });
+
+          document.addEventListener('click', function (event) {
+            if (!profileContainer.contains(event.target)) {
+              dropdownMenu.style.display = 'none';
+            }
+          });
+        });
+        function toggleMembersSidebar() {
+            const sidebar = document.getElementById('membersSidebar');
+            sidebar.classList.toggle('expanded');
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('membersSidebar');
+            const isClickInside = sidebar.contains(event.target);
+
+            if (!isClickInside && sidebar.classList.contains('expanded')) {
+                sidebar.classList.remove('expanded');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+          const showPopupButtons = document.querySelectorAll('.show-popup');
+          const form = document.getElementById('edit-user-form');
+
+          function resetFormFields() {
+            if (form) {
+              form.reset();
+              document.getElementById('user_id').value = '';
+              document.getElementById('form-search-input').value = '';
+              document.getElementById('form-autocomplete-results').innerHTML = '';
+            }
+          }
+
+          showPopupButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+              document.querySelector('.popup-container').classList.add('active');
+              resetFormFields();
+            });
+          });
+
+          document.querySelectorAll('.popup-container, .close-btn').forEach((element) => {
+            element.addEventListener('click', (e) => {
+              if (e.target.classList.contains('popup-container') || e.target.classList.contains('close-btn')) {
+                document.querySelector('.popup-container').classList.remove('active');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+              }
+            });
+          });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+          const userItems = document.querySelectorAll('.user-item');
+          const popupContainer = document.getElementById('popupContainer');
+          const popupName = document.getElementById('popupName');
+          const popupEmail = document.getElementById('popupEmail');
+          const popupTel = document.getElementById('popupTel');
+          const popupArea = document.getElementById('popupArea');
+
+          userItems.forEach(item => {
+            item.addEventListener('click', function (e) {
+
+              popupName.textContent = this.dataset.name;
+              popupEmail.textContent = this.dataset.email;
+              popupTel.textContent = this.dataset.tel;
+              popupArea.textContent = this.dataset.area;
+              popupContainer.style.display = 'block';
+            });
+          });
+        });
+        // Mostrar el modal si hay un mensaje de error
+          document.addEventListener('DOMContentLoaded', function () {
+            const message = "None";
+            if (message && message !== "None") {
+              const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+              errorModal.show();
+            }
+          });
+      </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const calendarIcon = document.querySelector('.calendar-icon .toolbar-icon');
+        // Redirect to the calendar URL when the calendar icon is clicked
+        calendarIcon.addEventListener('click', function () {
+          window.location.href = "http://localhost/calendar";
+        });
+        const tabs = document.querySelectorAll('.nav-link[data-bs-toggle="tab"]');
+        // Recibe el tab activo desde el backend (por ejemplo, 'tasks', 'project', etc.)
+        const activeTabId = "tasks-tab";
+
+        // Marcar el tab activo según el valor recibido
+        tabs.forEach(tab => {
+          if (tab.id === activeTabId) {
+            tab.classList.add('active');
+          } else {
+            tab.classList.remove('active');
+          }
+          tab.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            // Define las rutas para cada tab
+            const tabRoutes = {
+              'pm-tab': '/pm_main',
+              'tasks-tab': '/task_view',
+              'stats-tab': '/stats_view',
+              'actions-tab': '/action_view',
+              'revision-tab': '/revision_view'
+            };
+
+            // Redirige si existe una ruta asignada
+            if (tabRoutes[this.id]) {
+              window.location.href = tabRoutes[this.id];
+            }
+          });
+        });
+      });
+    </script>
+    <script>
+      document.getElementById('uploadForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        try {
+          const response = await fetch('/upload_file', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+
+          const messageDiv = document.getElementById('uploadMessage');
+          messageDiv.innerText = data.message;
+          messageDiv.className = data.status === 'success'
+            ? 'alert alert-success'
+            : 'alert alert-danger';
+
+        } catch (error) {
+          console.error('Error al subir archivo:', error);
+          const messageDiv = document.getElementById('uploadMessage');
+          messageDiv.innerText = 'Error al conectar con el servidor.';
+          messageDiv.className = 'alert alert-danger';
+        }
+      });
+</script>
+
+
+  </body>
+</html>

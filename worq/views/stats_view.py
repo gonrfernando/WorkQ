@@ -13,8 +13,8 @@ def stats_view(request):
     user_email = session.get('user_email')
     user_role = session.get('user_role')
 
-    if not user_id:
-        return HTTPFound(location=request.route_url('login'))
+    if 'user_email' not in session:
+        return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
 
     # 1) Obtener proyectos según rol del usuario
     if user_role in ['superadmin', 'admin']:
