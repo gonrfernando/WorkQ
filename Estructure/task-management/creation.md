@@ -4,9 +4,9 @@ icon: square-plus
 
 # Creation
 
-**Functional Requirements**
-
 To ensure clarity and accountability in project execution, the Project Manager (PM) follows a structured process when creating a task. This involves defining essential details such as the task’s objective, timeline, assigned members, and required resources.
+
+**Functional Requirements**
 
 1. **Create Task**
    * The project manager (PM) can create a task with a name.

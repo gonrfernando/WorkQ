@@ -4,6 +4,8 @@ icon: square-pen
 
 # Modification and Request
 
+This section defines the requirements for enabling Project Managers (PMs) to formally request changes to tasks or project details. Whether proposing a modification or a deletion, each request must include a clear justification and a description of the desired action. The interface should be user-friendly, responsive, and designed to streamline the change request process while maintaining clarity and accountability.
+
 **Functional Requirements**
 
 **Task Modification**

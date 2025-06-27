@@ -9,10 +9,10 @@
 
 ## Project Management
 
-* [Creation](project-management/creation.md)
+* [Project Creation](project-management/project-creation.md)
 * [Modification and Request](project-management/modification-and-request.md)
 * [Member Assigment](project-management/member-assigment.md)
-* [Permission management](project-management/permission-management.md)
+* [Permission Management](project-management/permission-management.md)
 
 ## Task management
 

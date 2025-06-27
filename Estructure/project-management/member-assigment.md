@@ -4,6 +4,8 @@ icon: square-user
 
 # Member Assigment
 
+This section outlines the requirements for managing project team composition. Project Managers (PMs) must be able to efficiently add or remove members from a project to ensure the right people are assigned to the right tasks. The interface should support a seamless and intuitive experience, enabling quick team adjustments as project needs evolve.
+
 **Functional Requirements**
 
 1. **Add Members**

@@ -4,6 +4,8 @@ icon: file-lock
 
 # File Security
 
+This section details the requirements for securely attaching files to tasks and project chats within the system. Users must be able to easily select and upload files through intuitive interfaces while receiving clear confirmation at each step. Ensuring a smooth, fast, and reliable file upload process is essential for effective collaboration and project documentation.
+
 **Functional Requirements**
 
 **Attach Files to Task**\

@@ -6,6 +6,8 @@ icon: calendar-days
 
 To help users stay organized and manage their workload efficiently, the system includes a calendar view that displays all pending tasks. This feature allows users to visualize their schedule, prioritize effectively, and navigate through their responsibilities with greater ease.
 
+***
+
 **As a** user\
 **I want to** see all pending tasks in a calendar\
 **So that** I can organize my workflow effectively

@@ -4,7 +4,9 @@ icon: user-check
 
 # Access Validation
 
-#### **Sign-up**
+This section specifies the requirements for user sign-up and log-in processes, focusing on validating user credentials to ensure secure and seamless access to the system. Key features include duplicate email checks, input validation, email verification, and secure password management. The goal is to provide an intuitive and efficient authentication experience while maintaining robust security standards.
+
+**Sign-up**
 
 **Functional Requirements**
 
