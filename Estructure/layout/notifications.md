@@ -4,6 +4,9 @@ icon: bell-ring
 
 # Notifications
 
+**Notification System Requirements**\
+This section outlines the functional and non-functional requirements for the notification system. The goal is to ensure users are promptly informed of updates, with a user-friendly interface that supports quick access, filtering, and clear visual cues.
+
 **Functional Requirements**
 
 **View Notifications**\
@@ -14,14 +17,12 @@ The system must allow users to view their notifications.
   * Unread notifications in black.
   * Read notifications in gray.
 
-**Configure Notifications**\
-The system must allow users to configure their notification preferences.
+**Filter Notifications**
 
-* The user must click the bell icon to access the list of recent notifications.
-* At the bottom of the notification list, the word “Settings” should appear in blue and be clickable.
-* Upon clicking “Settings,” a small menu with checkboxes for various notification options should appear.
-* The user must be able to select or deselect options such as "All notifications," "Email notifications," etc.
-* To exit the settings menu, the user can either click on the word “Settings” again or click outside the menu.
+* The system must allow users to filter their notifications.
+* A filter icon should be available; clicking it displays a menu where users can select different types of notifications.
+
+
 
 ***
 

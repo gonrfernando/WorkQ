@@ -2,7 +2,10 @@
 icon: user-lock
 ---
 
-# User Personal Info.
+# User Personal Info
+
+**User Personal Information Requirements**\
+This section defines the requirements for accessing and managing personal user information within the system. It focuses on enabling users to view and update their profile details, as well as securely change their password through a straightforward and user-friendly interface.
 
 **Functional Requirements**
 

@@ -5,7 +5,8 @@ icon: user-gear
 
 # Create and Edit users
 
-**Functional Requirements**
+**User Management Requirements**\
+This section outlines the system requirements for creating and editing users, specifically focusing on administrative functionality. Admins must be able to manage user information, assign roles and permissions, and update existing user profiles efficiently through an intuitive interface.**Functional Requirements**
 
 **User Creation with Roles and Permissions**\
 The system must allow an admin to create and edit users, as well as assign roles and permissions.
@@ -30,3 +31,8 @@ The system must allow an admin to edit an existing user's information, including
 
 * The user creation and editing interface must be intuitive and user-friendly, ensuring smooth navigation for the admin.
 * The process should be efficient, with clear feedback at each step to confirm actions.
+
+
+
+**Justification**\
+During the development of this module, it became clear that administrators would spend a significant amount of time manually creating and configuring new user accounts. To streamline this process and reduce administrative workload, we decided to implement a **self-sign-in module**. With this enhancement, admins can simply enter a user’s email address, and the system will automatically send a registration link or temporary password via email. This approach improves efficiency, enhances security, and simplifies onboarding for new users.

@@ -4,6 +4,9 @@ icon: sidebar-flip
 
 # Members Side Bar
 
+**Accessing and Viewing Project Members**\
+The members view provides an overview of all participants in the current project. Accessible from the right sidebar, it allows users to see who is involved and navigate to individual member details. All project participants can open this view for quick access to member information.
+
 **Access and Display**
 
 1. **Access Members View**
@@ -15,7 +18,6 @@ icon: sidebar-flip
 
 **Member Interaction**
 
-1. **Hover for Preview**
-   * When hovering over any member’s name, the system will show a preview of their data.
-2. **Redirect to Personal Data**
-   * When pressing a member’s name or picture, the system will redirect to their personal data.
+**Redirect to Personal Data**
+
+* When pressing a member’s name, the system will redirect to their personal data.

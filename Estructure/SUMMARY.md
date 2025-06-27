@@ -34,7 +34,7 @@
 
 ## system management
 
-* [User Personal Info.](system-management/user-personal-info..md)
+* [User Personal Info](system-management/user-personal-info.md)
 * [Create and Edit users](system-management/create-and-edit-users.md)
 * [Request Management](system-management/request-management.md)
 * [Logbook](system-management/logbook.md)
