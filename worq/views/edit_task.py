@@ -10,22 +10,22 @@ from zope.sqlalchemy import ZopeTransactionEvents
 
 @view_config(route_name='edit_task', renderer='worq:templates/edit_task.jinja2', request_method=('GET', 'POST'))
 def task_edit_view(request):
-    print("[INFO] Iniciando vista de edición de tarea.")
+    print("[INFO] Starting task edit view.")
 
     session = request.session
     if 'user_name' not in session:
-        print("[WARNING] Usuario no autenticado. Redirigiendo al inicio de sesión.")
+        print("[WARNING] Unauthenticated user. Redirecting to sign in.")
         return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
 
     if session.get('user_role') not in ('admin', 'superadmin'):
-        print(f"[WARNING] Acceso denegado. Rol actual: {session.get('user_role')}")
+        print(f"[WARNING] Access denied. Current role: {session.get('user_role')}")
         return HTTPFound(location=request.route_url('task_view'))
 
     dbsession = request.dbsession
     active_project_id = session.get("project_id")
     user_id = session.get('user_id')
 
-    # Obtener el task_id desde POST, JSON o GET
+    # Get the task_id from POST, JSON or GET
     if request.method == 'POST':
         if request.content_type and 'application/json' in request.content_type:
             data = request.json_body
@@ -34,59 +34,59 @@ def task_edit_view(request):
             data = request.POST
             task_id = data.get("task_id")
     else:
-        # En GET, permitimos obtenerlo por parámetro o mantenerlo en la sesión si ya lo cargaste antes
+        # In GET, allow to get it by parameter or keep it in session if already loaded before
         task_id = request.params.get("task_id") or request.session.get("edit_task_id")
 
     if not task_id:
-        print("[ERROR] No se proporcionó ID de tarea.")
+        print("[ERROR] No task ID provided.")
         return HTTPFound(location=request.route_url('task_view'))
 
-    # Buscar la tarea sin depender del proyecto activo
+    # Find the task without depending on the active project
     task = dbsession.query(Tasks).filter_by(id=task_id).first()
     if not task:
-        print(f"[ERROR] Tarea no encontrada (ID: {task_id}).")
+        print(f"[ERROR] Task not found (ID: {task_id}).")
         return HTTPFound(location=request.route_url('task_view'))
 
     if not task_id:
-        print("[ERROR] No se proporcionó ID de tarea.")
+        print("[ERROR] No task ID provided.")
         return HTTPFound(location=request.route_url('task_view'))
 
     task = dbsession.query(Tasks).filter_by(id=task_id).first()
     if not task:
-        print(f"[ERROR] Tarea no encontrada (ID: {task_id}, Proyecto: {active_project_id}).")
+        print(f"[ERROR] Task not found (ID: {task_id}, Project: {active_project_id}).")
         return HTTPFound(location=request.route_url('task_view'))
 
-    print(f"[INFO] Editando tarea ID: {task.id}")
+    print(f"[INFO] Editing task ID: {task.id}")
 
     # --- POST ---
     if request.method == 'POST':
-        print("[INFO] Método POST detectado. Procesando datos...")
+        print("[INFO] POST method detected. Processing data...")
 
         if request.content_type and 'application/json' in request.content_type:
             data = request.json_body
             get = data.get
             getall = lambda k: data[k] if isinstance(data.get(k), list) else [data[k]] if data.get(k) else []
-            print("[INFO] Datos recibidos como JSON.")
+            print("[INFO] Data received as JSON.")
         else:
             data = request.POST
             get = data.get
             getall = data.getall
-            print("[INFO] Datos recibidos como formulario POST.")
+            print("[INFO] Data received as POST form.")
 
         form_type = get('form_type')
         if form_type != 'edit_task':
-            print("[WARNING] Tipo de formulario no válido:", form_type)
+            print("[WARNING] Invalid form type:", form_type)
             return Response(json.dumps({'success': False, 'error': 'Invalid form type'}), content_type='application/json; charset=utf-8')
 
         try:
-            print("[INFO] Validando datos...")
+            print("[INFO] Validating data...")
 
             title = get('title')
             description = get('description')
             if not title or not description:
                 return Response(json.dumps({'success': False, 'error': 'Title and Description are required'}), content_type='application/json; charset=utf-8')
 
-            # Actualizar tarea
+            # Update task
             task.title = title
             task.description = description
             finished_date = get('finished_date')
@@ -95,15 +95,15 @@ def task_edit_view(request):
             task.status_id = 4
             
 
-            # Requisitos
+            # Requirements
             dbsession.query(TaskRequirements).filter_by(task_id=task.id).delete()
             for req in getall('requirements'):
                 req_text = req.strip()
                 if req_text:
                     dbsession.add(TaskRequirements(task_id=task.id, requirement=req_text, is_completed=False))
-            print("[INFO] Requisitos actualizados.")
+            print("[INFO] Requirements updated.")
 
-            # Colaboradores
+            # Collaborators
             dbsession.query(UsersTasks).filter_by(task_id=task.id).delete()
             new_collabs = []
             for collab in getall('collaborators'):
@@ -112,7 +112,7 @@ def task_edit_view(request):
                     continue
                 user = dbsession.query(Users).filter(Users.email.ilike(collab_text)).first()
                 if not user:
-                    print(f"[INFO] Usuario nuevo detectado, creando: {collab_text}")
+                    print(f"[INFO] New user detected, creating: {collab_text}")
                     user = Users(
                         name=collab_text.split('@')[0].capitalize(),
                         email=collab_text,
@@ -128,9 +128,9 @@ def task_edit_view(request):
             dbsession.add_all(new_collabs)
 
             dbsession.flush()
-            print(f"[SUCCESS] Tarea editada con éxito: ID {task.id}")
+            print(f"[SUCCESS] Task successfully edited: ID {task.id}")
 
-            # Limpiar el ID de la tarea editada para evitar reutilización
+            # Clear the edited task ID to avoid reuse
             request.session.pop("edit_task_id", None)
             return Response(
                 json.dumps({
@@ -143,11 +143,11 @@ def task_edit_view(request):
 
 
         except SQLAlchemyError as e:
-            print(f"[ERROR] Error al editar la tarea en la base de datos: {e}")
-            return Response(json.dumps({'success': False, 'error': 'Error al editar la tarea'}), content_type='application/json; charset=utf-8')
+            print(f"[ERROR] Error editing the task in the database: {e}")
+            return Response(json.dumps({'success': False, 'error': 'Error editing the task'}), content_type='application/json; charset=utf-8')
 
-    # --- GET: render template con datos de la tarea ---
-    print("[INFO] Método GET detectado. Preparando datos para plantilla.")
+    # --- GET: render template with task data ---
+    print("[INFO] GET method detected. Preparing data for template.")
     users = dbsession.query(Users).all()
     json_users = [{"id": u.id, "name": u.name, "email": u.email, "tel": u.tel, "country_id": u.country_id, "area_id": u.area_id, "role_id": u.role_id} for u in users]
 
@@ -173,7 +173,7 @@ def task_edit_view(request):
         ]
     }
 
-    print(f"[INFO] Datos preparados para edición de tarea ID {task.id}")
+    print(f"[INFO] Data prepared for editing task ID {task.id}")
 
     response_data = {
         "users": json_users,
@@ -185,17 +185,17 @@ def task_edit_view(request):
         "user_role": session.get('user_role'),
         "active_project_id": active_project_id,
         "task_to_edit": task_data,
-        "projects": []  # Ajusta según tus necesidades
+        "projects": []  # Adjust as needed
     }
 
-    print("[DEBUG] Datos retornados al renderizar plantilla:")
+    print("[DEBUG] Data returned when rendering template:")
     print(json.dumps(response_data, indent=2, default=str))
 
     return response_data
 
 @view_config(route_name='delete_task_status', request_method='POST', renderer='json')
 def delete_task_status(request):
-    print("[DEBUG] delete_task_status: llamada recibida.")
+    print("[DEBUG] delete_task_status: call received.")
     try:
         data = request.json_body
         task_id = data.get('task_id')
@@ -211,8 +211,8 @@ def delete_task_status(request):
         TASK_STATUS_DELETED = 7
         task.status_id = TASK_STATUS_DELETED
         request.dbsession.flush()
-        print(f"[SUCCESS] Tarea eliminada: ID {task.id}")
-        print(f"Nuevo status_id: {task.status_id}") 
+        print(f"[SUCCESS] Task deleted: ID {task.id}")
+        print(f"New status_id: {task.status_id}") 
 
         return {
             'user_id': user_id,

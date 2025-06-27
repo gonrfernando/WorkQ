@@ -21,3 +21,4 @@ coverage
 test
 *.sqlite
 tests/views/testing.py
+allure-results/

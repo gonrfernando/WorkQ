@@ -7,6 +7,9 @@ def add_user_form_view(request):
     session = request.session
     if 'user_name' not in session:
         return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+    if session.get('user_role') not in ('admin', 'superadmin'):
+        print(f"[WARNING] Access denied. Current role: {session.get('user_role')}")
+        return HTTPFound(location=request.route_url('task_view'))
     # Datos para renderizar el formulario
     departments = [
         {'id': 1, 'name': 'Engineering'},
