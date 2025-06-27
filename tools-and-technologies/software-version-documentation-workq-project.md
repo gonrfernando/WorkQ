@@ -44,7 +44,6 @@ icon: file-lines
 | ---------- | ---------------- | ------------------------------ |
 | Git        | 2.49.0.windows.1 | Version control                |
 | PostgreSQL | 13.18            | Relational database management |
-|            |                  |                                |
 
 ***
 
