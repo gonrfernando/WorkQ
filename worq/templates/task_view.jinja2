@@ -112,7 +112,11 @@
                             <!-- JS insertará aquí los usuarios -->
                         </div>
                     </div>
+                    <div class="task-files-list mt-3" id="task-files-list">
+                    </div>
+                    <form id="upload-form" action="/upload_file" method="POST" enctype="multipart/form-data">
                     <div class="task-files-modal">
+                        <input type="hidden" id="task_id" name="task_id" value="">
                         <input type="file" id="file" name="file" multiple>
                         <button type="submit" id="btnsubir" class="btn btn-primary" disabled>Upload</button>
                     </div>
@@ -146,7 +150,24 @@
             </div>
         </div>
     </div>
-
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="confirmDeleteLabel">Confirm File Deletion</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            Are you sure you want to permanently delete this file? This action cannot be undone.
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="confirmDeleteBtn" type="button" class="btn btn-danger">Yes, delete</button>
+        </div>
+        </div>
+    </div>
+    </div>
     <!-- Modal de configuración -->
     <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -222,7 +243,22 @@
     </div>
     </div>
 </div>
-
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">The request was submitted successfully!</div>
+    </div>
+  </div>
+</div>
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body" id="errorMessage">An error occurred.</div>
+    </div>
+  </div>
+</div>
 <!-- Scripts -->
 <script>
     const csrfToken = "{{ request.session.get_csrf_token() }}";
@@ -237,8 +273,14 @@
             return;
         }
 
-        // Guardar task_id oculto para usarlo en el formulario del modal de configuración
+        // Ya existente:
         document.getElementById('modal-task-id').value = taskId;
+
+        // NUEVO: también para el input de subida de archivos
+        document.getElementById('task_id').value = taskId;
+        loadTaskFiles(taskId);
+
+
         // Obtener la data de tareas del DOM (si está disponible)
         const allTasks = {{ tasks|tojson|safe }};
         const selectedTask = allTasks.find(t => t.id == taskId);
@@ -283,6 +325,7 @@
             `;
             usersContainer.appendChild(emptyMsg);
         }
+        
         // Mostrar el modal de tarea
         document.getElementById('task-modal').style.display = 'block';
     }
@@ -328,6 +371,36 @@
         });
     });
 </script>
+<script>
+      document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+        const formData = new FormData();
+        formData.append('file_id', fileToDeleteId);
+
+        fetch('/delete_file', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                alert('File deleted successfully');
+                loadTaskFiles(taskIdOfFile);
+
+                // Oculta el modal después de eliminar
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+                modal.hide();
+            } else {
+                alert(data.message || 'Error deleting file');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('Unexpected error');
+        });
+    });
+
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const settingsForm = document.querySelector('#settingsModal form');
@@ -422,7 +495,93 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const uploadForm = document.getElementById('uploadForm');
+        if (uploadForm) {
+          uploadForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
 
+            const formData = new FormData(this);
 
+            try {
+              const response = await fetch('/upload_file', {
+                method: 'POST',
+                body: formData
+              });
+
+              const data = await response.json();
+
+              const messageDiv = document.getElementById('uploadMessage');
+              messageDiv.innerText = data.message;
+              messageDiv.className = data.status === 'success'
+                ? 'alert alert-success'
+                : 'alert alert-danger';
+
+            } catch (error) {
+              console.error('Error al subir archivo:', error);
+              const messageDiv = document.getElementById('uploadMessage');
+              messageDiv.innerText = 'Error al conectar con el servidor.';
+              messageDiv.className = 'alert alert-danger';
+            }
+          });
+        }
+      });
+
+</script>
+
+{% for msg in request.session.pop_flash('success') %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('successModal').querySelector('.modal-body').textContent = {{ msg|tojson }};
+      new bootstrap.Modal(document.getElementById('successModal')).show();
+    });
+  </script>
+{% endfor %}
+{% for msg in request.session.pop_flash('error') %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('errorMessage').textContent = {{ msg|tojson }};
+      new bootstrap.Modal(document.getElementById('errorModal')).show();
+    });
+  </script>
+  
+{% endfor %}
+<script>
+function loadTaskFiles(taskId) {
+    fetch(`/files_by_task?task_id=${taskId}`)
+        .then(response => response.json())
+        .then(data => {
+            const filesList = document.getElementById('task-files-list');
+            filesList.innerHTML = '';
+
+            if (data.status === 'ok' && data.files.length > 0) {
+                data.files.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.classList.add('mb-2');
+
+                    fileItem.innerHTML = `
+                        <a href="/file_preview/${file.id}" target="_blank">${file.filename}</a>
+                        <a href="/download_file?task_id=${task_id}" download class="ms-2 text-decoration-none">⬇️</a>
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${file.id}, '${taskId}')">🗑️</button>
+
+                    `;
+
+                    filesList.appendChild(fileItem);
+                });
+            } else {
+                filesList.innerHTML = '<p>No files uploaded for this task.</p>';
+            }
+        });
+}
+</script>
+<script>
+function openDeleteModal(fileId, taskId) {
+    fileToDeleteId = fileId;
+    taskIdOfFile = taskId;
+    const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    modal.show();
+}
+</script>
 
 {% endblock tasks %}

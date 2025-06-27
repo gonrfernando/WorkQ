@@ -173,7 +173,6 @@ class Users(Base):
     tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='users')
     users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.invited_by]', back_populates='users')
     users_projects_: Mapped[List['UsersProjects']] = relationship('UsersProjects', foreign_keys='[UsersProjects.user_id]', back_populates='user')
-    chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='sender')
     feedbacks: Mapped[List['Feedbacks']] = relationship(
     'Feedbacks',
     back_populates='user',
@@ -204,7 +203,6 @@ class Files(Base):
     users: Mapped[Optional['Users']] = relationship('Users', back_populates='files')
     icons: Mapped[List['Icons']] = relationship('Icons', back_populates='file')
     task_files: Mapped[List['TaskFiles']] = relationship('TaskFiles', back_populates='file')
-    chat_files: Mapped[List['ChatFiles']] = relationship('ChatFiles', back_populates='file')
 
 
 class Projects(Base):
@@ -226,7 +224,6 @@ class Projects(Base):
     state: Mapped['States'] = relationship('States', back_populates='projects')
     user: Mapped[Optional['Users']] = relationship('Users', back_populates='projects')
     actions: Mapped[List['Actions']] = relationship('Actions', back_populates='project')
-    chats: Mapped[List['Chats']] = relationship('Chats', back_populates='project')
     project_notifications: Mapped[List['ProjectNotifications']] = relationship('ProjectNotifications', back_populates='project')
     tasks: Mapped[List['Tasks']] = relationship('Tasks', back_populates='project')
     users_projects: Mapped[List['UsersProjects']] = relationship('UsersProjects', back_populates='project')
@@ -267,21 +264,6 @@ class Actions(Base):
     project: Mapped['Projects'] = relationship('Projects', back_populates='actions')
     type: Mapped['Types'] = relationship('Types', back_populates='actions')
     user: Mapped['Users'] = relationship('Users', back_populates='actions')
-
-
-class Chats(Base):
-    __tablename__ = 'chats'
-    __table_args__ = (
-        ForeignKeyConstraint(['project_id'], ['projects.id'], name='project_fk'),
-        PrimaryKeyConstraint('id', name='chats_pkey')
-    )
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    project_id: Mapped[int] = mapped_column(Integer)
-    creationdate: Mapped[datetime.date] = mapped_column(Date)
-
-    project: Mapped['Projects'] = relationship('Projects', back_populates='chats')
-    chats_messages: Mapped[List['ChatsMessages']] = relationship('ChatsMessages', back_populates='chat')
 
 
 class Icons(Base):
@@ -368,25 +350,6 @@ class UsersProjects(Base):
     project: Mapped['Projects'] = relationship('Projects', back_populates='users_projects')
     role: Mapped['Roles'] = relationship('Roles', back_populates='users_projects')
     user: Mapped['Users'] = relationship('Users', foreign_keys=[user_id], back_populates='users_projects_')
-
-
-class ChatsMessages(Base):
-    __tablename__ = 'chats_messages'
-    __table_args__ = (
-        ForeignKeyConstraint(['chat_id'], ['chats.id'], name='chat_fk'),
-        ForeignKeyConstraint(['sender_id'], ['users.id'], name='sender_id'),
-        PrimaryKeyConstraint('id', name='chats_messages_pkey')
-    )
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    chat_id: Mapped[int] = mapped_column(Integer)
-    sender_id: Mapped[int] = mapped_column(Integer)
-    message: Mapped[str] = mapped_column(Text)
-    sent_time: Mapped[datetime.datetime] = mapped_column(DateTime(True))
-
-    chat: Mapped['Chats'] = relationship('Chats', back_populates='chats_messages')
-    sender: Mapped['Users'] = relationship('Users', back_populates='chats_messages')
-    chat_files: Mapped[List['ChatFiles']] = relationship('ChatFiles', back_populates='chat_message')
 
 
 class Feedbacks(Base):
@@ -481,19 +444,3 @@ class UsersTasks(Base):
 
     task: Mapped['Tasks'] = relationship('Tasks', back_populates='users_tasks')
     user: Mapped['Users'] = relationship('Users', back_populates='users_tasks')
-
-
-class ChatFiles(Base):
-    __tablename__ = 'chat_files'
-    __table_args__ = (
-        ForeignKeyConstraint(['chat_message_id'], ['chats_messages.id'], name='chat_messages_fk'),
-        ForeignKeyConstraint(['file_id'], ['files.id'], name='file_fk'),
-        PrimaryKeyConstraint('id', name='chat_files_pkey')
-    )
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    chat_message_id: Mapped[int] = mapped_column(Integer)
-    file_id: Mapped[int] = mapped_column(Integer)
-
-    chat_message: Mapped['ChatsMessages'] = relationship('ChatsMessages', back_populates='chat_files')
-    file: Mapped['Files'] = relationship('Files', back_populates='chat_files')
