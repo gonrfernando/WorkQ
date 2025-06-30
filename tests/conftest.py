@@ -250,6 +250,37 @@ def test_tasks_pm(db_session, test_user_pm, test_projects_pm, test_priorities, t
     db_session.add_all([task1, task2])
     db_session.commit()
     return [task1, task2]
+# ---------- FIXTURE DE ARCHIVOS ----------
+@pytest.fixture
+def test_files(db_session):
+    file1 = Files(
+        id=1,
+        filename='test_file_1.txt',
+        filepath='path/to/test_file_1.txt'
+    )
+    file2 = Files(
+        id=2,
+        filename='test_file_2.txt',
+        filepath='path/to/test_file_2.txt'
+    )
+    db_session.add_all([file1, file2])
+    db_session.commit()
+    return [file1, file2]
+@pytest.fixture
+def test_task_files(db_session, test_files, test_tasks):
+    task_file1 = TaskFiles(
+        id=1,
+        task_id=test_tasks[0].id,  # Asumiendo que tienes una tarea con ID 100
+        file_id=test_files[0].id
+    )
+    task_file2 = TaskFiles(
+        id=2,
+        task_id=test_tasks[1].id,  # Asumiendo que tienes una tarea con ID 200
+        file_id=test_files[1].id
+    )
+    db_session.add_all([task_file1, task_file2])
+    db_session.commit()
+    return [task_file1, task_file2]
 # ---------- FIXTURE DE REVISIÓN DE SOLICITUDES ----------
 @pytest.fixture
 def test_requests(db_session, test_user, test_projects, test_status):

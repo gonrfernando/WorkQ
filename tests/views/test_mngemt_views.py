@@ -638,3 +638,28 @@ def test_update_user_not_found(testapp, test_user):
     }, status=200)
     json_data = res.json
     assert json_data['error'] == "User not found"
+
+
+@allure.title("Update user updates fields successfully")
+@allure.suite("Edit User View")
+@allure.sub_suite("POST")
+@allure.severity(allure.severity_level.CRITICAL)
+def test_update_user_success(testapp, db_session, test_user, test_countries, test_areas, test_roles):
+    testapp.post('/sign-in', {'email': test_user.email, 'password': 'admin123'})
+    res = testapp.post_json('/update_user', {
+        "user_id": test_user.id,
+        "name": "Updated Name",
+        "email": "updated@example.com",
+        "tel": "1234567890",
+        "country_id": 1,
+        "area_id": 1,
+        "role_id": 5
+    }, status=200)
+
+    json_data = res.json
+    assert json_data['success'] is True
+    assert json_data['message'] == "User updated successfully"
+
+    # Verificar en la base
+    updated_user = db_session.query(Users).get(test_user.id)
+    assert updated_user.name == "Updated Name"
