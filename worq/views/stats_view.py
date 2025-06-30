@@ -3,9 +3,11 @@ from pyramid.httpexceptions import HTTPFound
 from datetime import datetime
 from worq.models.models import Projects, Tasks, UsersTasks, UsersProjects
 from sqlalchemy.orm import joinedload
+from worq.views.metrics import REQUEST_COUNT
 
 @view_config(route_name='stats_view', renderer='worq:templates/stats_view.jinja2')
 def stats_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     session = request.session
     error = request.params.get('error')
     user_id = session.get('user_id')

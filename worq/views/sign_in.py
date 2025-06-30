@@ -2,9 +2,11 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPInternalServerError, HTTPFound
 from worq.models.models import Users, Icons
 import bcrypt
+from worq.views.metrics import REQUEST_COUNT
 
 @view_config(route_name='sign_in', renderer='templates/sign_in.jinja2')
 def sign_in_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     try:
         session = request.session
         if 'user_name' in session:

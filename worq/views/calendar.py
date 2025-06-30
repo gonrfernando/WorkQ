@@ -4,9 +4,11 @@ from pyramid.httpexceptions import HTTPFound, HTTPInternalServerError
 from worq.models.models import Projects, Tasks, UsersProjects, TaskPriorities, UsersTasks
 from sqlalchemy.orm import joinedload
 from sqlalchemy import and_
+from worq.views.metrics import REQUEST_COUNT
 
 @view_config(route_name='calendar', renderer='worq:templates/calendar.jinja2')
 def my_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     try:
         session = request.session
         if 'user_name' not in session:

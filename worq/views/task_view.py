@@ -5,9 +5,11 @@ from pyramid.httpexceptions import HTTPFound
 from sqlalchemy import and_
 from pyramid.response import Response
 import json
+from worq.views.metrics import REQUEST_COUNT
 
 @view_config(route_name='task_view', renderer='worq:templates/task_view.jinja2')
 def task_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     session = request.session
  
     # Redirigir si el usuario no está autenticado
@@ -60,8 +62,8 @@ def task_view(request):
         for p in request.dbsession.query(TaskPriorities).all()
     }
 
-    if user_role in ['superadmin', 'admin','projectmanager']:
-            dbtasks = (
+    if user_role in ['superadmin', 'admin', 'projectmanager']:
+        dbtasks = (
         request.dbsession
         .query(Tasks)
         .options(
@@ -76,10 +78,11 @@ def task_view(request):
                 Tasks.status_id != 8
             )
         )
+        .order_by(Tasks.priority_id.desc())  # <-- Ordena por prioridad de mayor a menor
         .all()
-    )
+        )
     else:
-            dbtasks = (
+        dbtasks = (
         request.dbsession
         .query(Tasks)
         .options(
@@ -87,7 +90,7 @@ def task_view(request):
             joinedload(Tasks.priority)
         )
         .join(UsersTasks)
-                .filter(UsersTasks.user_id == user_id)
+        .filter(UsersTasks.user_id == user_id)
         .filter(
             and_(
                 Tasks.project_id == active_project_id,
@@ -96,6 +99,7 @@ def task_view(request):
                 Tasks.status_id != 8
             )
         )
+        .order_by(Tasks.priority_id.desc())  # <-- Ordena por prioridad de mayor a menor
         .all()
     )
 
@@ -169,6 +173,7 @@ def task_view(request):
     }
 @view_config(route_name='update_requirement', renderer='json', request_method='POST')
 def update_requirement(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     try:
         data = request.json_body
         req_id = data.get("requirement_id")
@@ -187,6 +192,7 @@ def update_requirement(request):
     
 @view_config(route_name='deliver_task', renderer='json', request_method='POST')
 def deliver_task(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     try:
         task_id = int(request.POST.get('task_id'))
         task = request.dbsession.query(Tasks).get(task_id)

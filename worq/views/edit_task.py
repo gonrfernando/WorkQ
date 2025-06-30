@@ -6,9 +6,11 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from pyramid.response import Response
 from zope.sqlalchemy import ZopeTransactionEvents
+from worq.views.metrics import REQUEST_COUNT
 
 @view_config(route_name='edit_task', renderer='worq:templates/edit_task.jinja2', request_method=('GET', 'POST'))
 def task_edit_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     print("[INFO] Iniciando vista de edición de tarea.")
 
     session = request.session

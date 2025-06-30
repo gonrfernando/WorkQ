@@ -4,6 +4,7 @@ import mimetypes
 from pyramid.view import view_config
 from worq.scripts.s3_utils import upload_file_to_s3
 from worq.models.models import Files
+from worq.views.metrics import REQUEST_COUNT
 
 # Extensiones permitidas (puedes ajustarlas)
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'pdf', 'docx', 'xlsx', 'txt'}
@@ -25,6 +26,7 @@ def allowed_file(filename):
 
 @view_config(route_name='upload_file', renderer='json', request_method='POST')
 def upload_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     archivo = request.POST['file']
     input_file = archivo.file
     original_filename = archivo.filename
