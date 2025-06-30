@@ -132,29 +132,26 @@ def task_edit_view(request):
             print(f"[SUCCESS] Tarea editada con éxito: ID {task.id}")
             # --- NOTIFICACIÓN ---
             try:
-                notif_type = dbsession.query(Types).filter_by(type='Tarea editada').first()
-                if not notif_type:
-                    notif_type = Types(type='Tarea editada', active=True)
-                    dbsession.add(notif_type)
-                    dbsession.flush()
-
                 notif = Notifications(
-                    type_id=notif_type.id,
+                    type_id=11,  # ID fijo para "Tarea editada"
                     date=datetime.datetime.utcnow(),
-                    state='unread'
+                    state_id=4  # "No leído"
                 )
                 dbsession.add(notif)
                 dbsession.flush()
 
+                # Asocia la notificación al proyecto
                 dbsession.add(ProjectNotifications(
                     project_id=task.project_id,
                     noti_id=notif.id
                 ))
 
-                for collab in new_collabs:
+                # Notifica a todos los colaboradores de la tarea
+                collaborators = dbsession.query(Users).join(UsersTasks).filter(UsersTasks.task_id == task.id).all()
+                for user in collaborators:
                     dbsession.add(UsersNotifications(
                         noti_id=notif.id,
-                        user_id=collab.user_id
+                        user_id=user.id
                     ))
 
                 dbsession.flush()
