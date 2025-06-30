@@ -2,6 +2,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
 from worq.models.models import Users
+import bcrypt
 import json
 
 
@@ -74,30 +75,32 @@ def info_user_put(request):
     session = request.session
 
     if 'user_email' not in session:
-        return json_response({'success': False, 'error': 'User not signed in'}, status=401)
+        return json_response({'success': False, 'error': 'User not signed in'})
 
     try:
         user_email = session.get('user_email')
         user = request.dbsession.query(Users).filter_by(email=user_email).first()
 
         if not user:
-            return json_response({'success': False, 'error': 'User not found'}, status=404)
+            return json_response({'success': False, 'error': 'User not found'})
 
         old_password = request.POST.get('pass')
         new_password = request.POST.get('n_pass')
         con_new_password = request.POST.get('cn_pass')
 
-        if user.passw != old_password:
-            return json_response({'success': False, 'error': 'Incorrect old password'}, status=403)
+        if old_password == '' or new_password == '' or con_new_password == '':
+            return json_response({'success': False, 'error': 'Please fill all the inputs'})
 
-        if new_password != con_new_password:
-            return json_response({'success': False, 'error': 'New passwords do not match'}, status=400)
-
-        user.passw= new_password
-        request.dbsession.flush()
-
-        return json_response({'success': True, 'message': 'Password updated successfully'})
-
+        if bcrypt.checkpw(old_password.encode('utf-8'), user.passw.encode('utf-8')):
+            if new_password != con_new_password:
+                return json_response({'success': False, 'error': 'New passwords do not match'})
+            hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            user.passw= hashed_password
+            request.dbsession.flush()
+            return json_response({'success': True, 'message': 'Password updated successfully'})
+        
+        else:
+            return json_response({'success': False, 'error': 'Incorrect old password'})
     except Exception as e:
         print(f"Error: {e}")
-        return json_response({'success': False, 'error': 'An unexpected error occurred'}, status=500)
+        return json_response({'success': False, 'error': 'An unexpected error occurred'})

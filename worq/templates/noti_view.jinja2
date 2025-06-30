@@ -1,0 +1,223 @@
+{% extends "workq_main.jinja2" %}
+
+{% block actions %}
+<div style="background-color: #f5f5f5; padding: 1rem; border-radius: 8px;">
+    <h2 style="background-color: #e0e0e0; padding: 1rem; border-radius: 8px;">Notifications</h2>
+    <div class="container-fluid">
+    <div class="project-bar row">
+    <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div></div>
+        <button id="openFilterModal" class="btn" type="button" style="background: none; border: none; display: flex; align-items: center;">
+        <span class="material-symbols-outlined">
+            filter_alt
+        </span>
+        <span style="margin-left: 0.5em;">Filter</span>
+        </button>
+    </div>
+
+    <div style="margin-top: 1rem; background-color: #e0e0e0; border-radius: 8px; padding: 1rem;">
+        {% for noti in notifications %}
+        <div class="notification-row"
+            data-id="{{ noti.id }}"
+            data-type="{{ noti.type }}"
+            data-project="{{ noti.project_name }}"
+            data-date="{{ noti.date.strftime('%d/%m/%Y %H:%M') }}"
+            data-state="{% if noti.state_id == 4 %}unread{% else %}read{% endif %}"
+            style="cursor:pointer; background-color: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; flex-wrap: wrap;"
+            onclick="showNotificationModal(this)">
+            <div>
+                <strong>{{ noti.type }}</strong>
+                <span class="noti-state-text" style="font-size:0.9em; color: #888;">
+                    ({{ noti.state|lower|capitalize }})
+                </span>
+            </div>
+            <div>Project: <strong>{{ noti.project_name }}</strong></div>
+            <div>{{ noti.date.strftime('%d/%m/%Y %H:%M') }}</div>
+        </div>
+        {% else %}
+        <p>No notifications found.</p>
+        {% endfor %}
+    </div>
+</div>
+<script>
+document.getElementById('openFilterModal').addEventListener('click', function() {
+  const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
+  filterModal.show();
+});
+
+function applyNotificationFilter() {
+  const project = document.getElementById('filter-project').value;
+  const type = document.getElementById('filter-type').value;
+  const state = document.getElementById('filter-state').value;
+
+  document.querySelectorAll('.notification-row').forEach(row => {
+    const matchesProject = !project || row.dataset.project === project;
+    const matchesType = !type || row.dataset.type === type;
+    const matchesState = !state || row.dataset.state === state;
+    row.style.display = (matchesProject && matchesType && matchesState) ? '' : 'none';
+  });
+
+// Cierra el modal de filtro
+  const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
+  if (filterModal) filterModal.hide();
+}
+function capitalizeFirst(str) {
+  if (!str) return "";
+  str = str.toLowerCase();
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Guarda el elemento de la notificación abierta
+let currentNotificationElement = null;
+
+function showNotificationModal(element) {
+  currentNotificationElement = element;
+
+  document.getElementById('modal-noti-type').textContent = element.dataset.type;
+  document.getElementById('modal-noti-project').textContent = element.dataset.project;
+  document.getElementById('modal-noti-date').textContent = element.dataset.date;
+  document.getElementById('modal-noti-state').textContent = capitalizeFirst(element.dataset.state);
+
+  // Llama al backend para marcar como leída
+  fetch('/mark_notification_read', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': '{{ request.session.get_csrf_token() }}'
+    },
+    body: JSON.stringify({ noti_id: element.dataset.id })
+  }).then(response => response.json())
+    .then(data => {
+        element.dataset.state = "read";
+        const stateSpan = element.querySelector('.noti-state-text');
+        if (stateSpan) {
+          stateSpan.textContent = "(Read)";
+        }
+        updateNotificationBadge();
+        updateTopNotificationBadge(); // <-- aquí
+      });
+
+  const modal = new bootstrap.Modal(document.getElementById('notificationDetailModal'));
+  modal.show();
+}
+
+// Al cerrar el modal, actualiza el estado visual y el badge
+document.getElementById('notificationDetailModal').addEventListener('hidden.bs.modal', function () {
+  console.log("Modal cerrado");
+  if (currentNotificationElement) {
+    currentNotificationElement.dataset.state = "read";
+    const stateSpan = currentNotificationElement.querySelector('.noti-state-text');
+    if (stateSpan) {
+      stateSpan.textContent = "(Read)";
+      console.log("Texto cambiado");
+    } else {
+      console.log("No encontró el span");
+    }
+    updateNotificationBadge();
+  }
+});
+
+function updateNotificationBadge() {
+  // Asegúrate que el valor "unread" es el que usas en data-state para no leídas
+  const unread = document.querySelectorAll('.notification-row[data-state="unread"]').length;
+  let badge = document.getElementById('notification-badge');
+  if (!badge) {
+    const icon = document.getElementById('notification-icon');
+    if (!icon) return;
+    badge = document.createElement('span');
+    badge.id = 'notification-badge';
+    badge.style.position = 'absolute';
+    badge.style.top = '0';
+    badge.style.right = '0';
+    badge.style.width = '12px';
+    badge.style.height = '12px';
+    badge.style.background = 'red';
+    badge.style.borderRadius = '50%';
+    badge.style.border = '2px solid white';
+    badge.style.display = 'inline-block';
+    icon.parentNode.appendChild(badge);
+  }
+  badge.style.display = unread > 0 ? 'inline-block' : 'none';
+}
+
+function updateTopNotificationBadge() {
+  // Busca el badge en la barra superior (fuera del panel de notificaciones)
+  const badge = document.querySelector('.notification-badge');
+  // Cuenta las notificaciones no leídas en la vista actual
+  const unread = document.querySelectorAll('.notification-row[data-state="unread"]').length;
+  if (badge) {
+    if (unread > 0) {
+      badge.textContent = unread;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+}
+
+// Llama al cargar la página
+updateNotificationBadge();
+</script>
+
+<div class="modal fade" id="notificationDetailModal" tabindex="-1" aria-labelledby="notificationDetailModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="notificationDetailModalLabel">Notification Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Type:</strong> <span id="modal-noti-type"></span></p>
+        <p><strong>Project:</strong> <span id="modal-noti-project"></span></p>
+        <p><strong>Date:</strong> <span id="modal-noti-date"></span></p>
+        <p><strong>Status:</strong> <span id="modal-noti-state"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de filtro -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <!-- Interior del modal de filtro -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="filterModalLabel">Filter Notifications</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <select id="filter-project" class="controls">
+            <option value="">All Projects</option>
+            {% for project in projects %}
+              <option value="{{ project.name }}">{{ project.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <select id="filter-type" class="controls">
+            <option value="">All Types</option>
+            {% for t in notifications|map(attribute='type')|unique %}
+              <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <select id="filter-state" class="controls">
+            <option value="">All Status</option>
+            <option value="unread">Unread</option>
+            <option value="read">Read</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="buttons" onclick="applyNotificationFilter()">Apply Filter</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -11,7 +11,7 @@ def task_view(request):
     session = request.session
  
     # Redirigir si el usuario no está autenticado
-    if 'user_name' not in session:
+    if 'user_email' not in session:
         return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
  
     # Parámetros de sesión
@@ -102,6 +102,12 @@ def task_view(request):
     # 5) Serializar tareas
     json_tasks = []
     for task in dbtasks:
+        assigned_users = (
+            request.dbsession.query(Users)
+            .join(UsersTasks, Users.id == UsersTasks.user_id)
+            .filter(UsersTasks.task_id == task.id)
+            .all()
+        )
         # 1. Obtener feedbacks de esta tarea
         task_feedbacks = (
             request.dbsession.query(Feedbacks)
@@ -133,6 +139,10 @@ def task_view(request):
                     "is_completed": req.is_completed
                 }
                 for req in task.task_requirements
+            ],
+            "assigned_users": [
+                {"id": u.id, "name": u.name, "email": u.email}
+                for u in assigned_users
             ],
             "feedbacks": feedback_list
         })
