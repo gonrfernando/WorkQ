@@ -5,6 +5,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
 import json
+from worq.views.metrics import REQUEST_COUNT
 
 @view_config(
     route_name='add_task',
@@ -12,6 +13,7 @@ import json
     request_method=('GET', 'POST')
 )
 def task_creation_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     session = request.session
     user_email = session.get('user_email')
     user_role  = session.get('user_role')

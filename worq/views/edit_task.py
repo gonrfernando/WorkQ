@@ -6,9 +6,11 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from pyramid.response import Response
 from zope.sqlalchemy import ZopeTransactionEvents
+from worq.views.metrics import REQUEST_COUNT
 
 @view_config(route_name='edit_task', renderer='worq:templates/edit_task.jinja2', request_method=('GET', 'POST'))
 def task_edit_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     print("[INFO] Iniciando vista de edición de tarea.")
 
     session = request.session
@@ -130,29 +132,26 @@ def task_edit_view(request):
             print(f"[SUCCESS] Tarea editada con éxito: ID {task.id}")
             # --- NOTIFICACIÓN ---
             try:
-                notif_type = dbsession.query(Types).filter_by(type='Tarea editada').first()
-                if not notif_type:
-                    notif_type = Types(type='Tarea editada', active=True)
-                    dbsession.add(notif_type)
-                    dbsession.flush()
-
                 notif = Notifications(
-                    type_id=notif_type.id,
+                    type_id=11,  # ID fijo para "Tarea editada"
                     date=datetime.datetime.utcnow(),
-                    state='unread'
+                    state_id=4  # "No leído"
                 )
                 dbsession.add(notif)
                 dbsession.flush()
 
+                # Asocia la notificación al proyecto
                 dbsession.add(ProjectNotifications(
                     project_id=task.project_id,
                     noti_id=notif.id
                 ))
 
-                for collab in new_collabs:
+                # Notifica a todos los colaboradores de la tarea
+                collaborators = dbsession.query(Users).join(UsersTasks).filter(UsersTasks.task_id == task.id).all()
+                for user in collaborators:
                     dbsession.add(UsersNotifications(
                         noti_id=notif.id,
-                        user_id=collab.user_id
+                        user_id=user.id
                     ))
 
                 dbsession.flush()

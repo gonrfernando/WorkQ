@@ -6,9 +6,11 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
 import json
+from worq.views.metrics import REQUEST_COUNT
 
 @view_config(route_name='action_view', renderer='worq:templates/action_view.jinja2')
 def action_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     session = request.session
     if 'user_name' not in session:
         return HTTPFound(

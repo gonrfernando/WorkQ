@@ -2,7 +2,8 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from countryinfo import CountryInfo
 from pyramid.httpexceptions import HTTPFound
-from worq.models.models import UsersProjects, Users, Countries, Areas, Roles, Projects
+from worq.models.models import UsersProjects, Users, Countries, Areas, Roles, Projects, Notifications, UsersNotifications
+import datetime
 from sqlalchemy.exc import SQLAlchemyError
 
 @view_config(route_name='edit_user', renderer='templates/edit_user.jinja2')
@@ -91,6 +92,22 @@ def update_user(request):
         new_passw = request.json_body.get("passw")
         if new_passw:
             user.passw = new_passw
+
+        # --- Notificación de edición de usuario ---
+
+        notif = Notifications(
+            type_id=12,  # ID para "Usuario editado"
+            date=datetime.datetime.utcnow(),
+            state_id=4   # Ajusta según tu tabla de estados (por ejemplo, 4 = "Pendiente" o "No leído")
+        )
+        request.dbsession.add(notif)
+        request.dbsession.flush()  # Para obtener notif.id
+
+        request.dbsession.add(UsersNotifications(
+            noti_id=notif.id,
+            user_id=user.id  # Notifica al usuario editado
+        ))
+        # --- Fin notificación ---
 
         request.dbsession.flush()
 

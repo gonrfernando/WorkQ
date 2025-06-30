@@ -6,9 +6,11 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
 import json
+from worq.views.metrics import REQUEST_COUNT
 
 @view_config(route_name='noti_view', renderer='worq:templates/noti_view.jinja2')
 def noti_view(request):
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
     session = request.session
     if 'user_name' not in session:
         return HTTPFound(
@@ -42,13 +44,28 @@ def noti_view(request):
 
     # 2. Obtener notificaciones relacionadas a esos proyectos y al usuario
     notifications = (
-        dbsession.query(Notifications, ProjectNotifications, Types, Projects)
-        .join(ProjectNotifications, ProjectNotifications.noti_id == Notifications.id)
-        .join(Projects, Projects.id == ProjectNotifications.project_id)
+    dbsession.query(Notifications, ProjectNotifications, Types, Projects)
+    .join(ProjectNotifications, ProjectNotifications.noti_id == Notifications.id)
+    .join(Projects, Projects.id == ProjectNotifications.project_id)
+    .join(Types, Types.id == Notifications.type_id)
+    .join(UsersNotifications, UsersNotifications.noti_id == Notifications.id)
+    .filter(
+        ProjectNotifications.project_id.in_(project_ids),
+        UsersNotifications.user_id == user_id
+    )
+    .order_by(Notifications.date.desc())
+    .all()
+    )
+
+    # 2b. Obtener notificaciones SOLO del usuario (sin proyecto)
+    user_only_notifications = (
+        dbsession.query(Notifications, Types)
         .join(Types, Types.id == Notifications.type_id)
         .join(UsersNotifications, UsersNotifications.noti_id == Notifications.id)
         .filter(
-            ProjectNotifications.project_id.in_(project_ids),
+            ~dbsession.query(ProjectNotifications)
+                .filter(ProjectNotifications.noti_id == Notifications.id)
+                .exists(),
             UsersNotifications.user_id == user_id
         )
         .order_by(Notifications.date.desc())
@@ -67,12 +84,25 @@ def noti_view(request):
             "state": notif.state.state if notif.state else None,
             "type_id": notif.type_id
         })
+
+    # Agrega las notificaciones sin proyecto
+    for notif, notif_type in user_only_notifications:
+        notifications_list.append({
+            "id": notif.id,
+            "type": notif_type.type,
+            "project_name": "General",  # O lo que prefieras
+            "date": notif.date,
+            "state_id": notif.state_id,
+            "state": notif.state.state if notif.state else None,
+            "type_id": notif.type_id
+        })
     print("user_id:", user_id)
     print("user_role:", user_role)
     print("project_ids:", project_ids)
     print("Total notificaciones encontradas:", len(notifications))
     for notif, proj_notif, notif_type, project in notifications:
         print("Notificación:", notif.id, notif_type.type, project.name, notif.state)
+    notifications_list.sort(key=lambda n: n["date"], reverse=True)
     return {
         "notifications": notifications_list,
         "projects": json_projects,
