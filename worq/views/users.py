@@ -114,4 +114,3 @@ def update_user(request):
         return {"success": True, "message": "User updated successfully"}
     except Exception as e:
         return {"success": False, "error": str(e)}
-
