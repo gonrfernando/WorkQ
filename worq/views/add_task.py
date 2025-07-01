@@ -33,7 +33,7 @@ def task_creation_view(request):
 
     # --- POST handling ---
     if request.method == 'POST':
-        active_project_id = request.POST.get("project_id")
+        active_project_id1 = request.POST.get("project_id")
         # Soporta tanto JSON como form-data
         if request.content_type and 'application/json' in request.content_type:
             data = request.json_body
