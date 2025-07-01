@@ -65,14 +65,40 @@
             </div>
             <span class="project-label">{{ project.name }}</span>
             {% if user_role in ['superadmin', 'admin', 'projectmanager'] and project.id == active_project_id %}
-              <span class="material-icons-round" style="padding-left: 3px;" id="settings-icon">settings</span>
+              <span class="material-icons-round settings-icon" style="padding-left: 3px;" data-id="{{ project.id }}" id="settings-icon">settings</span>
             {% endif %}
             <span class="material-icons-round" id="drag-indicator">drag_indicator</span>
           </li>
         {% endfor %}
       </ul>
     </div>
-
+    <div class="modal fade" id="settingsProjectModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ request.route_url('submit_request_project') }}">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="settingsModalLabel">Project Settings Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="project_id" id="modal-project-id" value="">
+                        <div class="mb-3">
+                            <label for="action-type" class="form-label">Action Type</label>
+                            <input type="text" class="form-control" id="action-type" name="action_type" placeholder="Enter action type">
+                        </div>
+                        <div class="mb-3">
+                            <label for="request-reason" class="form-label">Request Reason</label>
+                            <textarea class="form-control" id="request-reason" name="reason" placeholder="Enter reason"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Send Request</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
     <div id="overlay-blur" class="blur-overlay"></div>
     
     <div class="toolbar">
@@ -213,6 +239,23 @@
         </div>
       </div>
       {% endif %}
+    </div>
+    !-- Modal de éxito -->
+    <div class="modal fade modal-stack" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+            <h5 class="modal-title" id="successModalLabel">Success</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            The request was submitted successfully!
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+        </div>
+        </div>
+    </div>
     </div>
     <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -411,7 +454,54 @@
       });
 
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const settingsIcons = document.querySelectorAll('.settings-icon');
+  const modal = new bootstrap.Modal(document.getElementById('settingsProjectModal'));
+  const modalInput = document.getElementById('modal-project-id');
+
+  settingsIcons.forEach(icon => {
+    icon.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const projectId = this.getAttribute('data-id');
+      modalInput.value = projectId;
+      modal.show();
+    });
+  });
+});
+document.addEventListener('DOMContentLoaded', function () {
+  const settingsForm = document.querySelector('#settingsProjectModal form');
+  const errorModalEl = document.getElementById('errorModal');
+  const successModalEl = document.getElementById('successModal');
+  const errorModal = new bootstrap.Modal(errorModalEl);
+  const successModal = new bootstrap.Modal(successModalEl);
+
+  settingsForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const actionType = settingsForm.querySelector('#action-type').value.trim();
+    const reason = settingsForm.querySelector('#request-reason').value.trim();
+
+    if (!actionType || !reason) {
+      // Mostrar error en el modal de error
+      errorModalEl.querySelector('.modal-body').textContent = 'Please complete all required fields.';
+      errorModal.show();
+      return;
+    }
+
+    // Si pasa la validación, mostrar modal de éxito y enviar formulario después de cerrarlo
+    successModal.show();
+
+    // Cuando se cierre el modal de éxito, enviar el formulario
+    successModalEl.addEventListener('hidden.bs.modal', function () {
+      settingsForm.submit();
+    }, { once: true }); // "once" para que solo se ejecute una vez
+  });
+});
+
+</script>
 {% block footer_scripts %}
 {% endblock %}
+
   </body>
 </html>

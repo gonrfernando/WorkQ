@@ -1,6 +1,15 @@
 from unittest.mock import patch, MagicMock
 from worq.scripts.emailsender import send_email_async
+import allure
 
+@allure.title("Send email asynchronously successfully")
+@allure.suite("Email Functionality")
+@allure.sub_suite("send_email_async")
+@allure.severity(allure.severity_level.CRITICAL)
+@allure.description("""
+Verifies that the email is sent correctly when all SMTP values are valid.
+Mocks the SMTP connection to avoid sending real emails.
+""")
 def test_send_email_async():
     mock_request = MagicMock()
     mock_request.registry.settings = {
@@ -14,7 +23,7 @@ def test_send_email_async():
     temp_password = "temporary123"
 
     with patch('worq.scripts.emailsender.smtplib.SMTP') as mock_smtp:
-        mock_server = mock_smtp.return_value.__enter__.return_value  # para manejar el contexto (with)
+        mock_server = mock_smtp.return_value.__enter__.return_value
         mock_server.starttls.return_value = None
         mock_server.login.return_value = None
         mock_server.sendmail.return_value = None

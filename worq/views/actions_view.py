@@ -16,7 +16,6 @@ def action_view(request):
         return HTTPFound(
             location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'})
         )
-
     dbsession = request.dbsession
     active_project_id = session.get("project_id")
     user_id = session.get('user_id')

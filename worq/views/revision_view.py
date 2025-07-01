@@ -24,11 +24,11 @@ def my_view(request):
     if user_role == "user" :
         return HTTPFound(location=request.route_url('task_view', _query={'error': 'Sorry, it looks like you don’t have permission to view this content.'}))
 
-    # 1) Obtener proyectos según rol del usuario
+    # 1) Get projects according to user role
     if user_role in ['superadmin', 'admin']:
         user_projects = (
             request.dbsession.query(Projects)
-            .filter(Projects.state_id != 2)  # Filtrar los que no tienen state_id=2
+            .filter(Projects.state_id != 2)  # Filter those that do not have state_id=2
             .all()
         )
     else:
@@ -37,16 +37,16 @@ def my_view(request):
             .join(UsersProjects)
             .filter(
                 UsersProjects.user_id == user_id,
-                Projects.state_id != 2  # Filtrar también aquí
+                Projects.state_id != 2  # Also filter here
             )
             .all()
         )
 
     json_projects = [{"id": project.id, "name": project.name} for project in user_projects]
 
-    # ... el resto de tu código sigue igual
+    # ... rest of your code remains the same
 
-    # 2) Determinar proyecto activo
+    # 2) Determine active project
     active_project_id = session.get("project_id")
     active_project = next((project for project in json_projects if project["id"] == active_project_id), None)
 
@@ -57,13 +57,13 @@ def my_view(request):
 
     active_project_id = int(active_project_id) if active_project_id is not None else None
 
-    # 3) Cargar prioridades desde la base de datos
+    # 3) Load priorities from the database
     priority_map = {
         p.id: p.priority
         for p in request.dbsession.query(TaskPriorities).all()
     }
 
-    # 4) Consultar tareas con relaciones precargadas
+    # 4) Query tasks with eager loading
     dbtasks = (
         request.dbsession
         .query(Tasks)
@@ -83,7 +83,7 @@ def my_view(request):
         .all()
     )
 
-    # 5) Serializar tareas
+    # 5) Serialize tasks
     json_tasks = []
     for task in dbtasks:
         task_feedbacks = (
@@ -121,7 +121,7 @@ def my_view(request):
             "feedbacks": feedback_list
         })
 
-    # 6) Cargar usuarios del proyecto activo
+    # 6) Load users of the active project
     users = (
         request.dbsession.query(Users)
         .join(UsersProjects, Users.id == UsersProjects.user_id)
@@ -146,35 +146,36 @@ def my_view(request):
 
 @view_config(route_name='save_feedback', renderer='json', request_method='POST')
 def save_feedback(request):
+    print("Entrando a save_feedback")
     data = request.json_body
     user_id = request.session.get('user_id')
 
     if not user_id:
-        return {"success": False, "error": "Usuario no autenticado"}
+        return {"success": False, "error": "User not authenticated"}
 
     user = request.dbsession.query(Users).filter_by(id=user_id).first()
     if not user:
-        return {"success": False, "error": "Usuario no encontrado"}
+        return {"success": False, "error": "User not found"}
 
     feedback_id = data.get("feedback_id")
     comment = data.get("comment")
     task_id_raw = data.get("task_id")
-
+    print("Datos recibidos:", data)
     if not comment or task_id_raw is None:
-        return {"success": False, "error": "Faltan datos."}
+        return {"success": False, "error": "Missing data."}
 
     try:
         task_id = int(task_id_raw)
     except (ValueError, TypeError):
-        return {"success": False, "error": "ID de tarea inválido."}
+        return {"success": False, "error": "Invalid task ID."}
 
     task = request.dbsession.query(Tasks).filter_by(id=task_id).first()
     if not task:
-        return {"success": False, "error": "Tarea no encontrada."}
+        return {"success": False, "error": "Task not found."}
 
     try:
         if feedback_id:
-            # Actualizar feedback existente del usuario
+            # Update existing feedback from user
             feedback = (
                 request.dbsession.query(Feedbacks)
                 .filter_by(id=feedback_id, user_id=user.id)
@@ -184,20 +185,20 @@ def save_feedback(request):
                 feedback.comment = comment
                 feedback.date = datetime.utcnow()
             else:
-                return {"success": False, "error": "Feedback no encontrado o no autorizado"}
+                return {"success": False, "error": "Feedback not found or not authorized"}
         else:
-            # Verificar si ya existe feedback del usuario para esta tarea
+            # Check if feedback already exists for this user and task
             feedback = (
                 request.dbsession.query(Feedbacks)
                 .filter_by(task_id=task_id, user_id=user.id)
                 .first()
             )
             if feedback:
-                # Actualizar si ya existe
+                # Update if already exists
                 feedback.comment = comment
                 feedback.date = datetime.utcnow()
             else:
-                # Crear nuevo feedback
+                # Create new feedback
                 feedback = Feedbacks(
                     user_id=user.id,
                     task_id=task_id,
@@ -205,9 +206,10 @@ def save_feedback(request):
                     date=datetime.utcnow()
                 )
                 request.dbsession.add(feedback)
-
+                print("Nuevo feedback creado:", feedback.user_id, feedback.task_id, feedback.comment)
+        print("Feedback guardado:", feedback)
         request.dbsession.flush()  # para obtener id y datos actualizados
-
+        print("Feedback guardado en la base de datos", feedback.id)
         # Devolver el último feedback guardado para este usuario y tarea
         latest_feedback = {
             "feedback_id": feedback.id,
@@ -221,7 +223,7 @@ def save_feedback(request):
 
     except Exception as e:
         request.dbsession.rollback()
-        return {"success": False, "error": f"Error interno: {str(e)}"}
+        return {"success": False, "error": f"Internal error: {str(e)}"}
 
 @view_config(route_name='update_task_status', renderer='json', request_method='POST')
 def update_task_status(request):
@@ -238,7 +240,7 @@ def update_task_status(request):
             return {"success": False, "error": "Task not found"}
 
         task.status_id = status_id
-        request.dbsession.flush()  # Guardar en la DB
+        request.dbsession.flush()  # Save to DB
 
         return {"success": True}
     except Exception as e:
