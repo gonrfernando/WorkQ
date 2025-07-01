@@ -315,22 +315,22 @@ class UsersProjects(Base):
     user: Mapped['Users'] = relationship('Users', foreign_keys=[user_id], back_populates='users_projects_')
  
  
-class Feedbacks(Tasks):
+class Feedbacks(Base):
     __tablename__ = 'feedbacks'
     __table_args__ = (
-        ForeignKeyConstraint(['id'], ['tasks.id'], name='task_fk'),
+        ForeignKeyConstraint(['task_id'], ['tasks.id'], name='task_fk'),
         ForeignKeyConstraint(['user_id'], ['users.id'], name='user_fk'),
         PrimaryKeyConstraint('id', name='feedbacks_pkey')
     )
- 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    task_id: Mapped[Optional[int]] = mapped_column(Integer)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    task_id: Mapped[int] = mapped_column(Integer)
     comment: Mapped[Optional[str]] = mapped_column(Text)
     date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
-    user_id: Mapped[Optional[int]] = mapped_column(Integer)
- 
-    user: Mapped[Optional['Users']] = relationship('Users', back_populates='feedbacks')
-    users_feedbacks: Mapped[List['UsersFeedbacks']] = relationship('UsersFeedbacks', back_populates='feedback', foreign_keys='UsersFeedbacks.feedback_id' )
+    user_id: Mapped[int] = mapped_column(Integer)
+
+    user: Mapped['Users'] = relationship('Users', back_populates='feedbacks')
+    users_feedbacks: Mapped[List['UsersFeedbacks']] = relationship('UsersFeedbacks', back_populates='feedback')
 
 class Requests(Base):
     __tablename__ = 'requests'

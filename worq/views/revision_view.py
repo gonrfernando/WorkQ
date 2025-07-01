@@ -146,6 +146,7 @@ def my_view(request):
 
 @view_config(route_name='save_feedback', renderer='json', request_method='POST')
 def save_feedback(request):
+    print("Entrando a save_feedback")
     data = request.json_body
     user_id = request.session.get('user_id')
 
@@ -155,11 +156,11 @@ def save_feedback(request):
     user = request.dbsession.query(Users).filter_by(id=user_id).first()
     if not user:
         return {"success": False, "error": "Usuario no encontrado"}
-
+    print("Usuario autenticado:", user_id)
     feedback_id = data.get("feedback_id")
     comment = data.get("comment")
     task_id_raw = data.get("task_id")
-
+    print("Datos recibidos:", data)
     if not comment or task_id_raw is None:
         return {"success": False, "error": "Faltan datos."}
 
@@ -167,7 +168,7 @@ def save_feedback(request):
         task_id = int(task_id_raw)
     except (ValueError, TypeError):
         return {"success": False, "error": "ID de tarea inválido."}
-
+    print("ID de tarea:", task_id)
     task = request.dbsession.query(Tasks).filter_by(id=task_id).first()
     if not task:
         return {"success": False, "error": "Tarea no encontrada."}
@@ -205,9 +206,10 @@ def save_feedback(request):
                     date=datetime.utcnow()
                 )
                 request.dbsession.add(feedback)
-
+                print("Nuevo feedback creado:", feedback.user_id, feedback.task_id, feedback.comment)
+        print("Feedback guardado:", feedback)
         request.dbsession.flush()  # para obtener id y datos actualizados
-
+        print("Feedback guardado en la base de datos", feedback.id)
         # Devolver el último feedback guardado para este usuario y tarea
         latest_feedback = {
             "feedback_id": feedback.id,
