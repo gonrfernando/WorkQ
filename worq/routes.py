@@ -40,3 +40,9 @@ def includeme(config):
     config.add_route('reject_task', '/task/reject')
     config.add_route('update_task_status', 'update_task_status')
     config.add_route('submit_request_project', '/submit-request-project')
+    config.add_route('files_by_task', '/files_by_task')
+    config.add_route('download_file', '/download_file')
+    config.add_route('delete_file', '/delete_file')
+    config.add_route('file_preview', '/file_preview/{id}')
+
+

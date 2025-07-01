@@ -1,5 +1,6 @@
 {% extends "workq_main.jinja2" %}
 {% block revision %}
+<!--Revision Content-->
 <div class="container-fluid">
     <div class="project-bar row">
         <div class="col-6 bar-wrapper">
@@ -86,7 +87,11 @@
                     <div id="requirements-list">
                         <!-- Requirements will be dynamically added here -->
                     </div>
+                    <div class="task-files-list mt-3" id="task-files-list">
+                    </div>
+                    <form id="upload-form" action="/upload_file" method="POST" enctype="multipart/form-data">
                     <div class="task-files-modal">
+                        <input type="hidden" id="task_id" name="task_id" value="">
                         <input type="file" id="file" name="file" multiple>
                         <button type="submit" id="btnsubir" class="btn btn-primary" disabled>Upload</button>
                     </div>
@@ -122,6 +127,24 @@
                 <button id="completed-task" class="btn btn-success">Completed</button>
             </div>
         </div>
+    </div>
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="confirmDeleteLabel">Confirm File Deletion</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            Are you sure you want to permanently delete this file? This action cannot be undone.
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="confirmDeleteBtn" type="button" class="btn btn-danger">Yes, delete</button>
+        </div>
+        </div>
+    </div>
     </div>
 
     <!-- Modal de configuración -->
@@ -297,6 +320,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loadLastFeedback(task);
         // Guardar task_id oculto para usarlo en el formulario del modal de configuración
         document.getElementById('modal-task-id').value = taskId;
+        document.getElementById('task_id').value = taskId;
+        loadTaskFiles(taskId);
         document.getElementById('task-modal').style.display = 'block';
     }
 
@@ -513,8 +538,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('modal-task-id').value = taskId;
         document.getElementById('task-modal').style.display = 'block';
+        document.getElementById('task_id').value = taskId;
+        loadTaskFiles(taskId);
     }
 });
+</script>
+<script>
+      document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+        const formData = new FormData();
+        formData.append('file_id', fileToDeleteId);
+
+        fetch('/delete_file', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                alert('File deleted successfully');
+                loadTaskFiles(taskIdOfFile);
+
+                // Oculta el modal después de eliminar
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+                modal.hide();
+            } else {
+                alert(data.message || 'Error deleting file');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('Unexpected error');
+        });
+    });
+
+</script>
+<script>
+function loadTaskFiles(taskId) {
+    fetch(`/files_by_task?task_id=${taskId}`)
+        .then(response => response.json())
+        .then(data => {
+            const filesList = document.getElementById('task-files-list');
+            filesList.innerHTML = '';
+
+            if (data.status === 'ok' && data.files.length > 0) {
+                data.files.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.classList.add('mb-2');
+
+                    fileItem.innerHTML = `
+                        <a href="/file_preview/${file.id}" target="_blank">${file.filename}</a>
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${file.id}, '${taskId}')">🗑️</button>
+
+                    `;
+
+                    filesList.appendChild(fileItem);
+                });
+            } else {
+                filesList.innerHTML = '<p>No files uploaded for this task.</p>';
+            }
+        });
+}
+</script>
+<script>
+function openDeleteModal(fileId, taskId) {
+    fileToDeleteId = fileId;
+    taskIdOfFile = taskId;
+    const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    modal.show();
+}
 </script>
 
 

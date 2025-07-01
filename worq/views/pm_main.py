@@ -16,7 +16,9 @@ def project_creation_view(request):
         return HTTPFound(
             location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'})
         )
-
+    user_role = session.get('user_role')
+    if user_role == "user":
+        return HTTPFound(location=request.route_url('task_view', _query={'error': 'Sorry, it looks like you don’t have permission to view this content.'}))
     dbsession = request.dbsession
 
     if user_role in ['superadmin', 'admin']:
