@@ -562,7 +562,6 @@ function loadTaskFiles(taskId) {
 
                     fileItem.innerHTML = `
                         <a href="/file_preview/${file.id}" target="_blank">${file.filename}</a>
-                        <a href="/download_file?task_id=${task_id}" download class="ms-2 text-decoration-none">⬇️</a>
                         <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${file.id}, '${taskId}')">🗑️</button>
 
                     `;
