@@ -86,6 +86,12 @@ def project_creation_view(request):
             dbsession.add(new_proj)
             dbsession.flush()
             print("Nuevo proyecto ID:", new_proj.id)
+            # Asignar el proyecto recién creado al usuario creador
+            user_project = UsersProjects(
+                user_id=user_id,
+                project_id=new_proj.id
+            )
+            dbsession.add(user_project)
 
             transaction.commit()
 
