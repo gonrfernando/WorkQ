@@ -57,6 +57,9 @@ function applyActionFilter() {
     const matchesType = !actionType || row.dataset.type === actionType;
     row.style.display = (matchesUser && matchesType) ? '' : 'none';
   });
+// Cierra el modal de filtro
+  const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
+  if (filterModal) filterModal.hide();
 }
 function showActionModal(element) {
   document.getElementById('modal-action-type').textContent = element.dataset.type;

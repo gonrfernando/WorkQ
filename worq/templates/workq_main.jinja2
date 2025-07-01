@@ -112,9 +112,14 @@
         <span class="toolbar-icon material-icons-round">person_add</span>
       </a>
       {% endif %}
-      <div class="notification-icon">
-        <span class="toolbar-icon material-icons-round">notifications</span>
-      </div>
+      <a href="{{ request.route_url('noti_view') }}" style="position: relative;">
+        <span class="notification-icon" style="position: relative; display: inline-block;">
+          <span class="toolbar-icon material-icons-round">notifications</span>
+          {% if unread_count > 0 %}
+            <span class="notification-badge">{{ unread_count }}</span>
+          {% endif %}
+        </span>
+      </a>
       <div class="calendar-icon">
         <span class="toolbar-icon material-icons-round">calendar_today</span>
       </div>

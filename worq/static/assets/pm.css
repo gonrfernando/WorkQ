@@ -163,7 +163,7 @@
 }
 
 .add-tasks {
-  width: 600px;
+  width: 550px;
   /*raw content*/
   background: #fff;
   margin: auto;
@@ -173,8 +173,8 @@
 }
 
 .add-users {
-  width: 400px;
-  height: 290px;
+  width: 450px;
+  height: 500px;
   background: #fff;
   margin: auto;
   padding: 20px 30px;
@@ -200,13 +200,14 @@
 
 .task-items {
   display: flex;
+  position: relative;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
 
 .delete-req,
-.delete-collab {
+.delete-collab, .delete-user {
   background-color: #f9f9f9;
   border-radius: 6px;
   padding: 0.5rem 0;
@@ -285,7 +286,6 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   max-height: 200px;
-  left: 40px;
   overflow-y: auto;
   z-index: 1000;
   width: 250px;

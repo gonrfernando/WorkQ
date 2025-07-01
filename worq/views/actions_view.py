@@ -18,8 +18,28 @@ def action_view(request):
     dbsession = request.dbsession
     active_project_id = session.get("project_id")
     user_id = session.get('user_id')
+    error = request.params.get('error')
+    if not 'user_email' in session:
+        return HTTPFound(location=request.route_url('sign_in', _query={'error': 'Sign in to continue.'}))
+    error = request.params.get('error')
+    if error:
+            return {'message' : error }
+    
+    projects = request.dbsession.query(Projects).all()
+    json_projects = [{"id": project.id, "name": project.name} for project in projects]
+    active_project_id = request.params.get("project_id")
+    if not active_project_id:
+        # Si no hay parámetro, usa el de sesión o el primero de la lista
+        active_project_id = session.get("project_id") or (json_projects[0]["id"] if json_projects else None)
+    else:
+        active_project_id = int(active_project_id)
+    user_name = session.get('user_name')
+    user_email = session.get('user_email')
     user_role = session.get('user_role')
 
+    if user_role == "user" or user_role == "projectmanager":
+        return HTTPFound(location=request.route_url('task_view', _query={'error': 'Sorry, it looks like you don’t have permission to view this content.'}))
+    dbsession = request.dbsession
     if user_role in ['superadmin', 'admin']:
         user_projects = (
             request.dbsession.query(Projects)

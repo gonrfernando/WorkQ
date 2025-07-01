@@ -331,8 +331,7 @@ class Feedbacks(Tasks):
  
     user: Mapped[Optional['Users']] = relationship('Users', back_populates='feedbacks')
     users_feedbacks: Mapped[List['UsersFeedbacks']] = relationship('UsersFeedbacks', back_populates='feedback', foreign_keys='UsersFeedbacks.feedback_id' )
- 
- 
+
 class Requests(Base):
     __tablename__ = 'requests'
     __table_args__ = (

@@ -1,6 +1,8 @@
 {% extends "workq_main.jinja2" %}
 
 {% block tasks %}
+<!-- DEBUG: Number of projects: {{ projects|length }} -->
+
 <div class="container-fluid">
     <div class="project-bar row">
         <div class="col-6 bar-wrapper">
@@ -420,6 +422,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
 
 
 {% endblock tasks %}

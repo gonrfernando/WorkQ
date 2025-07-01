@@ -1,7 +1,6 @@
 import datetime
 import json
-
-from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks
+from worq.models.models import UsersProjects, Roles, Users, Tasks, TaskRequirements, TaskPriorities, UsersTasks, Notifications, UsersNotifications, ProjectNotifications, Types, Projects
 from sqlalchemy.exc import SQLAlchemyError
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
@@ -129,7 +128,37 @@ def task_edit_view(request):
 
             dbsession.flush()
             print(f"[SUCCESS] Tarea editada con éxito: ID {task.id}")
+            # --- NOTIFICACIÓN ---
+            try:
+                notif_type = dbsession.query(Types).filter_by(type='Tarea editada').first()
+                if not notif_type:
+                    notif_type = Types(type='Tarea editada', active=True)
+                    dbsession.add(notif_type)
+                    dbsession.flush()
 
+                notif = Notifications(
+                    type_id=notif_type.id,
+                    date=datetime.datetime.utcnow(),
+                    state='unread'
+                )
+                dbsession.add(notif)
+                dbsession.flush()
+
+                dbsession.add(ProjectNotifications(
+                    project_id=task.project_id,
+                    noti_id=notif.id
+                ))
+
+                for collab in new_collabs:
+                    dbsession.add(UsersNotifications(
+                        noti_id=notif.id,
+                        user_id=collab.user_id
+                    ))
+
+                dbsession.flush()
+                print("[INFO] Notificaciones creadas para los colaboradores de la tarea editada.")
+            except Exception as e:
+                print(f"[ERROR] Al crear notificación: {e}")
             # Limpiar el ID de la tarea editada para evitar reutilización
             request.session.pop("edit_task_id", None)
             return Response(
