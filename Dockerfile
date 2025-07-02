@@ -1,29 +1,23 @@
-# syntax=docker/dockerfile:1
 FROM python:3.11-slim
 
-# ── Opciones básicas de Python ─────────────────────────
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/root/.local/bin:$PATH"
 
-# ── Lugar donde vivirá tu código ───────────────────────
 WORKDIR /app
 
-# ── Paquetes nativos necesarios para compilar dependencias de BD / Pillow, etc. ──
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential gcc \
-        libpq-dev              \
+        libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Instalar dependencias Python ───────────────────────
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# ── Copiar el proyecto completo ────────────────────────
+# 👇 Instalamos con --user para que los binarios vayan a ~/.local/bin
+RUN pip install --no-cache-dir --user -r requirements.txt
+
 COPY . .
 
-# ── Puerto donde Pyramid (pserve) escucha ──────────────
 EXPOSE 6543
 
-# ── Arranque ───────────────────────────────────────────
-CMD ["python", "-m", "pyramid.scripts.pserve", "production.ini", "--reload"]
-
+CMD ["pserve", "production.ini", "--reload"]
