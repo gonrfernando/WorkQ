@@ -11,5 +11,6 @@ def main(global_config, **settings):
         config.include('pyramid_jinja2')
         config.include('.routes')
         config.include('.models')
+        config.add_static_view(name='static', path='worq:static', cache_max_age=3600)
         config.scan()
     return config.make_wsgi_app()

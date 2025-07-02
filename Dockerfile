@@ -17,6 +17,8 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir --user -r requirements.txt
 
+COPY worq/ /app/worq/
+
 COPY . .
 
 EXPOSE 6543
