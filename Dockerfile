@@ -11,9 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install --upgrade pip==25.1.1
+
 COPY requirements.txt .
 
-# 👇 Instalamos con --user para que los binarios vayan a ~/.local/bin
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 COPY . .

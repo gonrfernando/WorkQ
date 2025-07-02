@@ -31,3 +31,10 @@ pyramid_debugtoolbar==4.11
 pyramid_jinja2==2.10
 sqlalchemy==2.0.24
 sqlalchemy_utils==0.37.8
+zope.sqlalchemy==1.4.0
+zope.interface==5.4.0
+zope.deprecation==4.4.0
+pyramid_tm==2.0
+pyramid_retry==2.0
+bcrypt==4.0.1
+boto3==1.28.60
