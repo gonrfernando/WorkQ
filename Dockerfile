@@ -20,4 +20,4 @@ COPY . .
 
 EXPOSE 6543
 
-CMD ["pserve", "production.ini", "--reload"]
+CMD ["python", "-m", "pyramid.scripts.pserve", "production.ini", "--reload"]
