@@ -30,7 +30,6 @@ def task_creation_view(request):
     dbsession = request.dbsession
     active_project_id = session.get("project_id")
     user_id = session.get('user_id')
-
     # --- POST handling ---
     if request.method == 'POST':
         active_project_id1 = request.POST.get("project_id")

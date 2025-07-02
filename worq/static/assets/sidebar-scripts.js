@@ -59,6 +59,20 @@ function handleSearchInput(event) {
             item.onclick = () => {
                 document.getElementById("search-input").value = project.name;
                 resultsContainer.style.display = "none";
+                // Use handleCurrentProject logic to set active project
+                fetch(`/set_active_project`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ project_id: project.id }),
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        console.error("Failed to set the active project.");
+                    }
+                });
             };
             resultsContainer.appendChild(item);
         });

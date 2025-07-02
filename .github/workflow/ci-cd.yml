@@ -1,0 +1,54 @@
+name: Build & Deploy (Pyramid on EC2)
+
+on:
+  push:
+    branches: [main]       # ajusta si usas otra rama
+  workflow_dispatch:       # para gatillarlo a mano
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/pyramid-app:latest
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3.4.0   # última release estable 2025:contentReference[oaicite:0]{index=0}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@v6.18.0   # última release 2025:contentReference[oaicite:1]{index=1}
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE_NAME }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.2.2   # última versión 2025:contentReference[oaicite:2]{index=2}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            set -e
+            sudo docker pull ${IMAGE_NAME}
+
+            # Paramos y borramos contenedor previo, si existe
+            sudo docker stop pyramidapp || true
+            sudo docker rm pyramidapp || true
+
+            # Arrancamos con redireccionamiento de puerto 80→6543 y acceso a la BD local
+            sudo docker run -d --name pyramidapp \
+              --restart unless-stopped \
+              --add-host=host.docker.internal:host-gateway \
+              -e DATABASE_URL=${DATABASE_URL} \
+              -p 80:6543 \
+              ${IMAGE_NAME}
