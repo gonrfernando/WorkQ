@@ -29,3 +29,5 @@ prometheus_client==0.22.1
 pyramid==2.0
 pyramid_debugtoolbar==4.11
 pyramid_jinja2==2.10
+sqlalchemy==2.0.24
+sqlalchemy_utils==0.37.8
