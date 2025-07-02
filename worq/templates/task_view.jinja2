@@ -375,6 +375,7 @@
       document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
         const formData = new FormData();
         formData.append('file_id', fileToDeleteId);
+        formData.append('task_id', taskIdOfFile);
 
         fetch('/delete_file', {
             method: 'POST',
