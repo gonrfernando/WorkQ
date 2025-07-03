@@ -33,3 +33,4 @@
 * [Software Version Documentation - WorkQ Project](tools-and-technologies/software-version-documentation-workq-project.md)
 * [Entity-Relationship Diagram](tools-and-technologies/entity-relationship-diagram.md)
 * [Software Architecture](tools-and-technologies/software-architecture.md)
+* [Testing Reports](tools-and-technologies/testing-reports.md)
